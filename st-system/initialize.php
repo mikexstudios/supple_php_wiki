@@ -62,9 +62,9 @@ if (!function_exists('mysql_real_escape_string'))
 /**
  * Include main library if it exists.
  */
-if (file_exists('st-system/Supple2.class.php'))
+if (file_exists('st-system/Supple.class.php'))
 {
-	require_once('st-system/Supple2.class.php');
+	require_once('st-system/Supple.class.php');
 }
 else
 {
@@ -105,8 +105,7 @@ if (get_magic_quotes_gpc())
 //For now, just include the config file. Soon, we want to revamp the config
 //options.
 include('st-config.php');
-include('st-config2.php'); //New config file. This will become the st-config.php soon.
-
+define('SITEURL', '/suppleText');
 
 //Installer check?
 
@@ -122,9 +121,9 @@ define('ST_USERS_TABLE', $table_prefix.'users');
 
 
 //Load database
-require_once(ABSPATH.'st-system/includes/db.php');
-if(!isset($db))
-	{ $stdb = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST); }
+require_once(ABSPATH.'st-system/includes/Db.class.php');
+if(!isset($Stdb))
+	{ $Stdb = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST); }
 
 
 

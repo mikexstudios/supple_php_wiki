@@ -26,7 +26,7 @@
  */
  
 //Initialize needed script elements
-require('./st-system/initialize2.php');
+require('./st-system/initialize.php');
 
 
 //Get input
@@ -62,7 +62,7 @@ if ((strtolower($page) == $page) && (isset($_SERVER['REQUEST_URI']))) #38
  * Create Supple object
  */
 //print_r($suppleConfig);
-$Supple = new Supple($stdb);
+$Supple = new Supple($Stdb);
 
 //Theme helpers
 require_once ABSPATH.'/st-system/includes/theme_helpers.php';

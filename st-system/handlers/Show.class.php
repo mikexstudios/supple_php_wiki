@@ -1,8 +1,8 @@
 <?php
 /**
- * suppleText main script
+ * suppleText Show class
  * 
- * The purpose of this class is to load the core.  
+ * The purpose of this class is to load the page and provide output for templates.  
  *
  * @package suppleText
  * @version $Id:$
@@ -38,11 +38,13 @@ class Show extends Handler {
 		$this->registerAction('page_time',  'getPageTime');
 		$this->registerAction('page_id',  'getPageId');
 		
+		$this->setPagename($this->Supple->getPagename());
+		$this->loadPage();
 	}
 	
 	function run() {
-		$this->setPagename($this->Supple->getPagename());
-		$this->loadPage();
+		//Code in run should *only* be for when Show is loaded directly, not if some
+		//other class includes Show.
 		$this->loadTemplate();
 	}
 	
@@ -72,7 +74,7 @@ class Show extends Handler {
 	}
 	
 	function loadTemplate() {
-		include ABSPATH.'/st-external/themes/default/show.tpl.php';
+		include get_theme_system_path('show.tpl.php');
 	}
 	
 	function getPage() {
