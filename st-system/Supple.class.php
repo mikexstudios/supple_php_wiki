@@ -793,15 +793,9 @@ class Supple
 	function Run($tag, $handler = '')
 	{
 		// do our stuff!
-		if (!$this->handler = trim($handler))
-		{
-			$this->handler = 'show';
-		}
-		if (!$this->tag = trim($tag))
-		{
-			//Temporary remove infinite redirect loop when no page selected.
-			//$this->Redirect($this->Href('', $this->config['root_page']));
-		}
+		$this->handler = trim($handler);
+		$this->tag = trim($tag)
+		
 		if ($user = $this->LoadUser($this->GetCookie('user_name'), $this->GetCookie('pass')))
 		{
 			$this->SetUser($user);
