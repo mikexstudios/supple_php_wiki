@@ -26,7 +26,7 @@
  */
  
 //Initialize needed script elements
-require('./st-system/initialize.php');
+require('./st-system/initialize2.php');
 
 
 //Get input
@@ -62,7 +62,10 @@ if ((strtolower($page) == $page) && (isset($_SERVER['REQUEST_URI']))) #38
  * Create Supple object
  */
 //print_r($suppleConfig);
-$Supple = new Supple($stdb, $suppleConfig);
+$Supple = new Supple($stdb);
+
+//Theme helpers
+require_once ABSPATH.'/st-system/includes/theme_helpers.php';
 
 /** 
  * Run the engine.
@@ -77,14 +80,9 @@ if(empty($page))
 	$page = 'HomePage'; //Default to the HomePage
 }
 
-//This is wikka's hack to obtain output from the wakka class. If we modify the
-//core wakka class, we won't need this anymore.
-ob_start();
-$Supple->Run($page, $handler);
-$content =  ob_get_contents();
-ob_end_clean();
+$Supple->setPagename($page);
+$Supple->callHandler($handler);
 
-//Call a fixed theme for now unless we can implement a good theme system. 
-require('./st-external/themes/default/index.php');  
+
 
 ?>

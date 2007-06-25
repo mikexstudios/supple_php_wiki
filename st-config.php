@@ -1,64 +1,16 @@
 <?php
-// st-config.php written at 06/20/07 14:09:26
+// ** MySQL settings ** //
+define('DB_NAME', 'suppletext');    // The name of the database
+define('DB_USER', 'test');     // Your MySQL username
+define('DB_PASSWORD', 'test'); // ...and password
+define('DB_HOST', 'localhost');    // 99% chance you won't need to change this value
+define('DB_CHARSET', 'utf8');
+define('DB_COLLATE', '');
 
-$suppleConfig = array(
-	//'mysql_host' => 'localhost',
-	//'mysql_database' => 'suppletext',
-	//'mysql_user' => 'test',
-	//'mysql_password' => 'test',
-	'meta_keywords' => '',
-	'meta_description' => '',
-	//'table_prefix' => 'wikka_',
-	'root_page' => 'HomePage',
-	'wakka_name' => 'MyWikkaSite',
-	'base_url' => 'http://localhost/suppleText/',
-	'wiki_suffix' => '@wikka',
-	'action_path' => 'st-system/actions',
-	'handler_path' => 'st-system/handlers',
-	'edit_buttons_position' => 'bottom',
-	'stylesheet' => 'wikka.css',
-	'wikka_formatter_path' => 'st-system/formatters',
-	'wikka_highlighters_path' => 'formatters',
-	'geshi_path' => '3rdparty/plugins/geshi',
-	'geshi_languages_path' => '3rdparty/plugins/geshi/geshi',
-	'header_action' => 'header',
-	'footer_action' => 'footer',
-	'navigation_links' => 'HomePage :: [[CategoryCategory Categories]] :: PageIndex ::  RecentChanges :: RecentlyCommented :: [[UserSettings Login/Register]]',
-	'logged_in_navigation_links' => 'HomePage :: [[CategoryCategory Categories]] :: PageIndex :: RecentChanges :: RecentlyCommented :: [[UserSettings Change settings/Logout]]',
-	'referrers_purge_time' => '30',
-	'pages_purge_time' => '0',
-	'xml_recent_changes' => '10',
-	'hide_comments' => '0',
-	'anony_delete_own_comments' => '1',
-	'owner_delete_page' => '0',
-	'public_sysinfo' => '0',
-	'enable_rss_autodiscovery' => '1',
-	'require_edit_note' => '0',
-	'allow_user_registration' => '1',
-	'invitation_code' => '',
-	'enable_user_host_lookup' => '1',
-	'double_doublequote_html' => 'safe',
-	'sql_debugging' => '0',
-	'admin_users' => 'MichaelHuynh',
-	'admin_email' => 'mike.huynh@gmail.com',
-	'upload_path' => 'uploads',
-	'mime_types' => 'mime_types.txt',
-	'geshi_header' => 'div',
-	'geshi_line_numbers' => '1',
-	'geshi_tab_width' => '4',
-	'grabcode_button' => '1',
-	'wikiping_server' => '',
-	'default_write_acl' => '+',
-	'default_read_acl' => '*',
-	'default_comment_acl' => '*',
-	'pagesize_max' => '',
-	'default_revisioncount' => '',
-	'default_comment_display' => '1',
-	'default_lang' => 'en',
-	'pagename_case_sensitive' => '',
-	'rewrite_mode' => '0',
-	'gui_editor' => '1',
-	'wakka_version' => 'trunk',
-	'default_comment_read_acl' => '*',
-	'default_comment_post_acl' => '+');
+// You can have multiple installations in one database if you give each a unique prefix
+$table_prefix  = 'wikka_';   // Only numbers, letters, and underscores please!
+
+/* That's all, stop editing! Happy writing. */
+
+define('ABSPATH', dirname(__FILE__).'/');
 ?>

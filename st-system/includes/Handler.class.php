@@ -23,6 +23,21 @@ class Handler {
 		$this->Db = &$this->Supple->getDatabaseConnection();
 	}
 	
+	/**
+	 * Registers a plugin action with the core as a tag that can be
+	 * used later during script execution for template purposes.
+	 *
+	 * @access protected
+	 * @param string $tag Short variable-like name to associate with the function such as 'getimagetag'.
+	 * @param string $methodName Method (that exists on this object) to be registered such as 'getImageTag()'.
+	 */
+	function registerAction($tag, $methodName)
+	{
+	    global $Supple;
+	
+	    $Supple->registerAction($tag, array(&$this, $methodName));
+	}
+	
 
 }
  

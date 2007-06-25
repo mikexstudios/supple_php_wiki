@@ -62,9 +62,9 @@ if (!function_exists('mysql_real_escape_string'))
 /**
  * Include main library if it exists.
  */
-if (file_exists('st-system/Supple.class.php'))
+if (file_exists('st-system/Supple2.class.php'))
 {
-	require_once('st-system/Supple.class.php');
+	require_once('st-system/Supple2.class.php');
 }
 else
 {

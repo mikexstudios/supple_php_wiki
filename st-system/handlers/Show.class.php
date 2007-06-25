@@ -26,14 +26,23 @@
 class Show extends Handler {
 	var $pagename;
 	var $time;
+	var $page;
 	
 	function Show() {
 		parent::Handler();
+		
+		//Add functions to be used by themes.
+		//@todo Add a hook here so that plugin files can add theme functions too.
+		$this->registerAction('page_content', 'getPageContent');
+		$this->registerAction('page_tag',  'getPageTag');
+		$this->registerAction('page_time',  'getPageTime');
+		$this->registerAction('page_id',  'getPageId');
+		
 	}
 	
 	function run() {
 		$this->setPagename($this->Supple->getPagename());
-		$page = $this->loadPage();
+		$this->loadPage();
 		$this->loadTemplate();
 	}
 	
@@ -54,7 +63,7 @@ class Show extends Handler {
 	 */
 	function loadPage() {
 		//Could probably do this a little better
-		return $this->Db->get_row('SELECT * 
+		$this->page = $this->Db->get_row('SELECT * 
 																FROM '.ST_PAGES_TABLE.'
 																WHERE tag = "'.mysql_real_escape_string($this->pagename).'" '.($time ? '
 																	AND time = "'.mysql_real_escape_string($time).'"' : '
@@ -64,6 +73,26 @@ class Show extends Handler {
 	
 	function loadTemplate() {
 		include ABSPATH.'/st-external/themes/default/show.tpl.php';
+	}
+	
+	function getPage() {
+		return $this->page;
+	}
+	
+	function getPageId() {
+		return $this->page['id'];
+	}
+	
+	function getPageContent() {
+		return $this->page['body'];
+	}
+	
+	function getPageTag() {
+		return $this->page['tag'];
+	}
+	
+	function getPageTime() {
+		return $this->page['time'];
 	}
 }
 
