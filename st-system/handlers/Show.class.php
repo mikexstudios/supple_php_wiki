@@ -45,6 +45,14 @@ class Show extends Handler {
 	function run() {
 		//Code in run should *only* be for when Show is loaded directly, not if some
 		//other class includes Show.
+		global $Supple;
+		
+		//Syntax formatting. Include syntax file:
+		include_once(ABSPATH.'/st-system/formatters/creole.php');
+		$Supple->SyntaxParser->setText($this->page['body']);
+		$Supple->SyntaxParser->applyAll();
+		$this->page['body'] = $Supple->SyntaxParser->getText();
+		
 		$this->loadTemplate();
 	}
 	

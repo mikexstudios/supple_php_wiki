@@ -49,9 +49,42 @@ class SyntaxParser {
 		}
 	}
 	
+	/**
+	 * @access private
+	 */	 	
+	function sortRules() { //Currently only ascending
+		//Because we have a multi-dimensional array, we can use array_multisort or
+		//uasort. uasort is more elegant since we don't have to create "columns" for 
+		//array_multisort. We use uasort instead of usort in order to keep the "keys"
+		//associated to the arrays instead of having them replaced by number indicies.
+		uasort($this->rules, array(&$this, 'sortRules_callback'));	
+	}
+	
+	/**
+	 * Used by sortRules(...)/usort() to compare two elements. 
+	 *	 	
+	 * @access private
+	 */	 	
+	function sortRules_callback($a, $b) {
+		if($a['priority'] == $b['priority'])
+			{ return 0; }
+		else if($a['priority'] < $b['priority'])
+			{ return -1; }
+		else //a > b
+			{ return 1; }			
+	}
+	
 	//Sort by priority. Then apply each.
 	function applyAll() {
-	
+		$this->sortRules(); //Sort by priority first.
+
+		//According to comments in php manual:
+		//http://us2.php.net/manual/en/control-structures.foreach.php#54311
+		//This is faster than a foreach(... as $key => $value).
+		foreach(array_keys($this->rules) as $tag)
+		{			
+			$this->applyRule($tag);
+		}
 	}
 
 }
@@ -61,11 +94,17 @@ class SyntaxParser {
 //Testing
 $x = new SyntaxParser();
 $x->setText('The dog //ate// the moon.'."\n and other");
-$x->addRule('emphasis', '/\/\/(.*?)\/\//', '<em>\1</em>\n'."\n", '10');
-$x->applyRule('emphasis');
-$x->addRule('newline', '/\n/', 'newline', '20');
-$x->applyRule('newline');
+$x->addRule('emphasis', '/\/\/(.*?)\/\//', '<em>\1</em>\n'."\n", 10);
+#$x->applyRule('emphasis');
+$x->addRule('newline', '/\n/', 'newline', 30);
+#$x->applyRule('newline');
+$x->addRule('test', '/other/', 'test', 20);
+#$x->applyRule('test');
 echo $x->getText();
+echo "<br /><br />";
+$x->applyAll();
+echo $x->getText();
+//$x->sortRules();
 */
 
 ?>
