@@ -5,7 +5,7 @@
 
 <form action="<?php out('current_url'); ?>" method="post">
 <textarea id="body" name="body">
-	<?php out('page_content'); ?>
+<?php out('page_content'); ?>
 </textarea><br />
 <fieldset><legend>Store page</legend>
 <input id="note" size="50" type="text" name="note" value="" /> <label for="note">Please add a note on your edit</label><br />

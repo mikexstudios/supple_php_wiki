@@ -44,7 +44,6 @@ class Supple {
 	var $Db; //Database connection
 	var $pagename; //The page name we are operating on.
 	var $handlerName; //Holds the current handler name.
-	var $Handler;
 	var $actions = array();
 
 	// {{{ Classes objects
@@ -53,6 +52,7 @@ class Supple {
 	* @var object
 	*/
 	var $plugins;
+	var $SyntaxParser;
 	/**#@-*/
 	// }}}
 
@@ -120,7 +120,10 @@ class Supple {
 	
 		//Handler class
 		include_once ABSPATH.'st-system/includes/Handler.class.php';
-	
+		
+		//Syntax parsing class
+		include_once ABSPATH.'st-system/includes/SyntaxParser.class.php';
+		$this->SyntaxParser = new SyntaxParser();
 	}
 	
 	/**

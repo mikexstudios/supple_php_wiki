@@ -1,8 +1,8 @@
 <?php
 /**
- * suppleText main script
+ * Parent class to Handlers.
  * 
- * The purpose of this class is to load the core.  
+ * The purpose of this class is to provide some base functions for all Handlers.
  *
  * @package suppleText
  * @version $Id:$
