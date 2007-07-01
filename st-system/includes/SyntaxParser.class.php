@@ -13,6 +13,8 @@
 class SyntaxParser {
 	var $text;
 	var $rules;
+	var $token_pattern = '\n\n([a-z0-9]+)\n\n';
+	var $hashed_text = array();
 
 	function SyntaxParser() {
 		
@@ -57,7 +59,7 @@ class SyntaxParser {
 		//uasort. uasort is more elegant since we don't have to create "columns" for 
 		//array_multisort. We use uasort instead of usort in order to keep the "keys"
 		//associated to the arrays instead of having them replaced by number indicies.
-		uasort($this->rules, array(&$this, 'sortRules_callback'));	
+		uasort($this->rules, array(&$this, '_sortRules_callback'));	
 	}
 	
 	/**
@@ -65,7 +67,7 @@ class SyntaxParser {
 	 *	 	
 	 * @access private
 	 */	 	
-	function sortRules_callback($a, $b) {
+	function _sortRules_callback($a, $b) {
 		if($a['priority'] == $b['priority'])
 			{ return 0; }
 		else if($a['priority'] < $b['priority'])
@@ -85,6 +87,50 @@ class SyntaxParser {
 		{			
 			$this->applyRule($tag);
 		}
+	}
+
+	/**
+	 * @author Michel Fortin
+	 */	 	
+	function hash($text) {
+		# Swap back any tag hash found in $text so we do not have to `unhash`
+		# multiple times at the end.
+		$text = $this->unhash_contents($text);
+		
+		# Then hash the block.
+		$key = md5($text);
+		$this->hashed_text[$key] = $text;
+		return "\n\n$key\n\n"; # String that will replace the tag.
+	}
+
+	function unhash($key) {
+		if(!empty($this->hashed_text[$key]))
+		{
+			return $this->hashed_text[$key];			
+		}
+		
+		return $key;
+
+	}
+	
+	function unhash_contents($text) {
+		return preg_replace_callback('/'.$this->token_pattern.'/', array(&$this, '_unhash_contents_callback'), $text);
+		
+		//The below code isn't very good because it doesn't get rid of the \n\n's
+		//around the hash key.
+		//return str_replace(array_keys($this->hashed_text), 
+		//				   array_values($this->hashed_text), $text);
+	}
+	
+	/**
+	 * @access private
+	 */	 	
+	function _unhash_contents_callback(&$matches) {
+		return $this->unhash($matches[1]);
+	}
+	
+	function getTokenPattern() {
+		return $this->token_pattern;
 	}
 
 }

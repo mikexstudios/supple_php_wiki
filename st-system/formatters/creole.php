@@ -19,7 +19,7 @@
 //str_replace in this case is faster, but oh well, we sacrifice some.
 //Also, I've seen this done with (\r|\r\n), but this is slower since two
 //checks are done at each step.
-$Supple->SyntaxParser->addRule('to_unix_lineendings', '/\r\n?/', "\n", 10); 
+$Supple->SyntaxParser->addRule('to_unix_lineendings', '/\r\n?/', "\n", 10);
 
 //Replace 4 consecutive spaces at the beginning of a line with tab character.
 //Since the text is all one long string, we find the start of lines by the \n
@@ -32,7 +32,8 @@ $Supple->SyntaxParser->addRule('spaces_to_tab', '/\n[ ]{4}/', "\n\t", 20);
  * Remove whitespace from the beginning and end of a string
  * Actually trim is pretty important since future regex depend on
  * lines ending cleanly with \n.  
- * (But below implementation could be a little slow:)
+ * (But below implementation could be a little slow)
+ * NOTE: Trim conflicts with spaces_to_tab! 
  */ 
 $Supple->SyntaxParser->addRule('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30, true);
 function trim_spaces_callback(&$matches) {
@@ -48,16 +49,15 @@ function trim_spaces_callback(&$matches) {
  * (Note the U is for ungreedy. s is for the . to take into account all
  *  characters including newlines.)  
  */
- /*
+
 $Supple->SyntaxParser->addRule('preformatted', '/\n{{{\n(.*)\n}}}\n/Us', 'preformatted_callback', 100, true);
-$preformatted_storage = array();
-$preformatted_storage_count = 0;
 function preformatted_callback(&$matches) {
+	global $Supple;
+
 	//Currently taken from Preformatted.php from Creole of Pear::Text_wiki
 	//@author Tomaiuolo Michele <tomamic@yahoo.it>
 	
-	global $preformatted_storage, $preformatted_storage_count;
-	
+	global $preformatted_storage, $preformatted_storage_count, $preformatted_token;
 	// any sequence of closing curly braces separated
 	// by some spaces, will have one space removed
 	$find = "/} ( *)(?=})/";
@@ -73,28 +73,38 @@ function preformatted_callback(&$matches) {
 	
 	//There is more, but I didn't include it.
 	
-	//We want to remove the matched text and place it in an array. In place of
-	//the text, we put a delimiter. Later, we have a post_preformatted_callback
-	//which will insert the text back in.
-	$preformatted_storage[$preformatted_storage_count] = $matches[1];
-	$preformatted_storage_count++; //Increment for the next time preformatted is called.
-	return "\xFF".$preformatted_storage_count."\xFF"; //The token
+	return $Supple->SyntaxParser->hash("\n<pre>\n".$matches[1]."\n</pre>\n");
 }  
-*/
 
 //Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
 //NOTE: This should be checked VERY carefully against the Creole specification.
 //      I have a feeling that this is currently wrong.
-$Supple->SyntaxParser->addRule('tt', '/{{{({*?.*}*?)}}}/U', '<tt>\1</tt>', 110);
+//Creole 1.0 says that this doesn't HAVE to be monospace.
+$Supple->SyntaxParser->addRule('tt', '/{{{({*?.*}*?)}}}/U', 'tt_callback', 110, true);
+function tt_callback(&$matches) {
+	global $Supple;
+	return $Supple->SyntaxParser->hash('<tt>'.$matches[1].'</tt>');
+}
+
+//Escape character here. But that's not extremely important right now.
+$Supple->SyntaxParser->addRule('escape', '/~(.)/', 'escape_callback', 115, true);
+function escape_callback(&$matches) {
+	global $Supple;
+	
+	return '~'.$Supple->SyntaxParser->hash($matches[1]);
+} 
+
 
 /**
  * Line Breaks
- * \\ to \n
+ * \\ to <br />\n
  * (The problem with this current implementation is that if we have \\\
  *  that will translate to \n\ (where \\n might be preferred). We have to
- *  consult Creole more carefully.)   
+ *  consult Creole more carefully.)
+ *  I'm not sure why we need '/\\\\\\\/' to match correctly when the correct
+ *  way, I thought, was '/\\\\/'. Is this a bug?    
  */
-$Supple->SyntaxParser->addRule('linebreak', '/\\\\/', "\n", 120);  
+$Supple->SyntaxParser->addRule('linebreak', '/\\\\\\\/', "<br />\n", 120);  
 
 
 //Won't implement Raw, Footnote
@@ -102,13 +112,156 @@ $Supple->SyntaxParser->addRule('linebreak', '/\\\\/', "\n", 120);
 //Won't implement Table for now. Should also have option of tables being
 //done in HTML.
 
-//Need to include URL stuff here.
+
+/**
+ * Links
+ *  
+ */
+$Supple->SyntaxParser->addRule('links', '/\[\[(.+?)\]\]/', 'links_callback', 140, true);
+function links_callback(&$matches) {
+	global $Supple;
+
+	//I'm not sure if we can do a if(  = preg_replace) so we will just do a
+	//preg_match first.
+	//For the http, etc. check, we should also include local paths (ie. images/logo.gif)
+	//Recall: (?: means no capturing.
+
+	//Match external url with link text. This should come before the 
+	//'just external url case' since \S+ also matches the | character.
+	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
+		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
+	}
+	
+	//Match just external url.
+	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
+	}
+	
+	//Match WikiLinks (The regex for these should be better...and safer)
+	if(preg_match('/(\S+)\|(.+)/', $matches[1], $link_matches))
+	{
+		$link_matches[2] = $Supple->SyntaxParser->hash($link_matches[2]);
+		return '<a href="'.$Supple->SyntaxParser->hash(SITEURL.'/index.php?wiki='.$link_matches[1]).'">'.$link_matches[2].'</a>';
+	}	
+	
+	if(preg_match('/(\S+)/', $matches[1], $link_matches))
+	{
+		$link_matches[1] = $Supple->SyntaxParser->hash($link_matches[1]); //Crude hack since we nest hashes. Should fix this up later.
+		return '<a href="'.$Supple->SyntaxParser->hash(SITEURL.'/index.php?wiki='.$link_matches[1]).'">'.$link_matches[1].'</a>';
+	}	
+	
+	//For everything else that doesn't seem to match.
+	return $matches[1];
+	
+	//Interwiki links
+	//(not implemented)
+}
+
+
+
+/**
+ * WikiWord Links
+ * @author Paul M. Jones <pmjones@php.net>
+ */  
+//This is good for most purposes, but does not take into account other languages
+$upper = "A-Z";
+$lower = "a-z0-9";
+$either = "A-Za-z0-9";
+$wikiword_regex =      
+						"/(\s)(!?" .            // START WikiPage pattern (1) //Hmm need to check for a space or newline?
+            "[$upper]" .       // 1 upper
+            "[$either]*" .     // 0+ alpha or digit
+            "[$lower]+" .      // 1+ lower or digit
+            "[$upper]" .       // 1 upper
+            "[$either]*" .     // 0+ or more alpha or digit
+            ")/";               // END WikiPage pattern (/1)
+$Supple->SyntaxParser->addRule('wikiwordlink', $wikiword_regex, 'wikiwordlink_callback', 150, true);
+function wikiwordlink_callback(&$matches) {
+	global $Supple;
+	
+	//$matches[1] includes the whitespace characters.
+	return $matches[1].'<a href="'.$Supple->SyntaxParser->hash(SITEURL.'/index.php?wiki='.$matches[2]).'">'.$matches[2].'</a>';
+}
 
 /**
  * Image (inline)
  * {{myimage.png|text}} -> <img src="myimage.png" alt="text"> 
  */ 
-$Supple->SyntaxParser->addRule('inlineimage', '/{{(.*)(\|(.*))?}}/U', '<img src="\1" alt="\2" />', 180); 
+//$Supple->SyntaxParser->addRule('inlineimage', '/{{(.+)(?:\|(.*))?}}/U', '<img src="$1" alt="$2" />', 180); 
+$Supple->SyntaxParser->addRule('inlineimage', '/\{\{(.+?)\}\}/', 'inlineimage_callback', 180, true);
+function inlineimage_callback(&$matches) {
+	global $Supple;
+	
+	//NOTE: Maybe we should add check for image format so that people don't
+	//include scripts or other malicious stuff.
+	
+	//Match external url with alt text. This should come before the 
+	//'just external url case' since \S+ also matches the | character.
+	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		return '<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />';
+	}
+	
+	//Match just external url.
+	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		return '<img src="'.$url_matches[1].'" />';
+	}
+	
+	//For everything else that doesn't seem to match.
+	return $matches[1];
+}
+
+/**
+ * Raw URLs.
+ * Turned into clickable links. However, single punctuation characters
+ * (,.?!:;"') at the end of the URLs should not be considered part of the URL
+ * NOTE: This should go towards the end where all other URLs are already parsed
+ *       (like [[ links ]] and {{ images }}, etc.)  
+ * The regex below is complicated because of the pesky escape character in the
+ * front of a URL:
+ * ie. ~http://www.server.com
+ * Since the h after the ~ is hashed, the regex below checks for the case where
+ * we have ~ and the hashed pattern. Since the hash pattern can change, we get
+ * the regex from the SyntaxParser class. It's really inelegant.     
+ */
+$Supple->SyntaxParser->addRule('raw_url', '/(?:~'.$Supple->SyntaxParser->getTokenPattern().')?([a-z]+:\/\/)(\S+)/', 'raw_url_callback', 185, true); //The lesser complex version is: '([a-z]+:\/\/)(\S+)/'
+function raw_url_callback(&$matches) {
+	global $Supple;
+	
+	//Check for escaped URL. If found, just return unlinked URL.
+	if(!empty($matches[1])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
+	{
+		$matches[1] = $Supple->SyntaxParser->unhash($matches[1]);
+		return $matches[1].$matches[2].$matches[3];
+	}
+	
+	//We won't consider single punctuation characters at the end of the URL
+	if(preg_match('/(\S+)([,\.\?!:;"\']+)(\S+)?/', $matches[3], $raw_url_matches)) 
+	{
+		//This is kind of crude, but works. Perhaps a recursive approach would be
+		//more elegant.
+		//For cases like: http://www.another.rawlink.org where .org is in the second (\S+)
+		if(!empty($raw_url_matches[3])) 
+		{
+			$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
+			return '<a href="'.$url.'">'.$url.'</a>';
+		}
+		$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1]);
+		return '<a href="'.$url.'">'.$url.'</a>'.$raw_url_matches[2]; //We keep the punctuation on the end.
+	}
+	
+	$url = $Supple->SyntaxParser->hash($matches[2].$matches[3]);
+	return '<a href="'.$url.'">'.$url.'</a>';
+}
 
 /**
  * Headings
@@ -126,38 +279,80 @@ function headings_callback(&$matches) {
 	$level = strlen($matches[1]);
   $text = trim($matches[2]);
   
-  return '<h'.$level.'>'.$text.'</h'.$level.'>'."\n\n"; //Maybe we don't need the newlines
+  return '<h'.$level.'>'.$text.'</h'.$level.'>'; //Maybe we don't need the newlines
 }
-
 
 /**
  * Horizontal Rule
  * ---- -> <hr />
  */
-$Supple->SyntaxParser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />'."\n", 200);
+$Supple->SyntaxParser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />', 200);
 
 
-//Skip Lists, for now
 
 /**
  * Emphasis/Italics
  * // // -> <em> </em>
- * (Double check regex) 
+ * (Double check regex)
+ * Note: The ordering here is very important. We need to take care of emphasis
+ *       over lines and paragraphs after we do the normal inline stuff.  
+ * Italics *MUST* be loaded before Bold according to Creole specifications. 
  */
-$Supple->SyntaxParser->addRule('emphasis', '/\/\/(.+?)\/\//', '<em>\1</em>', 250);
+$Supple->SyntaxParser->addRule('emphasis_inline', '/\/\/(.+?)\/\//', '<em>$1</em>', 239); //Maybe we need to make this ungreedy
+$Supple->SyntaxParser->addRule('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>'."\n", 240);
+$Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', '<em>$1</em>'."\n\n", 245);
+
 
 /**
  * Strong/Bold
  * ** ** -> <strong> </strong>
+ * Note: The ordering here is very important. See reasoning for Emphasis. 
  */
-$Supple->SyntaxParser->addRule('strong', '/\*\*(.*?)\*\*/', '<strong>\1</strong>', 260);
-
+$Supple->SyntaxParser->addRule('strong', '/\*\*(.*?)\*\*/', '<strong>$1</strong>', 250);
+$Supple->SyntaxParser->addRule('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>'."\n", 251);
+$Supple->SyntaxParser->addRule('strong_cross_paragraph', '/\*\*(.+)\n{2,}?/', '<strong>$1</strong>'."\n\n", 255);
 
 /**
  * Postfilters
  */ 
+ 
 //Remove the last <br />
 $Supple->SyntaxParser->addRule('remove_last_br', '/<br \/>$/', '', 2000);
+
+$Supple->SyntaxParser->addRule('unhash_all', '/\n\n([a-z0-9]+)\n\n/', 'unhash_call_callback', 2010, true);
+function unhash_call_callback(&$matches) {
+	global $Supple;
+	
+	return $Supple->SyntaxParser->unhash($matches[1]);
+}
+
+/**
+ * Paragraph
+ * (put <p> and </p>)
+ */
+//$Supple->SyntaxParser->addRule('paragraph', '/(.+?)\n\n/s', '<p>\1</p>'."\n\n", 300);  
+//$Supple->SyntaxParser->addRule('paragraph', '/(.+)/s', 'wpautop', 300, true);  
+//$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', "<p>$1</p>\n\n", 2020); // make paragraphs, including one at the end
+$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', 'paragraph_callback', 2020, true);
+function paragraph_callback(&$matches) {
+	//We check to see if the block that is passed in begin or ends with any
+	//of the block-level tags defined below:
+	$allblocks = '(?:table|thead|tfoot|caption|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|form|map|area|blockquote|address|math|style|input|p|h[1-6]|hr)';
+	//if(!preg_match('!^\s*</?' . $allblocks . '[^>]*>!', $matches[1]))
+	//if(!preg_match('!</?' . $allblocks . '[^>]*>\s*$!', $matches[1]))
+	if((!preg_match('!^\s*</?' . $allblocks . '[^>]*>!', $matches[1])) && (!preg_match('!</?' . $allblocks . '[^>]*>\s*$!', $matches[1])))
+	{
+		return '<p>'.$matches[1].'</p>'."\n\n";
+	}
+	
+	return $matches[1]."\n\n";
+}
+
+/**
+ * Paragraph Newlines
+ * Convert all \n in paragraphs to <br />. 
+ */  
+$Supple->SyntaxParser->addRule('paragraph_newline', '/<p>(.*)<\/p>/Us', 'paragraph_newline_callback', 2030, true); 
 
 /* Things to implement:
     var $rules = array(
