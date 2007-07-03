@@ -371,7 +371,7 @@ $Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n\n(<
  */
 $Supple->SyntaxParser->addRule('tables', '/\n(?:\|.+?\n)+/s', 'tables_callback', 250, true);
 function tables_callback(&$matches) {
-	$table_html = "<table>\n";
+	$table_html = "\n<table>\n";
 	
 	//$syntax_rows = preg_split('/\n/', trim($matches[0])); //We trim to remove the beginning and end \n that we match
 	$syntax_rows = explode("\n", trim($matches[0]));
@@ -460,9 +460,10 @@ function unhash_call_callback(&$matches) {
 //$Supple->SyntaxParser->addRule('paragraph', '/(.+?)\n\n/s', '<p>\1</p>'."\n\n", 300);  
 //$Supple->SyntaxParser->addRule('paragraph', '/(.+)/s', 'wpautop', 300, true);  
 //$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', "<p>$1</p>\n\n", 2020); // make paragraphs, including one at the end
-$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', 'paragraph_callback', 2020, true);
+$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(\n\s*\n|\z)/s', 'paragraph_callback', 2020, true);
 /**
  * @author Wordpress
+ * $matches[2] contains the newlines 
  */ 
 function paragraph_callback(&$matches) {
 	//We check to see if the block that is passed in begin or ends with any
@@ -472,10 +473,11 @@ function paragraph_callback(&$matches) {
 	//if(!preg_match('!</?' . $allblocks . '[^>]*>\s*$!', $matches[1]))
 	if((!preg_match('!^\s*</?' . $allblocks . '[^>]*>!', $matches[1])) && (!preg_match('!</?' . $allblocks . '[^>]*>\s*$!', $matches[1])))
 	{
-		return '<p>'.$matches[1].'</p>'."\n\n";
+		return '<p>'.$matches[1].'</p>'.$matches[2];
 	}
 	
-	return $matches[1]."\n\n";
+	//return $matches[1]."\n\n";
+	return $matches[1].$matches[2]."\n"; //Extra \n needed for non-paragraph items
 }
 
 
@@ -510,6 +512,15 @@ function paragraph_newline_hash_callback(&$matches) {
 	
 	return $Supple->SyntaxParser->hash($matches[1]);
 }
+
+//When non-paragraph items are separated by more than one newline, then we
+//assume that the user is intentionally inserting a newline:
+//See #10: http://dev.suppletext.org/ticket/10
+$Supple->SyntaxParser->addRule('intentional_newline', '/\n(\n+)\n/', 'intentional_newline_callback', 2050, true);
+function intentional_newline_callback(&$matches) {
+	return "\n".str_replace("\n", "<br />\n", $matches[1])."\n";
+}
+
 
 /* Things to implement:
     var $rules = array(
