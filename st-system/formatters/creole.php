@@ -97,18 +97,6 @@ function escape_callback(&$matches) {
 	return '~'.$Supple->SyntaxParser->hash($matches[1]);
 } 
 
-
-/**
- * Line Breaks
- * \\ to <br />\n
- * (The problem with this current implementation is that if we have \\\
- *  that will translate to \n\ (where \\n might be preferred). We have to
- *  consult Creole more carefully.)
- *  I'm not sure why we need '/\\\\\\\/' to match correctly when the correct
- *  way, I thought, was '/\\\\/'. Is this a bug?    
- */
-$Supple->SyntaxParser->addRule('linebreak', '/\\\\\\\/', "<br />\n", 120);   
-
 //Won't implement Raw, Footnote
 
 //Won't implement Table for now. Should also have option of tables being
@@ -373,9 +361,47 @@ function lists($in_text, $type) {
 	return $list_html;	
 }
 
-//Ugly hack to connect the lists. Later on, we should indent lists inside of lists.
+//Ugly hack to connect the lists (inner lists). Later on, we should indent lists inside of lists.
 $Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
 $Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n\n(<ol>.+?<\/ol>)\n/s', "\n".'$1', 238);
+
+
+/**
+ * Tables
+ */
+$Supple->SyntaxParser->addRule('tables', '/\n(?:\|.+?\n)+/s', 'tables_callback', 250, true);
+function tables_callback(&$matches) {
+	$table_html = "<table>\n";
+	
+	//$syntax_rows = preg_split('/\n/', trim($matches[0])); //We trim to remove the beginning and end \n that we match
+	$syntax_rows = explode("\n", trim($matches[0]));
+	
+	foreach($syntax_rows as $each_row) 
+	{
+		$table_html .= "<tr>\n";
+		$row_elements = explode('|', trim($each_row, '|')); //We trim to remove the |'s on the end.
+		foreach($row_elements as $each_cell)
+		{
+			$each_cell = trim($each_cell); //We trim again to remove any white space used to form the table.
+			//Check for table headers
+			if(preg_match('/^=(.+)/', $each_cell, $cell_matches))
+			{
+				$table_html .= "<th>".$cell_matches[1]."</th>\n";	
+			}
+			else
+			{
+				$table_html .= "<td>".$each_cell."</td>\n";
+			} 
+		}
+		$table_html .= "</tr>\n";
+	}
+	
+	$table_html .= "</table>\n";
+	
+	return $table_html;
+			
+	//return "\n".'<pre>'.$matches[0].'</pre>'."\n";
+} 
 
 
 /**
@@ -386,9 +412,9 @@ $Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n\n(<
  *       over lines and paragraphs after we do the normal inline stuff.  
  * Italics *MUST* be loaded before Bold according to Creole specifications. 
  */
-$Supple->SyntaxParser->addRule('emphasis_inline', '/\/\/(.+?)\/\//', '<em>$1</em>', 239); //Maybe we need to make this ungreedy
-$Supple->SyntaxParser->addRule('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>', 240);
-$Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', '<em>$1</em>'."\n\n", 245);
+$Supple->SyntaxParser->addRule('emphasis_inline', '/\/\/(.+?)\/\//', '<em>$1</em>', 339); //Maybe we need to make this ungreedy
+$Supple->SyntaxParser->addRule('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>', 340);
+$Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', '<em>$1</em>'."\n\n", 345);
 
 
 /**
@@ -396,9 +422,21 @@ $Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', 
  * ** ** -> <strong> </strong>
  * Note: The ordering here is very important. See reasoning for Emphasis. 
  */
-$Supple->SyntaxParser->addRule('strong', '/\*\*(.*?)\*\*/', '<strong>$1</strong>', 250);
-$Supple->SyntaxParser->addRule('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>', 251);
-$Supple->SyntaxParser->addRule('strong_cross_paragraph', '/\*\*(.+)\n{2,}?/', '<strong>$1</strong>'."\n\n", 255);
+$Supple->SyntaxParser->addRule('strong', '/\*\*(.*?)\*\*/', '<strong>$1</strong>', 350);
+$Supple->SyntaxParser->addRule('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>', 351);
+$Supple->SyntaxParser->addRule('strong_cross_paragraph', '/\*\*(.+)\n{2,}?/', '<strong>$1</strong>'."\n\n", 355);
+
+
+/**
+ * Line Breaks
+ * \\ to <br />\n
+ * (The problem with this current implementation is that if we have \\\
+ *  that will translate to \n\ (where \\n might be preferred). We have to
+ *  consult Creole more carefully.)
+ *  I'm not sure why we need '/\\\\\\\/' to match correctly when the correct
+ *  way, I thought, was '/\\\\/'. Is this a bug?    
+ */
+$Supple->SyntaxParser->addRule('linebreak', '/\\\\\\\/', "<br />\n", 400);   
 
 /**
  * Postfilters
