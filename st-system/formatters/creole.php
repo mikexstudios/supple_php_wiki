@@ -297,12 +297,19 @@ $Supple->SyntaxParser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />', 200);
 //Watch out for the \n at the beginning and the \n at the end of the regex. The list could be at the
 //beginning or end of the long string so we should insert \n at the beginning and end of the string.
 $Supple->SyntaxParser->addRule('unordered_lists', '/\n(?:\*.+?\n)+/s', 'unordered_lists_callback', 235, true);
+$Supple->SyntaxParser->addRule('ordered_lists', '/\n(?:\#.+?\n)+/s', 'ordered_lists_callback', 236, true);
 function unordered_lists_callback(&$matches) {
 
-	return unordered_lists($matches[0]);	
+	return lists($matches[0], 'unordered');	
 
 } 
-function unordered_lists($in_text) {
+function ordered_lists_callback(&$matches) {
+
+	//return 'asdf';
+	return lists($matches[0], 'ordered');	
+
+} 
+function lists($in_text, $type) {
 	global $Supple;
 	
 	$inner_list = ''; //Make empty
@@ -314,17 +321,34 @@ function unordered_lists($in_text) {
 		return "\n".$in_text; //We should more rigorously do the newline stuff. Right now, it's a lot of guesswork.
 	}
 	
+	//We should do something similar for ##.
+	
 	//This function is recursive! If we don't stop it, it will run infinitely!
 	
 	//Split by each line
-	$list_html = "\n\n<ul>\n";
+	if(strcmp($type, 'unordered')==0)
+	{
+		$tag = 'ul';
+		$identifier = '\*';
+	}
+	else if(strcmp($type, 'ordered')==0)
+	{
+		$tag = 'ol';
+		$identifier = '\#';
+	}
+	else
+	{
+		return '';
+	}
+	
+	$list_html = "\n\n<$tag>\n";
 	//See http://us.php.net/manual/en/function.preg-match-all.php
 	//to figure out code below:
-	if(preg_match_all('/\*(.+)\n/', $in_text, $list_matches))
+	if(preg_match_all('/'.$identifier.'(.+)\n/', $in_text, $list_matches))
 	{
 		foreach($list_matches[1] as $each_line)
 		{
-			if(preg_match('/(\*.+)/', $each_line))
+			if(preg_match('/('.$identifier.'.+)/', $each_line))
 			{
 				$inner_list .= $each_line."\n";
 			}
@@ -332,7 +356,7 @@ function unordered_lists($in_text) {
 			{
 				//Reset inner_list
 				//$inner_list = '';
-				$list_html .= '<li>'.preg_replace_callback('/(?:\*.+?\n)+/s', 'unordered_lists_callback', $inner_list).'</li>'."\n";
+				$list_html .= '<li>'.preg_replace_callback('/(?:'.$identifier.'.+?\n)+/s', $type.'_lists_callback', $inner_list).'</li>'."\n";
 				$inner_list = '';
 				$list_html .= '<li>'.$each_line.'</li>'."\n"; //We need this to output the each_line for the line right after an inner list.
 			}
@@ -344,17 +368,14 @@ function unordered_lists($in_text) {
 			//$list_html .= '<li>'.$each_line.'</li>'."\n";
 		}
 	}
-	$list_html .= "</ul>\n\n";
+	$list_html .= "</$tag>\n\n";
 		
 	return $list_html;	
 }
 
 //Ugly hack to connect the lists. Later on, we should indent lists inside of lists.
 $Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
-//$Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n(<ul>.*</ul>)\n/', 'unordered_lists_callback', 235, true);
-function unordered_lists_postprocess_callback(&$matches) {
-	
-}
+$Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n\n(<ol>.+?<\/ol>)\n/s', "\n".'$1', 238);
 
 
 /**
