@@ -26,7 +26,6 @@ $Supple->SyntaxParser->addRule('to_unix_lineendings', '/\r\n?/', "\n", 10);
 //and then we count four consecutive spaces.
 $Supple->SyntaxParser->addRule('spaces_to_tab', '/\n[ ]{4}/', "\n\t", 20); 
 
-
 /**
  * Trim
  * Remove whitespace from the beginning and end of a string
@@ -39,6 +38,10 @@ $Supple->SyntaxParser->addRule('trim_spaces', '/(.*)/m', 'trim_spaces_callback',
 function trim_spaces_callback(&$matches) {
 	return trim($matches[1]);
 } 
+
+//Insert a newline at the beginning and end of the text. This will help
+//in regex later since we can assume lines start and end with \n
+//$Supple->SyntaxParser->addRule('beg_end_newline', '/(.+)/s', "\n\n".'$1'."asdf\n\n", 40);
 
 /**
  * Preformatted
@@ -104,8 +107,7 @@ function escape_callback(&$matches) {
  *  I'm not sure why we need '/\\\\\\\/' to match correctly when the correct
  *  way, I thought, was '/\\\\/'. Is this a bug?    
  */
-$Supple->SyntaxParser->addRule('linebreak', '/\\\\\\\/', "<br />\n", 120);  
-
+$Supple->SyntaxParser->addRule('linebreak', '/\\\\\\\/', "<br />\n", 120);   
 
 //Won't implement Raw, Footnote
 
@@ -288,6 +290,71 @@ function headings_callback(&$matches) {
  */
 $Supple->SyntaxParser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />', 200);
 
+/**
+ * Lists
+ * NOTE: Should come before the Strong syntax since ** is interpreted as the strong syntax. (Disregard for now)
+ */
+//Watch out for the \n at the beginning and the \n at the end of the regex. The list could be at the
+//beginning or end of the long string so we should insert \n at the beginning and end of the string.
+$Supple->SyntaxParser->addRule('unordered_lists', '/\n(?:\*.+?\n)+/s', 'unordered_lists_callback', 235, true);
+function unordered_lists_callback(&$matches) {
+
+	return unordered_lists($matches[0]);	
+
+} 
+function unordered_lists($in_text) {
+	global $Supple;
+	
+	$inner_list = ''; //Make empty
+	
+	//If we match ** by itself without surrounding *, then we know that it
+	//is the 'strong' modifier. Therefore, we return without doing anything.
+	if(preg_match('/\n\*\*.+$/', $in_text))
+	{
+		return "\n".$in_text; //We should more rigorously do the newline stuff. Right now, it's a lot of guesswork.
+	}
+	
+	//This function is recursive! If we don't stop it, it will run infinitely!
+	
+	//Split by each line
+	$list_html = "\n\n<ul>\n";
+	//See http://us.php.net/manual/en/function.preg-match-all.php
+	//to figure out code below:
+	if(preg_match_all('/\*(.+)\n/', $in_text, $list_matches))
+	{
+		foreach($list_matches[1] as $each_line)
+		{
+			if(preg_match('/(\*.+)/', $each_line))
+			{
+				$inner_list .= $each_line."\n";
+			}
+			else if(!empty($inner_list)) //We finally get to a line that doesn't start with *
+			{
+				//Reset inner_list
+				//$inner_list = '';
+				$list_html .= '<li>'.preg_replace_callback('/(?:\*.+?\n)+/s', 'unordered_lists_callback', $inner_list).'</li>'."\n";
+				$inner_list = '';
+				$list_html .= '<li>'.$each_line.'</li>'."\n"; //We need this to output the each_line for the line right after an inner list.
+			}
+			else
+			{
+				$list_html .= '<li>'.$each_line.'</li>'."\n";
+			}
+			//$list_html .= '<li>'.preg_replace_callback('/(?:\*.+?)+/s', 'unordered_lists_callback', $each_line).'</li>'."\n";
+			//$list_html .= '<li>'.$each_line.'</li>'."\n";
+		}
+	}
+	$list_html .= "</ul>\n\n";
+		
+	return $list_html;	
+}
+
+//Ugly hack to connect the lists. Later on, we should indent lists inside of lists.
+$Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
+//$Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n(<ul>.*</ul>)\n/', 'unordered_lists_callback', 235, true);
+function unordered_lists_postprocess_callback(&$matches) {
+	
+}
 
 
 /**
@@ -299,7 +366,7 @@ $Supple->SyntaxParser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />', 200);
  * Italics *MUST* be loaded before Bold according to Creole specifications. 
  */
 $Supple->SyntaxParser->addRule('emphasis_inline', '/\/\/(.+?)\/\//', '<em>$1</em>', 239); //Maybe we need to make this ungreedy
-$Supple->SyntaxParser->addRule('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>'."\n", 240);
+$Supple->SyntaxParser->addRule('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>', 240);
 $Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', '<em>$1</em>'."\n\n", 245);
 
 
@@ -309,17 +376,18 @@ $Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', 
  * Note: The ordering here is very important. See reasoning for Emphasis. 
  */
 $Supple->SyntaxParser->addRule('strong', '/\*\*(.*?)\*\*/', '<strong>$1</strong>', 250);
-$Supple->SyntaxParser->addRule('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>'."\n", 251);
+$Supple->SyntaxParser->addRule('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>', 251);
 $Supple->SyntaxParser->addRule('strong_cross_paragraph', '/\*\*(.+)\n{2,}?/', '<strong>$1</strong>'."\n\n", 255);
 
 /**
  * Postfilters
  */ 
  
-//Remove the last <br />
+//Remove the last <br />. Not totally sure why we need this right now.
 $Supple->SyntaxParser->addRule('remove_last_br', '/<br \/>$/', '', 2000);
 
-$Supple->SyntaxParser->addRule('unhash_all', '/\n\n([a-z0-9]+)\n\n/', 'unhash_call_callback', 2010, true);
+//Unhash everything. This is absolutely necessary to reverse all of the hiding done by other functions.
+$Supple->SyntaxParser->addRule('unhash_all', '/'.$Supple->SyntaxParser->getTokenPattern().'/', 'unhash_call_callback', 2010, true);
 function unhash_call_callback(&$matches) {
 	global $Supple;
 	
@@ -334,6 +402,9 @@ function unhash_call_callback(&$matches) {
 //$Supple->SyntaxParser->addRule('paragraph', '/(.+)/s', 'wpautop', 300, true);  
 //$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', "<p>$1</p>\n\n", 2020); // make paragraphs, including one at the end
 $Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', 'paragraph_callback', 2020, true);
+/**
+ * @author Wordpress
+ */ 
 function paragraph_callback(&$matches) {
 	//We check to see if the block that is passed in begin or ends with any
 	//of the block-level tags defined below:
@@ -348,11 +419,38 @@ function paragraph_callback(&$matches) {
 	return $matches[1]."\n\n";
 }
 
+
 /**
  * Paragraph Newlines
  * Convert all \n in paragraphs to <br />. 
  */  
-$Supple->SyntaxParser->addRule('paragraph_newline', '/<p>(.*)<\/p>/Us', 'paragraph_newline_callback', 2030, true); 
+$Supple->SyntaxParser->addRule('paragraph_newline', '/<p>(.*)<\/p>/Us', 'paragraph_newline_callback', 2030, true);
+function paragraph_newline_callback(&$matches) {
+	global $Supple;
+	
+	//Rehash certain elements in the paragraph so that newlines are not
+	//converted. Like <pre> tags
+	$rehash_elements = '(?:pre)'; //Add more. Erg, we can't have li in here either. We don't need ul and ol in here now since we don't put them in paragraphs.
+	$matches[1] = preg_replace_callback('/(<'.$rehash_elements.'>.+<\/'.$rehash_elements.'>)\n?/Us', 'paragraph_newline_hash_callback', $matches[1]);
+	
+	//We run into <br />\n since that is the result of \\\n (a line break)
+	//The solution is to remove the <br /> in the <br />\n and let the next
+	//preg_replace change that into a <br />.
+	//We do NOT modify the 'linebreak' rule from <br />\n to just \n since
+	//the \\ can be used in headers and other block-level elements.
+	$matches[1] = preg_replace('/<br \/>\n/', "\n", $matches[1]);
+	
+	//Replace newlines
+	$matches[1] = '<p>'.preg_replace('/\n/', '<br />'."\n", $matches[1]).'</p>';
+	
+	//Now we unhash everything
+	return $Supple->SyntaxParser->unhash_contents($matches[1]);
+} 
+function paragraph_newline_hash_callback(&$matches) {
+	global $Supple;
+	
+	return $Supple->SyntaxParser->hash($matches[1]);
+}
 
 /* Things to implement:
     var $rules = array(

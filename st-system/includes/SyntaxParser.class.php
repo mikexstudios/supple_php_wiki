@@ -13,11 +13,12 @@
 class SyntaxParser {
 	var $text;
 	var $rules;
-	var $token_pattern = '\n\n([a-z0-9]+)\n\n';
+	var $delimiter = "\xFF";
+	var $token_pattern;
 	var $hashed_text = array();
 
 	function SyntaxParser() {
-		
+		$this->token_pattern = $this->delimiter.'([a-z0-9]+)'.$this->delimiter;
 	}	
 	
 	function setText($in_text) {
@@ -100,7 +101,7 @@ class SyntaxParser {
 		# Then hash the block.
 		$key = md5($text);
 		$this->hashed_text[$key] = $text;
-		return "\n\n$key\n\n"; # String that will replace the tag.
+		return $this->delimiter.$key.$this->delimiter; # String that will replace the tag.
 	}
 
 	function unhash($key) {
