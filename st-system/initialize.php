@@ -28,7 +28,7 @@
 error_reporting (E_ALL ^ E_NOTICE);
 
 /**
- * PHP Version Check
+ * PHP Version Check. We should just make the version 5.2 and add PDO support, etc.
  */ 
 if ( version_compare( '4.2', phpversion(), '>' ) ) { //Wikka has version 4.1.0, but we can make it 4.2 just to be safe since we might be using code from WP.
 	die( 'Your server is running PHP version ' . phpversion() . ' but suppleText requires at least 4.2.' );
@@ -104,7 +104,7 @@ if (get_magic_quotes_gpc())
  */
 //For now, just include the config file. Soon, we want to revamp the config
 //options.
-include('st-config.php');
+include('st-config.php'); //Maybe should ABSPATH this.
 define('SITEURL', '/suppleText');
 
 //Installer check?
@@ -118,6 +118,7 @@ define('SITEURL', '/suppleText');
 //DATABASE
 define('ST_PAGES_TABLE', $table_prefix.'pages');
 define('ST_USERS_TABLE', $table_prefix.'users');
+define('ST_ARCHIVES_TABLE', $table_prefix.'archives');
 
 
 //Load database

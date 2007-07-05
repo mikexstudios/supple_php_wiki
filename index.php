@@ -24,6 +24,9 @@
  * @copyright Copyright 2007, suppleText Development Team
  * 
  */
+
+
+define('ABSPATH', dirname(__FILE__).'/'); 
  
 //Initialize needed script elements
 require('./st-system/initialize.php');

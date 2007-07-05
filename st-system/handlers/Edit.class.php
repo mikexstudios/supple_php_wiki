@@ -92,11 +92,22 @@ class Edit extends Handler {
 	function storeChanges() {
 			// set all other revisions to old
 			//$this->Query('UPDATE '.$this->config['table_prefix'].'pages SET latest = "N" WHERE tag = "'.mysql_real_escape_string($tag).'"');
-
-			// set all other revisions to old. This could be slow if we have tons of pages.
-			$this->Db->query('UPDATE '.ST_PAGES_TABLE.' 
-												SET latest = "N" 
+			
+			//We send the old version into an archives table.
+			$this->Db->query('INSERT INTO '.ST_ARCHIVES_TABLE.'
+												SELECT *  
+												FROM '.ST_PAGES_TABLE.' 
 												WHERE tag = "'.mysql_real_escape_string($this->pagename).'"');
+			//Then delete the entry from the pages table. Should add a check to see if
+			//the copy was successful before deleting.
+			$this->Db->query('DELETE FROM '.ST_PAGES_TABLE.'
+												WHERE tag = "'.mysql_real_escape_string($this->pagename).'"
+												LIMIT 1');
+			
+			// set all other revisions to old. This could be slow if we have tons of pages.
+			//$this->Db->query('UPDATE '.ST_PAGES_TABLE.' 
+			//									SET latest = "N" 
+			//									WHERE tag = "'.mysql_real_escape_string($this->pagename).'"');
 
 			$this->Db->query('INSERT INTO '.ST_PAGES_TABLE.' 
 												SET tag = "'.mysql_real_escape_string($this->pagename).'", '.
