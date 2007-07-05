@@ -39,6 +39,11 @@ class Show extends Handler {
 		$this->registerAction('page_id',  'getPageId');
 		
 		$this->setPagename($this->Supple->getPagename());
+		//Set the time if specified in GET
+		if(!empty($_GET['time']))
+		{
+			$this->setTime($_GET['time']);
+		}
 		$this->loadPage();
 	}
 	
@@ -73,12 +78,20 @@ class Show extends Handler {
 	 */
 	function loadPage() {
 		//Could probably do this a little better
+		//We load the latest page first just so we can load information from the latest page.
 		$this->page = $this->Db->get_row('SELECT * 
 																FROM '.ST_PAGES_TABLE.'
-																WHERE tag = "'.mysql_real_escape_string($this->pagename).'" '.($time ? '
-																	AND time = "'.mysql_real_escape_string($time).'"' : '
-																	AND latest = "Y"').' 
+																WHERE tag = "'.mysql_real_escape_string($this->pagename).'"  
 																LIMIT 1');
+		//Then we check if we need to grab an older copy.														
+		if(!empty($this->time) && (strcmp($this->page['time'], $this->time)!=0)) //The latest page time and the specified time are not the same.
+		{
+			$this->page = $this->Db->get_row('SELECT * 
+																	FROM '.ST_ARCHIVES_TABLE.'
+																	WHERE tag = "'.mysql_real_escape_string($this->pagename).'" 
+																	AND time = "'.mysql_real_escape_string($this->time).'" 
+																	LIMIT 1');
+		}
 	}
 	
 	function loadTemplate() {
