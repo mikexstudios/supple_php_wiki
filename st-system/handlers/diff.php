@@ -15,6 +15,9 @@ $Show->loadPage();
 $Diff->setRevisionA($_GET['a']);
 $Diff->setRevisionB($_GET['b']);
 $Diff->computeDifferences();
+global $revision_a_data, $revision_b_data;
+$revision_a_data = $Diff->getRevisionAData();
+$revision_b_data = $Diff->getRevisionBData();
 
 
 $Supple->registerAction('diff_added', 'getAddedFormatted');
@@ -34,6 +37,19 @@ function getDeletedFormatted() {
 	$Supple->SyntaxParser->setText($Diff->getDeleted());
 	$Supple->SyntaxParser->applyAll();
 	return $Supple->SyntaxParser->getText();
+}
+
+$Supple->registerAction('revision_a_time', 'getATime');
+$Supple->registerAction('revision_b_time', 'getBTime');
+function getATime() {
+	global $revision_a_data;
+	
+	return $revision_a_data['time'];
+}
+function getBTime() {
+	global $revision_b_data;
+	
+	return $revision_b_data['time'];
 }
 
 //Load the page.

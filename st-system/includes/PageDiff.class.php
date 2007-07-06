@@ -27,8 +27,8 @@
 class PageDiff extends Handler {
 	var $Show;
 	var $pagename;
-	var $revision_a;
-	var $revision_b;
+	var $revision_a, $revision_a_data;
+	var $revision_b, $revision_b_data;
 	var $added;
 	var $deleted;
 	
@@ -64,15 +64,15 @@ class PageDiff extends Handler {
 		//Get page data from both revisions.
 		$this->Show->setPageId($this->revision_a);
 		$this->Show->loadPage();
-		$revision_a_data = $this->Show->getPage();
+		$this->revision_a_data = $this->Show->getPage();
 		
 		$this->Show->setPageId($this->revision_b);
 		$this->Show->loadPage();
-		$revision_b_data = $this->Show->getPage();
+		$this->revision_b_data = $this->Show->getPage();
 		
 		// prepare bodies. Below code from Wikkawiki:
-		$bodyA = explode("\n", $revision_a_data['body']);
-		$bodyB = explode("\n", $revision_b_data['body']);
+		$bodyA = explode("\n", $this->revision_a_data['body']);
+		$bodyB = explode("\n", $this->revision_b_data['body']);
 
 		$this->added   = array_diff($bodyA, $bodyB);
 		$this->deleted = array_diff($bodyB, $bodyA);
@@ -84,6 +84,14 @@ class PageDiff extends Handler {
 	
 	function getDeleted() {
 		return implode("\n", $this->deleted);
+	}
+	
+	function getRevisionAData() {
+		return $this->revision_a_data;
+	}
+	
+	function getRevisionBData() {
+		return $this->revision_b_data;
 	}
 	
 

@@ -5,7 +5,8 @@
 
 
 <div class="revisioninfo">
-	Comparison of <a href="http://localhost/wikka-trunk/wikka.php?wakka=SandBox&amp;time=2007-07-06+12%3A06%3A06">2007-07-06 12:06:06</a> &amp; <a href="http://localhost/wikka-trunk/wikka.php?wakka=SandBox&amp;time=2007-07-06+10%3A46%3A23">2007-07-06 10:46:23</a>
+	Comparison of <a href="<?php out('page_url', get('page_tag'), 'show', 'time='.urlencode(get('revision_a_time'))); ?>"><?php out('revision_a_time'); ?></a>
+	 &amp; <a href="<?php out('page_url', get('page_tag'), 'show', 'time='.urlencode(get('revision_b_time'))); ?>"><?php out('revision_b_time'); ?></a>
 </div>
 <div class="additions">
 	<strong>Additions:</strong><br />
