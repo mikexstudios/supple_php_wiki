@@ -34,31 +34,10 @@ class Show extends Handler {
 		//Add functions to be used by themes.
 		//@todo Add a hook here so that plugin files can add theme functions too.
 		$this->registerAction('page_content', 'getPageContent');
-		$this->registerAction('page_tag',  'getPageTag');
-		$this->registerAction('page_time',  'getPageTime');
-		$this->registerAction('page_id',  'getPageId');
+		$this->registerAction('page_tag', 'getPageTag');
+		$this->registerAction('page_time', 'getPageTime');
+		$this->registerAction('page_id', 'getPageId');
 		
-		$this->setPagename($this->Supple->getPagename());
-		//Set the time if specified in GET
-		if(!empty($_GET['time']))
-		{
-			$this->setTime($_GET['time']);
-		}
-		$this->loadPage();
-	}
-	
-	function run() {
-		//Code in run should *only* be for when Show is loaded directly, not if some
-		//other class includes Show.
-		global $Supple;
-		
-		//Syntax formatting. Include syntax file:
-		include_once(ABSPATH.'/st-system/formatters/creole.php');
-		$Supple->SyntaxParser->setText($this->page['body']);
-		$Supple->SyntaxParser->applyAll();
-		$this->page['body'] = $Supple->SyntaxParser->getText();
-		
-		$this->loadTemplate();
 	}
 	
 	function setPagename($in_pagename) {
@@ -92,10 +71,6 @@ class Show extends Handler {
 																	AND time = "'.mysql_real_escape_string($this->time).'" 
 																	LIMIT 1');
 		}
-	}
-	
-	function loadTemplate() {
-		include get_theme_system_path('show.tpl.php');
 	}
 	
 	function getPage() {

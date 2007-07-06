@@ -32,49 +32,14 @@ class Edit extends Handler {
 	function Edit() {
 		parent::Handler();
 		
-		//Edit always needs the Show class.
-		include_once ABSPATH.'/st-system/handlers/Show.class.php';
-		$this->Show = new Show();
-		
 		//Add functions to be used by themes.
 		//@todo Add a hook here so that plugin files can add theme functions too.
 		
-		
-		$this->setPagename($this->Supple->getPagename());
-	}
-	
-	function run() {
-		//Get info from POST. We should secure this:
-		//Also see edit.php (Wikka's) for more info how to better do this.
-		if($_POST['submit'] == 'Store')
-		{
-			// strip CRLF line endings down to LF to achieve consistency ... plus it saves database space.
-			// Note: these codes must remain enclosed in double-quotes to work!
-			$body = str_replace("\r\n", "\n", $_POST['body']);
-			$body = preg_replace("/\n[ ]{4}/", "\n\t", $body);	// @@@ FIXME: misses first line and multiple sets of four spaces
-		
-			// we don't need to escape here, we do that just before display (i.e., treat note just like body!)
-			$note = trim($_POST['note']);
-			
-			//Should check for overwriting.
-		
-			//DO THIS LATER: only save if new body differs from old body
-			
-			$this->setContent($body);
-			$this->setEditnote($note);
-			
-			$this->storeChanges();
-			redirect_page($this->pagename);
-		}
-		$this->loadTemplate();
-	}
-	
-	function loadTemplate() {
-		include get_theme_system_path('edit.tpl.php');
 	}
 
 	function setPagename($in_pagename) {
 		$this->pagename = $in_pagename;
+	
 	}
 	
 	function setContent($in_content) {
@@ -115,7 +80,6 @@ class Edit extends Handler {
 																		'owner = "", '.
 																		'user = "", '.
 																		'note = "'.mysql_real_escape_string($this->note).'", '.
-																		'latest = "Y", '.
 																		'body = "'.mysql_real_escape_string($this->content).'"');
 
 	}

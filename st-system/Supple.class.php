@@ -182,9 +182,8 @@ class Supple {
 		$this->handlerName = ucfirst(trim($in_handler));
 		
 		//Ugly, so we should improve:
-		include_once ABSPATH.'/st-system/handlers/'.$this->handlerName.'.class.php';
-		$this->Handler = new $this->handlerName; //Make first letter of handler name uppercase.
-		$this->Handler->run();
+		include_once ABSPATH.'/st-system/handlers/'.$this->handlerName.'.php';
+
 	}
 	
 	//The following are part of suppleText's new extensible features. Code based off of
