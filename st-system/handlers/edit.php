@@ -43,6 +43,7 @@ if($_POST['submit'] == 'Store')
 	redirect_page($Edit->pagename);
 }
 
+//Otherwise, we load the page.
 include get_theme_system_path('edit.tpl.php');
 
 ?>

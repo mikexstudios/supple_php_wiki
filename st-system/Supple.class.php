@@ -179,7 +179,8 @@ class Supple {
 	 *
 	 */	 	 	
 	function callHandler($in_handler) {
-		$this->handlerName = ucfirst(trim($in_handler));
+		//$this->handlerName = ucfirst(trim($in_handler));
+		$this->handlerName = trim($in_handler); //No longer need the capitalization.
 		
 		//Ugly, so we should improve:
 		include_once ABSPATH.'/st-system/handlers/'.$this->handlerName.'.php';
@@ -234,17 +235,18 @@ class Supple {
 	 * @param string $functionName Function (that exists) to be registered such as 'getImageTag()'.
 	 */
 	function registerAction($tag, $functionName) {
-		
+		/* For now, we allow overwriting:
 		//Check for existing action. Match tags.
 		foreach($this->actions as $actionName=>$actionFunction)
 		{
 			if($tag == $actionName)
 			{
 				//Error
-				echo 'Error: '.$tag;
+				echo 'Error (already exists): '.$tag;
 				return;
 			}
 		}
+		*/
 		
 		//Add new action to actions array
 		$this->actions[$tag] = $functionName;  

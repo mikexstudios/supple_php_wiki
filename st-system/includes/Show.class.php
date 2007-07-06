@@ -27,6 +27,7 @@ class Show extends Handler {
 	var $pagename;
 	var $time;
 	var $page;
+	var $id;
 	
 	function Show() {
 		parent::Handler();
@@ -38,6 +39,10 @@ class Show extends Handler {
 		$this->registerAction('page_time', 'getPageTime');
 		$this->registerAction('page_id', 'getPageId');
 		
+	}
+	
+	function setPageId($in_id) {
+		$this->id = $in_id;
 	}
 	
 	function setPagename($in_pagename) {
@@ -56,18 +61,41 @@ class Show extends Handler {
 	 * @return mixed Page table row containing content, author, etc.
 	 */
 	function loadPage() {
+		//Possibly add AND clauses in the future.
+		if(!empty($this->id))
+		{
+			$where = 'WHERE id = "'.mysql_real_escape_string($this->id).'"';
+		}
+		else if(!empty($this->pagename))
+		{
+			$where = 'WHERE tag = "'.mysql_real_escape_string($this->pagename).'"';
+		}
+		else
+		{
+			return; //Nothing can happen since page identifiers aren't set.
+		}
+		
 		//Could probably do this a little better
 		//We load the latest page first just so we can load information from the latest page.
 		$this->page = $this->Db->get_row('SELECT * 
-																FROM '.ST_PAGES_TABLE.'
-																WHERE tag = "'.mysql_real_escape_string($this->pagename).'"  
+																FROM '.ST_PAGES_TABLE.' 
+																'.$where.'
 																LIMIT 1');
+		
+		if(!empty($this->id) && $this->page['id'] != $this->id)
+		{
+			$this->page = $this->Db->get_row('SELECT * 
+														FROM '.ST_ARCHIVES_TABLE.' 
+														'.$where.'
+														LIMIT 1');
+		}														
+		
 		//Then we check if we need to grab an older copy.														
 		if(!empty($this->time) && (strcmp($this->page['time'], $this->time)!=0)) //The latest page time and the specified time are not the same.
 		{
 			$this->page = $this->Db->get_row('SELECT * 
-																	FROM '.ST_ARCHIVES_TABLE.'
-																	WHERE tag = "'.mysql_real_escape_string($this->pagename).'" 
+																	FROM '.ST_ARCHIVES_TABLE.' 
+																	'.$where.'
 																	AND time = "'.mysql_real_escape_string($this->time).'" 
 																	LIMIT 1');
 		}

@@ -296,7 +296,7 @@ class wpdb {
 	 * @param string $output ARRAY_A | ARRAY_N | OBJECT
 	 * @return mixed results
 	 */
-	function get_results($query = null, $output = OBJECT) {
+	function get_results($query = null, $output = ARRAY_A) {
 		$this->func_call = "\$db->get_results(\"$query\", $output)";
 
 		if ( $query )
