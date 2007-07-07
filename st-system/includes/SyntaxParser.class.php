@@ -133,6 +133,13 @@ class SyntaxParser {
 	function getTokenPattern() {
 		return $this->token_pattern;
 	}
+	
+
+	//Actions: <<<actionname parameters parameter2>>>
+	function doSnippet($action, $args='')
+	{
+		return include_buffered(ABSPATH.'/st-system/actions/'.$action.'.php');
+	}
 
 }
 

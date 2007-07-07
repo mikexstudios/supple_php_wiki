@@ -97,6 +97,37 @@ function escape_callback(&$matches) {
 	return '~'.$Supple->SyntaxParser->hash($matches[1]);
 } 
 
+/**
+ * Snippets
+ * well, they are the Wikka/Wakka "actions", but we don't have a better 
+ * name for them yet.
+ */
+$Supple->SyntaxParser->addRule('snippets', '/<<<(.+)>>>/U', 'snippets_callback', 120, true); 
+function snippets_callback(&$matches) {
+	global $Supple;
+	
+	$action = trim($matches[1]);
+
+	// search for parameters separated by spaces or newlines - Wikka #371
+	if (preg_match('/\s/', $action))
+	{
+		// parse input for action name and parameters
+		preg_match('/^([A-Za-z0-9]*)\s+(.*)$/s', $action, $matches);
+		// extract $action and $vars_temp ("raw" attributes)
+		list(, $action, $args) = $matches;
+
+		//Call action, pass the args to it
+		return $Supple->SyntaxParser->doSnippet($action, $args);
+		
+	}
+	if (!preg_match('/^[a-zA-Z0-9]+$/', $action))
+	{
+		return '<em class="error">Unknown action; the action name must not contain special characters.</em>';
+	}
+	
+	return $Supple->SyntaxParser->hash($Supple->SyntaxParser->doSnippet($action));
+}
+
 //Won't implement Raw, Footnote
 
 //Won't implement Table for now. Should also have option of tables being

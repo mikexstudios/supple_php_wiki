@@ -27,6 +27,7 @@ class Edit extends Handler {
 	var $Show;
 	var $pagename;
 	var $content;
+	var $author;
 	var $note;
 	
 	function Edit() {
@@ -39,11 +40,14 @@ class Edit extends Handler {
 
 	function setPagename($in_pagename) {
 		$this->pagename = $in_pagename;
-	
 	}
 	
 	function setContent($in_content) {
 		$this->content = $in_content;
+	}
+	
+	function setAuthor($in_author) {
+		$this->author = $in_author;
 	}
 	
 	function setEditnote($in_note) {
@@ -78,7 +82,7 @@ class Edit extends Handler {
 												SET tag = "'.mysql_real_escape_string($this->pagename).'", '.
 																		'time = now(), '.
 																		'owner = "", '.
-																		'user = "", '.
+																		'user = "'.mysql_real_escape_string($this->author).'", '.
 																		'note = "'.mysql_real_escape_string($this->note).'", '.
 																		'body = "'.mysql_real_escape_string($this->content).'"');
 

@@ -51,8 +51,8 @@ class Supple {
 	* @access public
 	* @var object
 	*/
-	var $plugins;
 	var $SyntaxParser;
+	var $UserManagement;
 	/**#@-*/
 	// }}}
 
@@ -117,9 +117,13 @@ class Supple {
 	 * @access private
 	 */
 	function loadAndAssociateCoreClasses() {
-	
 		//Handler class
 		include_once ABSPATH.'st-system/includes/Handler.class.php';
+		
+		//UserManagement class
+		include_once ABSPATH.'/st-system/includes/UserManagement.class.php'; //Login/Logout
+		$this->UserManagement = new UserManagement();
+		$this->UserManagement->isLoggedIn();
 		
 		//Syntax parsing class
 		include_once ABSPATH.'st-system/includes/SyntaxParser.class.php';

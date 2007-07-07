@@ -303,4 +303,12 @@ function construct_page_url($page, $handler='', $args='') {
 	return $url;
 }
 
+function include_buffered($filename) {
+		ob_start();
+		include($filename);
+		$output = ob_get_contents();
+		ob_end_clean();
+		return $output;
+}
+
 ?>

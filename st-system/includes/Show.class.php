@@ -114,6 +114,11 @@ class Show extends Handler {
 	}
 	
 	function getPageTag() {
+		if(empty($this->page['tag']))
+		{
+			return $this->pagename; //This fixes cases where the page does not exist yet.
+		}
+		
 		return $this->page['tag'];
 	}
 	

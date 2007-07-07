@@ -35,6 +35,7 @@ if($_POST['submit'] == 'Store')
 	//Should check for overwriting.
 
 	//DO THIS LATER: only save if new body differs from old body
+	$Edit->setAuthor($Supple->UserManagement->getUsername());
 	
 	$Edit->setContent($body);
 	$Edit->setEditnote($note);
