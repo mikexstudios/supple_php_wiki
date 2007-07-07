@@ -2,6 +2,11 @@
 global $Diff, $Supple; //Need this to access $Supple
 
 //Load Revisions class
+include_once ABSPATH.'/st-system/includes/Revisions.class.php';
+$Revisions = new Revisions();
+$Revisions->setPagename($Supple->getPagename());
+
+//Load PageDiff class
 include_once ABSPATH.'/st-system/includes/PageDiff.class.php';
 $Diff = new PageDiff();
 $Diff->setPagename($Supple->getPagename());
@@ -12,14 +17,33 @@ $Show = new Show();
 $Show->setPagename($Supple->getPagename());
 $Show->loadPage();
 
-$Diff->setRevisionA($_GET['a']);
-$Diff->setRevisionB($_GET['b']);
-$Diff->computeDifferences();
-global $revision_a_data, $revision_b_data;
-$revision_a_data = $Diff->getRevisionAData();
-$revision_b_data = $Diff->getRevisionBData();
+include_once ABSPATH.'/st-system/formatters/creole.php';
 
+//Get list of revisions
+$revisions = $Revisions->getRevisionList();
+for($i=0; $i < count($revisions); $i++)
+{
+	if(isset($revisions[$i+1])) //if the next revision exists
+	{
+		//echo $revisions[$i]['id'].' ';
+		$Diff->setRevisionA($revisions[$i]['id']);
+		$Diff->setRevisionB($revisions[$i+1]['id']);
+		$Diff->computeDifferences();
+		$revision_a_data[$i] = $Diff->getRevisionAData();
+		$added[$i] = $Diff->getAdded();
+				$Supple->SyntaxParser->setText($added[$i]);
+				$Supple->SyntaxParser->applyAll();
+				$added[$i] = $Supple->SyntaxParser->getText();
+		$revision_b_data[$i] = $Diff->getRevisionBData();
+		$deleted[$i] = $Diff->getDeleted();
+				$Supple->SyntaxParser->setText($deleted[$i]);
+				$Supple->SyntaxParser->applyAll();
+				$deleted[$i] = $Supple->SyntaxParser->getText();
+	}
+}
+$num_revisions = $i;
 
+/*
 $Supple->registerAction('diff_added', 'getAddedFormatted');
 $Supple->registerAction('diff_deleted', 'getDeletedFormatted');
 function getAddedFormatted() {
@@ -51,8 +75,9 @@ function getBTime() {
 	
 	return $revision_b_data['time'];
 }
+*/
 
 //Load the page.
-include get_theme_system_path('diff.tpl.php');
+include get_theme_system_path('history.tpl.php');
 
 ?>

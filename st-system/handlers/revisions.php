@@ -22,3 +22,5 @@ $Show->loadPage();
 
 //Load the page.
 include get_theme_system_path('revisions.tpl.php');
+
+?>
