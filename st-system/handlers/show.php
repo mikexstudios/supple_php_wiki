@@ -4,6 +4,7 @@ global $Supple; //Need this to access $Supple
 //Include the Show class
 include_once ABSPATH.'/st-system/includes/Show.class.php';
 $Show = new Show();
+$Show->registerActions();
 
 $Show->setPagename($Supple->getPagename());
 //Set the time if specified in GET

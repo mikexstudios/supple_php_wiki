@@ -136,8 +136,12 @@ class SyntaxParser {
 	
 
 	//Actions: <<<actionname parameters parameter2>>>
-	function doSnippet($action, $args='')
+	function doSnippet($in_action, $in_args='')
 	{
+		global $action, $args; //Set these to global so that the included file can use them.
+		$action = $in_action;
+		$args = $in_args;
+		
 		return include_buffered(ABSPATH.'/st-system/actions/'.$action.'.php');
 	}
 

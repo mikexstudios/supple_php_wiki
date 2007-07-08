@@ -89,12 +89,13 @@ function tt_callback(&$matches) {
 	return $Supple->SyntaxParser->hash('<tt>'.$matches[1].'</tt>');
 }
 
-//Escape character here. But that's not extremely important right now.
-$Supple->SyntaxParser->addRule('escape', '/~(.)/', 'escape_callback', 115, true);
+//Escape character here. We parse the escape character only if it is at the start
+//of some word (so we have a whitespace char in front).
+$Supple->SyntaxParser->addRule('escape', '/(\s)~(.)/', 'escape_callback', 115, true);
 function escape_callback(&$matches) {
 	global $Supple;
 	
-	return '~'.$Supple->SyntaxParser->hash($matches[1]);
+	return $matches[1].$Supple->SyntaxParser->hash($matches[2]);
 } 
 
 /**
@@ -254,7 +255,7 @@ function inlineimage_callback(&$matches) {
  * we have ~ and the hashed pattern. Since the hash pattern can change, we get
  * the regex from the SyntaxParser class. It's really inelegant.     
  */
-$Supple->SyntaxParser->addRule('raw_url', '/(?:~'.$Supple->SyntaxParser->getTokenPattern().')?([a-z]+:\/\/)(\S+)/', 'raw_url_callback', 185, true); //The lesser complex version is: '([a-z]+:\/\/)(\S+)/'
+$Supple->SyntaxParser->addRule('raw_url', '/(?:'.$Supple->SyntaxParser->getTokenPattern().')?([a-z]+:\/\/)(\S+)/', 'raw_url_callback', 185, true); //The lesser complex version is: '([a-z]+:\/\/)(\S+)/'
 function raw_url_callback(&$matches) {
 	global $Supple;
 	

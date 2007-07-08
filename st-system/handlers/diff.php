@@ -9,6 +9,7 @@ $Diff->setPagename($Supple->getPagename());
 //Load Show class
 include_once ABSPATH.'/st-system/includes/Show.class.php';
 $Show = new Show();
+$Show->registerActions();
 $Show->setPagename($Supple->getPagename());
 $Show->loadPage();
 

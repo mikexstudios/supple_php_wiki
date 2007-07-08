@@ -221,9 +221,11 @@ function out($inTag) {
 
 $Supple->registerAction('theme_system_path', 'get_theme_system_path');
 function get_theme_system_path($file='') {
+	global $Supple;
+	
 	if(empty($file))
 	{
-		return ABSPATH.'/st-external/themes/default';
+		return ABSPATH.'/st-external/themes/'.$Supple->Settings->getSetting('use_theme');
 	}
 	return get_theme_system_path().'/'.$file;
 }
@@ -231,9 +233,11 @@ function get_theme_system_path($file='') {
 //Registering as Action eliminates the need for separate out_* functions.
 $Supple->registerAction('theme_url', 'get_theme_url_path');
 function get_theme_url_path($file='') {
+	global $Supple;
+	
 	if(empty($file))
 	{
-		return SITEURL.'/st-external/themes/default';
+		return SITEURL.'/st-external/themes/'.$Supple->Settings->getSetting('use_theme');
 	}
 	return get_theme_url_path().'/'.$file;
 }
@@ -315,6 +319,21 @@ $Supple->registerAction('site_name', 'get_site_name');
 function get_site_name() {
 	global $Supple;
 	return $Supple->Settings->getSetting('site_name');
+}
+
+$Supple->registerAction('root_page', 'get_default_page');
+function get_default_page() {
+	global $Supple;
+	return $Supple->Settings->getSetting('root_page');
+}
+
+$Supple->registerAction('format', 'format_text');
+function format_text($in_text) {
+	global $Supple;
+	include_once(ABSPATH.'/st-system/formatters/creole.php');
+	$Supple->SyntaxParser->setText($in_text);
+	$Supple->SyntaxParser->applyAll();
+	return $Supple->SyntaxParser->getText();
 }
 
 ?>

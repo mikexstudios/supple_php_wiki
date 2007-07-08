@@ -32,13 +32,17 @@ class Show extends Handler {
 	function Show() {
 		parent::Handler();
 		
+
+		
+	}
+	
+	function registerActions() {
 		//Add functions to be used by themes.
 		//@todo Add a hook here so that plugin files can add theme functions too.
 		$this->registerAction('page_content', 'getPageContent');
 		$this->registerAction('page_tag', 'getPageTag');
 		$this->registerAction('page_time', 'getPageTime');
-		$this->registerAction('page_id', 'getPageId');
-		
+		$this->registerAction('page_id', 'getPageId');	
 	}
 	
 	function setPageId($in_id) {
