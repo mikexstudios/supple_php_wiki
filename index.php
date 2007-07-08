@@ -80,7 +80,7 @@ if (!isset($handler))
 
 if(empty($page))
 {
-	$page = 'HomePage'; //Default to the HomePage
+	$page = $Supple->Settings->getSetting('root_page'); //Default to the what is set in the database config for default page
 }
 
 $Supple->setPagename($page);

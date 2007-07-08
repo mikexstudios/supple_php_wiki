@@ -53,6 +53,7 @@ class Supple {
 	*/
 	var $SyntaxParser;
 	var $UserManagement;
+	var $Settings;
 	/**#@-*/
 	// }}}
 
@@ -123,11 +124,16 @@ class Supple {
 		//UserManagement class
 		include_once ABSPATH.'/st-system/includes/UserManagement.class.php'; //Login/Logout
 		$this->UserManagement = new UserManagement();
-		$this->UserManagement->isLoggedIn();
+		$this->UserManagement->isLoggedIn(); //Currently need to run this.
 		
 		//Syntax parsing class
 		include_once ABSPATH.'st-system/includes/SyntaxParser.class.php';
 		$this->SyntaxParser = new SyntaxParser();
+		
+		//Configuration Information----------------------
+		include_once ABSPATH.'/st-system/includes/Settings.class.php';
+		$this->Settings = new Settings($db);
+		//-----------------------------------------------
 	}
 	
 	/**

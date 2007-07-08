@@ -311,4 +311,10 @@ function include_buffered($filename) {
 		return $output;
 }
 
+$Supple->registerAction('site_name', 'get_site_name');
+function get_site_name() {
+	global $Supple;
+	return $Supple->Settings->getSetting('site_name');
+}
+
 ?>

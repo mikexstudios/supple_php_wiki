@@ -119,13 +119,13 @@ define('SITEURL', '/suppleText');
 define('ST_PAGES_TABLE', $table_prefix.'pages');
 define('ST_USERS_TABLE', $table_prefix.'users');
 define('ST_ARCHIVES_TABLE', $table_prefix.'archives');
+define('ST_CONFIG_TABLE', $table_prefix.'config');
 
 
 //Load database
 require_once(ABSPATH.'st-system/includes/Db.class.php');
 if(!isset($Stdb))
 	{ $Stdb = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST); }
-
 
 
 ?>

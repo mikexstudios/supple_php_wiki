@@ -54,9 +54,12 @@ class Revisions extends Handler {
 																	WHERE tag = "'.mysql_real_escape_string($this->pagename).'"
 																	ORDER BY time DESC 
 																	');
-		foreach($results as $each_row)
+		if(!empty($results))
 		{
-			array_push($this->revisions_data, $each_row);
+			foreach($results as $each_row)
+			{
+				array_push($this->revisions_data, $each_row);
+			}
 		}
 		
 		return $this->revisions_data;
