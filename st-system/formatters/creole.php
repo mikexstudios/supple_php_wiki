@@ -41,7 +41,7 @@ function trim_spaces_callback(&$matches) {
 
 //Insert a newline at the beginning and end of the text. This will help
 //in regex later since we can assume lines start and end with \n
-//$Supple->SyntaxParser->addRule('beg_end_newline', '/(.+)/s', "\n\n".'$1'."asdf\n\n", 40);
+$Supple->SyntaxParser->addRule('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40);
 
 /**
  * Preformatted
@@ -76,27 +76,33 @@ function preformatted_callback(&$matches) {
 	
 	//There is more, but I didn't include it.
 	
-	return $Supple->SyntaxParser->hash("\n<pre>\n".$matches[1]."\n</pre>\n");
+	return "\n".$Supple->SyntaxParser->hash("<pre>\n".$matches[1]."\n</pre>")."\n";
 }  
+
+//Escape character here. We parse the escape character only if it is at the start
+//of some word (so we have a whitespace char in front).
+$Supple->SyntaxParser->addRule('escape', '/(\s)~(.)/', 'escape_callback', 105, true);
+function escape_callback(&$matches) {
+	global $Supple;
+	
+	//If \s is a space, we remove it
+	if(strcmp($matches[1], ' ')==0)
+	{
+		return $Supple->SyntaxParser->hash($matches[2]);
+	}
+	
+	return $matches[1].$Supple->SyntaxParser->hash($matches[2]);
+} 
 
 //Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
 //NOTE: This should be checked VERY carefully against the Creole specification.
 //      I have a feeling that this is currently wrong.
 //Creole 1.0 says that this doesn't HAVE to be monospace.
-$Supple->SyntaxParser->addRule('tt', '/{{{({*?.*}*?)}}}/U', 'tt_callback', 110, true);
+$Supple->SyntaxParser->addRule('tt', '/{{{({*?.*?}*)}}}/', 'tt_callback', 110, true); //Removed the U modifier. Seems to still work.
 function tt_callback(&$matches) {
 	global $Supple;
 	return $Supple->SyntaxParser->hash('<tt>'.$matches[1].'</tt>');
 }
-
-//Escape character here. We parse the escape character only if it is at the start
-//of some word (so we have a whitespace char in front).
-$Supple->SyntaxParser->addRule('escape', '/(\s)~(.)/', 'escape_callback', 115, true);
-function escape_callback(&$matches) {
-	global $Supple;
-	
-	return $matches[1].$Supple->SyntaxParser->hash($matches[2]);
-} 
 
 /**
  * Snippets
@@ -134,6 +140,38 @@ function snippets_callback(&$matches) {
 //Won't implement Table for now. Should also have option of tables being
 //done in HTML.
 
+/**
+ * Image (inline)
+ * {{myimage.png|text}} -> <img src="myimage.png" alt="text"> 
+ */ 
+//$Supple->SyntaxParser->addRule('inlineimage', '/{{(.+)(?:\|(.*))?}}/U', '<img src="$1" alt="$2" />', 180); 
+$Supple->SyntaxParser->addRule('inlineimage', '/\{\{(.+?)\}\}/', 'inlineimage_callback', 130, true);
+function inlineimage_callback(&$matches) {
+	global $Supple;
+	
+	//NOTE: Maybe we should add check for image format so that people don't
+	//include scripts or other malicious stuff.
+	
+	//Match external url with alt text. This should come before the 
+	//'just external url case' since \S+ also matches the | character.
+	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		return '<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />';
+	}
+	
+	//Match just external url.
+	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		return '<img src="'.$url_matches[1].'" />';
+	}
+	
+	//For everything else that doesn't seem to match.
+	return $matches[1];
+}
+
 
 /**
  * Links
@@ -161,6 +199,20 @@ function links_callback(&$matches) {
 	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
 		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
+	}
+	
+	//Match mailto: type links. NOTE: This could be dangerous if we don't check well.
+	//javascript injection possible! This is crude!
+	if(preg_match('/([a-z]+:\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
+		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
+	}
+		if(preg_match('/([a-z]+:\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+	{
+		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
 		return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
 	}
 	
@@ -208,38 +260,6 @@ function wikiwordlink_callback(&$matches) {
 	
 	//$matches[1] includes the whitespace characters.
 	return $matches[1].'<a href="'.$Supple->SyntaxParser->hash(SITEURL.'/index.php?wiki='.$matches[2]).'">'.$matches[2].'</a>';
-}
-
-/**
- * Image (inline)
- * {{myimage.png|text}} -> <img src="myimage.png" alt="text"> 
- */ 
-//$Supple->SyntaxParser->addRule('inlineimage', '/{{(.+)(?:\|(.*))?}}/U', '<img src="$1" alt="$2" />', 180); 
-$Supple->SyntaxParser->addRule('inlineimage', '/\{\{(.+?)\}\}/', 'inlineimage_callback', 180, true);
-function inlineimage_callback(&$matches) {
-	global $Supple;
-	
-	//NOTE: Maybe we should add check for image format so that people don't
-	//include scripts or other malicious stuff.
-	
-	//Match external url with alt text. This should come before the 
-	//'just external url case' since \S+ also matches the | character.
-	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
-	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
-		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
-		return '<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />';
-	}
-	
-	//Match just external url.
-	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
-	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
-		return '<img src="'.$url_matches[1].'" />';
-	}
-	
-	//For everything else that doesn't seem to match.
-	return $matches[1];
 }
 
 /**
@@ -338,7 +358,7 @@ function lists($in_text, $type) {
 	//is the 'strong' modifier. Therefore, we return without doing anything.
 	if(preg_match('/\n\*\*.+$/', $in_text))
 	{
-		return "\n".$in_text; //We should more rigorously do the newline stuff. Right now, it's a lot of guesswork.
+		return $in_text; //We should more rigorously do the newline stuff. Right now, it's a lot of guesswork.
 	}
 	
 	//We should do something similar for ##.
@@ -361,7 +381,9 @@ function lists($in_text, $type) {
 		return '';
 	}
 	
-	$list_html = "\n\n<$tag>\n";
+	//The weird thing is that two new lines are inserted in the XHTML output
+	//even though only one \n is here.
+	$list_html = "\n<$tag>\n";
 	//See http://us.php.net/manual/en/function.preg-match-all.php
 	//to figure out code below:
 	if(preg_match_all('/'.$identifier.'(.+)\n/', $in_text, $list_matches))
@@ -388,7 +410,7 @@ function lists($in_text, $type) {
 			//$list_html .= '<li>'.$each_line.'</li>'."\n";
 		}
 	}
-	$list_html .= "</$tag>\n\n";
+	$list_html .= "</$tag>\n";
 		
 	return $list_html;	
 }
@@ -548,7 +570,7 @@ function paragraph_newline_hash_callback(&$matches) {
 //When non-paragraph items are separated by more than one newline, then we
 //assume that the user is intentionally inserting a newline:
 //See #10: http://dev.suppletext.org/ticket/10
-$Supple->SyntaxParser->addRule('intentional_newline', '/\n(\n+)\n/', 'intentional_newline_callback', 2050, true);
+$Supple->SyntaxParser->addRule('intentional_newline', '/\n\n(\n+)\n/', 'intentional_newline_callback', 2050, true);
 function intentional_newline_callback(&$matches) {
 	return "\n".str_replace("\n", "<br />\n", $matches[1])."\n";
 }

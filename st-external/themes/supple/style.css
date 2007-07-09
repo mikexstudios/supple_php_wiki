@@ -26,6 +26,7 @@ a {text-decoration: underline; padding: 1px; }
 a:link { color: #006600; }
 a:visited { color: #006600; }
 a:hover { color: #ccc; background-color: #fff; text-decoration: none; }
+a img { border: 0; }
 
 ins {
 	background-color: #cfc;
@@ -47,6 +48,22 @@ code, pre	{
 
 * html code	{
 	font-size : 105%; 
+}
+
+table {
+	border-collapse: collapse;
+}
+table th {
+	border-width: 1px 1px 1px 1px;
+	padding: 3px 3px 3px 3px;
+	border-style: solid solid solid solid;
+	border-color: gray gray gray gray;
+}
+table td {
+	border-width: 1px 1px 1px 1px;
+	padding: 3px 3px 3px 3px;
+	border-style: solid solid solid solid;
+	border-color: gray gray gray gray;
 }
 
 /*-------------------------------------------------
