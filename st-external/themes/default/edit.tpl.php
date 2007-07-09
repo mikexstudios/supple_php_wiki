@@ -12,7 +12,7 @@
 <input name="submit" type="submit" value="Store" accesskey="s" />
 
 <input name="submit" type="submit" value="Preview" accesskey="p" />
-<input type="button" value="Cancel" onclick="document.location='http://localhost/wikka-trunk/wikka.php?wakka=SandBox';" />
+<input type="button" value="Cancel" onclick="document.location='<?php out('page_url', get('page_tag')); ?>';" />
 </fieldset>
 </form>
 <script type="text/javascript" src="<?php out('theme_url', 'wikiedit/protoedit.js'); ?>"></script>

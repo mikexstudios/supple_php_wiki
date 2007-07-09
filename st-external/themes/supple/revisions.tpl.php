@@ -1,7 +1,7 @@
 <?php theme_include('header.tpl.php'); ?>
 
 <!--starting page content-->
-<div class="page">
+<div id="page">
 
 <form action="<?php out('page_url', get('page_tag'), 'diff'); ?>" method="get">
 	<input type="hidden" name="wiki" value="<?php out('page_tag'); ?>/diff" />

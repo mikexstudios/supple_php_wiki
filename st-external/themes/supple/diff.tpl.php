@@ -1,7 +1,7 @@
 <?php theme_include('header.tpl.php'); ?>
 
 <!--starting page content-->
-<div class="page">
+<div id="page">
 
 
 <div class="revisioninfo">

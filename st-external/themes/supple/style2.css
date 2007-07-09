@@ -19,9 +19,9 @@ form, h1, h2, h3, h4, h5 {
 /* page layout */
 
 body {
-	font-family: Verdana, Arial, Helvetica, sans-serif; font-size: small; line-height: 1.3em;
+	font-family: "Lucida Grande", Verdana, Arial, Helvetica, sans-serif; font-size: small; line-height: 1.3em;
 
-/*	text-align: justify; */			/* comment out this line if you really need justified text */
+	/*	text-align: justify; */			/* comment out this line if you really need justified text */
 	line-height: 20px;
 	color: #000;
 	background-color: #fff;
@@ -73,15 +73,14 @@ body {
 .page {
 	clear: both;
 	text-align: justify;
-	/*color: #000;*/
-	/*font-size: 13px;*/
-	/*font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;*/
-	/*background-color: white;*/
 	padding: 15px;
 	border: 1px solid #eeeeee;
-
-	*/
 	height: 100%;
+}
+
+.page p {
+	font-size: 14px;
+  line-height: 19px;
 }
 
 .footer {

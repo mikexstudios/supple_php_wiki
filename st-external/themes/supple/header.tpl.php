@@ -8,20 +8,10 @@
 	<link rel="shortcut icon" href="<?php out('theme_url', 'favicon.ico'); ?>" type="image/x-icon" />
 </head>
 <body>
-<div class="header">
-	<h2><a href="<?php out('page_url', get('root_page')); ?>"><?php out('site_name'); ?></a></h2>
-	
-	<div class="search">
-		<form action="<?php out('page_url', 'TextSearch'); ?>" method="get">
-			Search: <input name="phrase" size="15" class="searchbox" />
-		</form>
-	</div>
-	
-	<div class="pagetitle"><?php out('page_tag'); ?></div>
+<div id="header">
+	<h1><?php out('page_tag'); ?> : <a href="<?php out('page_url', get('root_page')); ?>"><?php out('site_name'); ?></a></h1>
 	
 	<div class="pagenavigation">
-	<?php 
-		out('format', '<<<include NavigationLinks>>>');
-	?> 	
+		<?php out('format', '<<<include NavigationLinks>>>'); ?> 	
 	</div>
 </div>
