@@ -23,7 +23,7 @@
 		<tr>
 		<td><input type="radio" name="a" value="<?php echo $each_revision['id']; ?>" <?php echo ($c == 1 ? 'checked="checked"' : ''); ?> /></td>
 		<td><input type="radio" name="b" value="<?php echo $each_revision['id']; ?>" <?php echo ($c == 2 ? 'checked="checked"' : ''); ?> /></td>
-		<td><a href="<?php out('page_url', get('page_tag'), 'show', 'time='.urlencode($each_revision['time'])); ?>"><?php echo  htmlspecialchars_ent($each_revision['time']); ?></a> by <span class="user"><?php echo  htmlspecialchars_ent($each_revision['user']); ?></span> <span class="pagenote smaller"><?php htmlspecialchars_ent($each_revision['note']); ?></span></td>
+		<td><a href="<?php out('page_url', get('page_tag'), 'show', 'time='.urlencode($each_revision['time'])); ?>"><?php echo  htmlspecialchars_ent($each_revision['time']); ?></a> by <span class="user"><?php echo  htmlspecialchars_ent($each_revision['user']); ?></span> <span class="pagenote smaller">[<?php echo htmlspecialchars_ent($each_revision['note']); ?>]</span></td>
 		</tr>
 		<?php endforeach; ?>
 	</table>

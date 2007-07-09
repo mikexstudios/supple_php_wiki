@@ -220,13 +220,13 @@ function links_callback(&$matches) {
 	if(preg_match('/(\S+)\|(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[2] = $Supple->SyntaxParser->hash($link_matches[2]);
-		return '<a href="'.$Supple->SyntaxParser->hash(SITEURL.'/index.php?wiki='.$link_matches[1]).'">'.$link_matches[2].'</a>';
+		return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[2].'</a>';
 	}	
 	
 	if(preg_match('/(\S+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $Supple->SyntaxParser->hash($link_matches[1]); //Crude hack since we nest hashes. Should fix this up later.
-		return '<a href="'.$Supple->SyntaxParser->hash(SITEURL.'/index.php?wiki='.$link_matches[1]).'">'.$link_matches[1].'</a>';
+		return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[1].'</a>';
 	}	
 	
 	//For everything else that doesn't seem to match.
@@ -259,7 +259,7 @@ function wikiwordlink_callback(&$matches) {
 	global $Supple;
 	
 	//$matches[1] includes the whitespace characters.
-	return $matches[1].'<a href="'.$Supple->SyntaxParser->hash(SITEURL.'/index.php?wiki='.$matches[2]).'">'.$matches[2].'</a>';
+	return $matches[1].'<a href="'.$Supple->SyntaxParser->hash(construct_page_url($matches[2])).'">'.$matches[2].'</a>';
 }
 
 /**
@@ -425,7 +425,7 @@ $Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n\n(<
  */
 $Supple->SyntaxParser->addRule('tables', '/\n(?:\|.+?\n)+/s', 'tables_callback', 250, true);
 function tables_callback(&$matches) {
-	$table_html = "\n<table>\n";
+	$table_html = "\n".'<table class="wiki_syntax_table">'."\n";
 	
 	//$syntax_rows = preg_split('/\n/', trim($matches[0])); //We trim to remove the beginning and end \n that we match
 	$syntax_rows = explode("\n", trim($matches[0]));

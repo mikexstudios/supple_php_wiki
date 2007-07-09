@@ -237,7 +237,7 @@ function get_theme_url_path($file='') {
 	
 	if(empty($file))
 	{
-		return SITEURL.'/st-external/themes/'.$Supple->Settings->getSetting('use_theme');
+		return $Supple->Settings->getSetting('site_url').'/st-external/themes/'.$Supple->Settings->getSetting('use_theme');
 	}
 	return get_theme_url_path().'/'.$file;
 }
@@ -293,8 +293,17 @@ function redirect_page($page, $handler='') {
 
 $Supple->registerAction('page_url', 'construct_page_url');
 function construct_page_url($page, $handler='', $args='') {
+	global $Supple;
+	
 	//Construct URL:
-	$url = SITEURL.'/index.php?wiki='.$page;
+	if($Supple->Settings->getSetting('is_rewrite'))
+	{
+		$url = $Supple->Settings->getSetting('site_url').'/'.$page;
+	}
+	else
+	{
+		$url = $Supple->Settings->getSetting('site_url').'/index.php?wiki='.$page;
+	}
 	if(!empty($handler))
 	{
 		$url .= '/'.$handler;

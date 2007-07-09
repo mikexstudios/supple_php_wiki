@@ -105,7 +105,7 @@ if (get_magic_quotes_gpc())
 //For now, just include the config file. Soon, we want to revamp the config
 //options.
 include('st-config.php'); //Maybe should ABSPATH this.
-define('SITEURL', '/suppleText');
+//define('SITEURL', '/suppleText');
 
 //Installer check?
 
