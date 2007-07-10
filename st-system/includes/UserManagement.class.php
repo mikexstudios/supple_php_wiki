@@ -56,11 +56,15 @@ class UserManagement extends Handler {
 		$sql = '
 			INSERT INTO '.ST_USERS_TABLE.' (username, password, email) 
 			VALUES (
-				"'.$username.'", 
-				"'.$this->md5pass.'",,
-				"'.$email.'"
+				:username, 
+				:password,
+				:email
 				)';
-		$this->Db->query($sql);
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':username', $this->username, PDO::PARAM_STR);
+		$stmt->bindParam(':password', $this->md5pass, PDO::PARAM_STR);
+		$stmt->bindParam(':email', $email, PDO::PARAM_STR);
+		$stmt->execute();
 		
 		//Add check for query failure.
 	}
@@ -70,11 +74,13 @@ class UserManagement extends Handler {
 		
 		//Update the email for the username
 		$sql = '
-		    UPDATE '.ST_USERS_TABLE.' 
-			SET email = "'.$inEmail.'" 
-			WHERE uid = '.$this->id;
-		$this->Db->query($sql);
-		
+		  UPDATE '.ST_USERS_TABLE.' 
+			SET email = :email  
+			WHERE uid = :uid';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':email', $inEmail, PDO::PARAM_STR);
+		$stmt->bindParam(':uid', $this->id, PDO::PARAM_INT);
+		$stmt->execute();	
 	}
 	
 	function changePassword($inNewPassword) {
@@ -84,10 +90,13 @@ class UserManagement extends Handler {
 		
 		//Make changes to DB
 		$sql = '
-		    UPDATE '.ST_USERS_TABLE.'
-			SET password = "'.$this->md5pass.'" 
-			WHERE uid = '.$this->id;
-	    $this->Db->query($sql);
+		  UPDATE '.ST_USERS_TABLE.'
+			SET password = :password 
+			WHERE uid = :uid';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':password', $this->md5pass, PDO::PARAM_STR);
+		$stmt->bindParam(':uid', $this->id, PDO::PARAM_INT);
+		$stmt->execute();	
 
 	}
 	
@@ -100,17 +109,19 @@ class UserManagement extends Handler {
 		
 		//Delete from DB
 		$sql = '
-		    DELETE FROM '.ST_USERS_TABLE.'
-			WHERE uid = '.$this->id;
-		$this->Db->query($sql);
+		  DELETE FROM '.ST_USERS_TABLE.'
+			WHERE uid = :uid';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':uid', $this->id, PDO::PARAM_INT);
+		$stmt->execute();	
 
 	}
 	
 	function getUsername() {
-	    if (isset($this->username)) 
-			{
-	        return $this->username;
-	    }
+		if (isset($this->username)) 
+		{
+		    return $this->username;
+		}
 
 		if(empty($this->id)) //If no username set, then we give the user an identity.
 		{
@@ -118,10 +129,13 @@ class UserManagement extends Handler {
 		}
 		
 		$sql = '
-		    SELECT username
+		  SELECT username
 			FROM '.ST_USERS_TABLE.' 
-			WHERE uid = '.$this->id;
-	    $result = $this->Db->get_var($sql);
+			WHERE uid = :uid';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':uid', $this->id, PDO::PARAM_INT);
+		$stmt->execute();	
+		$result = $stmt->getColumn();
 
 		//Return username
 		$this->username = $result;
@@ -132,12 +146,14 @@ class UserManagement extends Handler {
 	{
 		
 		$sql = '
-		    SELECT uid
+		  SELECT uid
 			FROM '.ST_USERS_TABLE.' 
-			WHERE username = "'.$this->username.'"';
-	    $result = $this->Db->get_var($sql);
-		
-		//Return username
+			WHERE username = :username';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':username', $this->username, PDO::PARAM_STR);
+		$stmt->execute();
+	  $result = $stmt->fetchColumn();
+
 		$this->id = $result;
 		return $result;  
 	}
@@ -147,23 +163,27 @@ class UserManagement extends Handler {
 		if (!isset($this->username) && !isset($this->id)) {
 		    return false;
 		}
-
+		
 		$sql = '
-		    SELECT username
+			SELECT username
 			FROM '.ST_USERS_TABLE.' 
 			WHERE ';
 		    if (isset($this->id)) {
-			    $sql .= 'uid = '.$this->id;
+			    $sql .= 'uid = :uid ';
 			} elseif (isset($this->username)) {
-			    $sql .= 'username = "'.$this->username.'"';
+			    $sql .= 'username = :username';
 			} else {
 				//Neither id or username is set so the hypothetical user
 				//does not exist.
 				return false;
 			}
-
-		$result = $this->Db->get_var($sql);
-
+		
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':uid', $this->id, PDO::PARAM_INT);
+		$stmt->bindParam(':username', $this->username, PDO::PARAM_STR);
+		$stmt->execute();
+		$result = $stmt->fetchColumn(); //Get only one variable
+		
 		if (!empty($result)) {
 			//User exists
 			return true;
@@ -186,12 +206,14 @@ class UserManagement extends Handler {
 
 		//Grab password from Db
 		$sql = '
-		    SELECT password 
+		  SELECT password 
 			FROM '.ST_USERS_TABLE.'
-			WHERE username = "'.$this->username.'"';
+			WHERE username = :username';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':username', $this->username, PDO::PARAM_STR);
+		$stmt->execute();
+		$result = $stmt->fetchColumn();
 
-		$result = $this->Db->get_var($sql);
-		
 		//Return user id
 		if ($this->md5pass == $result) {
 			//User authenticated

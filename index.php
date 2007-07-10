@@ -87,5 +87,8 @@ $Supple->setPagename($page);
 $Supple->callHandler($handler);
 
 
+//Do some end of script stuff. (Assuming we reach here)
+//include_once ABSPATH.'/st-system/includes/finalize.php';
+//Well, we'll just let PHP destroy the classes and db connection for now.
 
 ?>

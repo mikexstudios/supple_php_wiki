@@ -30,8 +30,8 @@ error_reporting (E_ALL ^ E_NOTICE);
 /**
  * PHP Version Check. We should just make the version 5.2 and add PDO support, etc.
  */ 
-if ( version_compare( '4.2', phpversion(), '>' ) ) { //Wikka has version 4.1.0, but we can make it 4.2 just to be safe since we might be using code from WP.
-	die( 'Your server is running PHP version ' . phpversion() . ' but suppleText requires at least 4.2.' );
+if ( version_compare( '5.0', phpversion(), '>' ) ) { //Wikka has version 4.1.0, but we can make it 4.2 just to be safe since we might be using code from WP.
+	die( 'Your server is running PHP version ' . phpversion() . ' but suppleText requires at least 5.0.' );
 }
 
 /**
@@ -43,21 +43,6 @@ function getmicrotime() {
 }
 
 $tstart = substr(microtime(),11).substr(microtime(),1,9); 
- 
-if (!function_exists('mysql_real_escape_string'))
-{
-/**
- * Escape special characters in a string for use in a SQL statement.
- * 
- * This function is added for back-compatibility with MySQL 3.23.
- * @param string $string the string to be escaped
- * @return string a string with special characters escaped
- */
-	function mysql_real_escape_string($string)
-	{
-		return mysql_escape_string($string);
-	}
-}
 
 /**
  * Include main library if it exists.
@@ -123,7 +108,8 @@ define('ST_CONFIG_TABLE', $table_prefix.'config');
 
 
 //Load database
-require_once(ABSPATH.'st-system/includes/Db.class.php');
+//require_once(ABSPATH.'st-system/includes/Db.class.php');
+require_once(ABSPATH.'st-system/includes/db.php');
 if(!isset($Stdb))
 	{ $Stdb = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST); }
 

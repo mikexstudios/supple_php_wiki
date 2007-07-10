@@ -43,17 +43,27 @@ class Revisions extends Handler {
 	}
 	
 	function getRevisionList() {
-	
-		$this->revisions_data[] = $this->Db->get_row('SELECT * 
-																FROM '.ST_PAGES_TABLE.'
-																WHERE tag = "'.mysql_real_escape_string($this->pagename).'"  
-																LIMIT 1');
-
-		$results = $this->Db->get_results('SELECT * 
-																	FROM '.ST_ARCHIVES_TABLE.'
-																	WHERE tag = "'.mysql_real_escape_string($this->pagename).'"
-																	ORDER BY time DESC 
-																	');
+		$sql = '
+			SELECT * 
+			FROM '.ST_PAGES_TABLE.' 
+			WHERE tag = :tag 
+			LIMIT 1';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+		$stmt->execute();
+		$this->revisions_data[] = $stmt->fetch(PDO::FETCH_ASSOC);
+		
+		
+		$sql = '
+			SELECT * 
+			FROM '.ST_ARCHIVES_TABLE.' 
+			WHERE tag = :tag 
+			ORDER BY time DESC';
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+		$stmt->execute();
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		
 		if(!empty($results))
 		{
 			foreach($results as $each_row)

@@ -59,32 +59,42 @@ class Edit extends Handler {
 	}
 	
 	function storeChanges() {
-			// set all other revisions to old
-			//$this->Query('UPDATE '.$this->config['table_prefix'].'pages SET latest = "N" WHERE tag = "'.mysql_real_escape_string($tag).'"');
 			
 			//We send the old version into an archives table.
-			$this->Db->query('INSERT INTO '.ST_ARCHIVES_TABLE.'
-												SELECT *  
-												FROM '.ST_PAGES_TABLE.' 
-												WHERE tag = "'.mysql_real_escape_string($this->pagename).'"');
+			$sql = '
+				INSERT INTO '.ST_ARCHIVES_TABLE.'
+				SELECT *  
+				FROM '.ST_PAGES_TABLE.' 
+				WHERE tag = :tag';
+			$stmt = $this->Db->prepare($sql);
+			$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+			$stmt->execute();
+
 			//Then delete the entry from the pages table. Should add a check to see if
 			//the copy was successful before deleting.
-			$this->Db->query('DELETE FROM '.ST_PAGES_TABLE.'
-												WHERE tag = "'.mysql_real_escape_string($this->pagename).'"
-												LIMIT 1');
-			
-			// set all other revisions to old. This could be slow if we have tons of pages.
-			//$this->Db->query('UPDATE '.ST_PAGES_TABLE.' 
-			//									SET latest = "N" 
-			//									WHERE tag = "'.mysql_real_escape_string($this->pagename).'"');
-
-			$this->Db->query('INSERT INTO '.ST_PAGES_TABLE.' 
-												SET tag = "'.mysql_real_escape_string($this->pagename).'", '.
-																		'time = now(), '.
-																		'owner = "", '.
-																		'user = "'.mysql_real_escape_string($this->author).'", '.
-																		'note = "'.mysql_real_escape_string($this->note).'", '.
-																		'body = "'.mysql_real_escape_string($this->content).'"');
+			$sql = 
+				'DELETE FROM '.ST_PAGES_TABLE.'
+				WHERE tag = :tag 
+				LIMIT 1';
+			$stmt = $this->Db->prepare($sql);
+			$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+			$stmt->execute();
+	
+			//Now we create the new version.
+			$sql = '
+				INSERT INTO '.ST_PAGES_TABLE.' 
+				SET tag = :tag,
+						time = now(),
+						owner = "",
+						user = :user, 
+						note = :note, 
+						body = :body';
+			$stmt = $this->Db->prepare($sql);
+			$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+			$stmt->bindParam(':user', $this->author, PDO::PARAM_STR);
+			$stmt->bindParam(':note', $this->note, PDO::PARAM_STR);
+			$stmt->bindParam(':body', $this->content, PDO::PARAM_STR);
+			$stmt->execute();
 
 	}
 

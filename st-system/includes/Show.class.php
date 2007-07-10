@@ -68,11 +68,13 @@ class Show extends Handler {
 		//Possibly add AND clauses in the future.
 		if(!empty($this->id))
 		{
-			$where = 'WHERE id = "'.mysql_real_escape_string($this->id).'"';
+			//$where = 'WHERE id = "'.mysql_real_escape_string($this->id).'"';
+			$where = 'WHERE id = :id';
 		}
 		else if(!empty($this->pagename))
 		{
-			$where = 'WHERE tag = "'.mysql_real_escape_string($this->pagename).'"';
+			//$where = 'WHERE tag = "'.mysql_real_escape_string($this->pagename).'"';
+			$where = 'WHERE tag = :tag';
 		}
 		else
 		{
@@ -81,27 +83,48 @@ class Show extends Handler {
 		
 		//Could probably do this a little better
 		//We load the latest page first just so we can load information from the latest page.
-		$this->page = $this->Db->get_row('SELECT * 
-																FROM '.ST_PAGES_TABLE.' 
-																'.$where.'
-																LIMIT 1');
+		$sql = '
+			SELECT * 
+			FROM '.ST_PAGES_TABLE.' 
+			'.$where.'
+			LIMIT 1';
 		
+		$stmt = $this->Db->prepare($sql);
+		$stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+		$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+		$stmt->execute();
+		$this->page = $stmt->fetch(PDO::FETCH_ASSOC);
+		
+		//If the ID that we want isn't the latest page id, we look in the archives table.
 		if(!empty($this->id) && $this->page['id'] != $this->id)
 		{
-			$this->page = $this->Db->get_row('SELECT * 
-														FROM '.ST_ARCHIVES_TABLE.' 
-														'.$where.'
-														LIMIT 1');
+			$sql = '
+				SELECT * 
+				FROM '.ST_ARCHIVES_TABLE.' 
+				'.$where.'
+				LIMIT 1';
+			$stmt = $this->Db->prepare($sql);
+			$stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+			$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+			$stmt->execute();
+			$this->page = $stmt->fetch(PDO::FETCH_ASSOC);
 		}														
 		
 		//Then we check if we need to grab an older copy.														
 		if(!empty($this->time) && (strcmp($this->page['time'], $this->time)!=0)) //The latest page time and the specified time are not the same.
 		{
-			$this->page = $this->Db->get_row('SELECT * 
-																	FROM '.ST_ARCHIVES_TABLE.' 
-																	'.$where.'
-																	AND time = "'.mysql_real_escape_string($this->time).'" 
-																	LIMIT 1');
+			$sql = '
+				SELECT * 
+				FROM '.ST_ARCHIVES_TABLE.' 
+				'.$where.'
+				AND time = :time 
+				LIMIT 1';
+			$stmt = $this->Db->prepare($sql);
+			$stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+			$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+			$stmt->bindParam(':time', $this->time); //MySQL Datetime data type.
+			$stmt->execute();
+			$this->page = $stmt->fetch(PDO::FETCH_ASSOC);
 		}
 	}
 	

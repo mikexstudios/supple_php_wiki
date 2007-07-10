@@ -22,15 +22,14 @@ class Settings extends Handler {
 
 		$sql = '
 		    SELECT * 
-		    FROM ' . ST_CONFIG_TABLE . ' ORDER BY `order` ASC';
-
-		$result = $this->Db->get_results($sql);
+		    FROM '.ST_CONFIG_TABLE.' 
+				ORDER BY `order` ASC'; //Need the ` ` around order or else interpreted as SQL.
 		
-		if ($result==0) {
-			#$message->error("Could not query config information");
-			die('Could not query config information'); //Comment out for now since we have no settings in db.
+		try {
+			$result = $this->Db->query($sql);
+		} catch(PDOException $e) {
+			die('Could not query config information: '.$e->getMessage() );
 		}
-		
 		
 		foreach ($result as $row) {
 			//Place configuration information in array
