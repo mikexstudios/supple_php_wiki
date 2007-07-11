@@ -51,9 +51,11 @@ class Supple {
 	* @access public
 	* @var object
 	*/
+	var $Input;
 	var $SyntaxParser;
 	var $UserManagement;
 	var $Settings;
+	var $Validation;
 	/**#@-*/
 	// }}}
 
@@ -118,8 +120,12 @@ class Supple {
 	 * @access private
 	 */
 	function loadAndAssociateCoreClasses() {
+		//Input class - sanitizes external input
+		include_once ABSPATH.'st-system/includes/Input.class.php';
+		$this->Input = new Input();
+	
 		//Handler class
-		include_once ABSPATH.'st-system/includes/Handler.class.php';
+		include_once ABSPATH.'/st-system/includes/Handler.class.php';
 		
 		//UserManagement class
 		include_once ABSPATH.'/st-system/includes/UserManagement.class.php'; //Login/Logout
@@ -127,13 +133,17 @@ class Supple {
 		$this->UserManagement->isLoggedIn(); //Currently need to run this.
 		
 		//Syntax parsing class
-		include_once ABSPATH.'st-system/includes/SyntaxParser.class.php';
+		include_once ABSPATH.'/st-system/includes/SyntaxParser.class.php';
 		$this->SyntaxParser = new SyntaxParser();
 		
 		//Configuration Information----------------------
 		include_once ABSPATH.'/st-system/includes/Settings.class.php';
 		$this->Settings = new Settings($db);
 		//-----------------------------------------------
+		
+		//Validation class
+		include_once ABSPATH.'st-system/includes/Validation.class.php';
+		$this->Validation = new Validation();
 	}
 	
 	/**
@@ -160,7 +170,7 @@ class Supple {
 		if ((strtolower($parsed['page']) == $parsed['page']) && (isset($_SERVER['REQUEST_URI']))) #38
 		{
 			$pattern = preg_quote($parsed['page'], '/');
-			if (preg_match("/($pattern)/i", urldecode($_SERVER['REQUEST_URI']), $match_url))
+			if (preg_match("/($pattern)/i", urldecode($Supple->Input->server('REQUEST_URI', true)), $match_url))
 			{
 				$parsed['page'] = $match_url[1];
 			}

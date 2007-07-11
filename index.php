@@ -31,41 +31,28 @@ define('ABSPATH', dirname(__FILE__).'/');
 //Initialize needed script elements
 require('./st-system/initialize.php');
 
-
-//Get input
-$wiki = $_GET['wiki'];
-
-/**
- * Remove leading slash.
- */
-$wiki = preg_replace("/^\//", "", $wiki);
-
-/**
- * Extract pagename and handler from URL. This will be removed.
- */
-if (preg_match("#^(.+?)/(.*)$#", $wiki, $matches))
-{
-	list(, $page, $handler) = $matches;
-}
-else if (preg_match("#^(.*)$#", $wiki, $matches))
-{
-	list(, $page) = $matches;
-}
-//Fix lowercase mod_rewrite bug: URL rewriting makes pagename lowercase. #135
-if ((strtolower($page) == $page) && (isset($_SERVER['REQUEST_URI']))) #38
-{
-	$pattern = preg_quote($page, '/');
-	if (preg_match("/($pattern)/i", urldecode($_SERVER['REQUEST_URI']), $match_url))
-	{
-		$page = $match_url[1];
-	}
-}
-
 /**
  * Create Supple object
  */
 //print_r($suppleConfig);
 $Supple = new Supple($Stdb);
+
+//Get input. Since Supple calls Input, we know
+//that any input variables are already sanitized.
+$wiki = $Supple->Input->get('wiki', true); //We want XSS clean
+
+/**
+ * Remove leading slash.
+ */
+$wiki = preg_replace('/^\//', '', $wiki);
+
+/**
+ * Extract pagename and handler from URL. This will be removed.
+ */
+ 
+$parsed_url = $Supple->parseUrlFragment($wiki); 
+$page = $parsed_url['page'];
+$handler = $parsed_url['handler'];
 
 //Theme helpers
 require_once ABSPATH.'/st-system/includes/theme_helpers.php';
@@ -73,7 +60,7 @@ require_once ABSPATH.'/st-system/includes/theme_helpers.php';
 /** 
  * Run the engine.
  */
-if (!isset($handler))
+if (empty($handler))
 {
 	$handler='show'; //Default to the show handler
 }
@@ -83,12 +70,20 @@ if(empty($page))
 	$page = $Supple->Settings->getSetting('root_page'); //Default to the what is set in the database config for default page
 }
 
+//Perform some verification on $page and $handler:
+//200 characters length is reasonable, right? We allow alpha-numerics, dashes, 
+//underscores and colons (and other special chars).
+if(!$Supple->Validation->max_length($page, 200) || !$Supple->Validation->alpha_special($page)) 
+{
+	die('The specified page does not exist.'); //TODO: Make error messages pretty.
+}
+//70 characters length is reasonable, right? Handlers must be alphanumeric.
+if(!$Supple->Validation->max_length($handler, 70) || !$Supple->Validation->alpha_numeric($handler)) 
+{
+	die('The specified handler does not exist.');
+}
+
 $Supple->setPagename($page);
 $Supple->callHandler($handler);
-
-
-//Do some end of script stuff. (Assuming we reach here)
-//include_once ABSPATH.'/st-system/includes/finalize.php';
-//Well, we'll just let PHP destroy the classes and db connection for now.
 
 ?>

@@ -37,11 +37,7 @@ if ( version_compare( '5.0', phpversion(), '>' ) ) { //Wikka has version 4.1.0, 
 /**
  * Calculate page generation time.
  */
-function getmicrotime() {
-	list($usec, $sec) = explode(' ', microtime());
-	return ((float)$usec + (float)$sec);
-}
-
+global $tstart;
 $tstart = substr(microtime(),11).substr(microtime(),1,9); 
 
 /**
@@ -54,34 +50,6 @@ if (file_exists('st-system/Supple.class.php'))
 else
 {
 	die('Supple class missing.'); #fatalerror
-}
-
-/** 
- * Workaround for the amazingly annoying magic quotes.
- */
-function magicQuotesWorkaround(&$a)
-{
-	if (is_array($a))
-	{
-		foreach ($a as $k => $v)
-		{
-			if (is_array($v))
-			{
-				magicQuotesWorkaround($a[$k]);
-			}
-			else
-			{
-				$a[$k] = stripslashes($v);
-			}
-		}
-	}
-}
-set_magic_quotes_runtime(0);
-if (get_magic_quotes_gpc())
-{
-	magicQuotesWorkaround($_POST);
-	magicQuotesWorkaround($_GET);
-	magicQuotesWorkaround($_COOKIE);
 }
 
 /**
@@ -99,17 +67,13 @@ include('st-config.php'); //Maybe should ABSPATH this.
 
 //Start session
 
-//Temporary dump for constants
-//DATABASE
-define('ST_PAGES_TABLE', $table_prefix.'pages');
-define('ST_USERS_TABLE', $table_prefix.'users');
-define('ST_ARCHIVES_TABLE', $table_prefix.'archives');
-define('ST_CONFIG_TABLE', $table_prefix.'config');
+//Load constants
+require_once ABSPATH.'/st-system/includes/constants.php';
 
 
 //Load database
 //require_once(ABSPATH.'st-system/includes/Db.class.php');
-require_once(ABSPATH.'st-system/includes/db.php');
+require_once(ABSPATH.'/st-system/includes/db.php');
 if(!isset($Stdb))
 	{ $Stdb = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST); }
 

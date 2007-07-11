@@ -345,4 +345,17 @@ function format_text($in_text) {
 	return $Supple->SyntaxParser->getText();
 }
 
+
+$Supple->registerAction('execution_time', 'get_execution_time');
+function get_execution_time($digits=4) {
+	global $tstart;
+	
+	$tend = substr(microtime(),11).substr(microtime(),1,9); 
+	//calculate the difference
+	$totaltime = ($tend - $tstart);
+	
+	return sprintf('%.'.strval($digits).'f', $totaltime);
+
+}
+
 ?>
