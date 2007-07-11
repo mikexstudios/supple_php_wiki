@@ -339,7 +339,8 @@ function get_default_page() {
 $Supple->registerAction('format', 'format_text');
 function format_text($in_text) {
 	global $Supple;
-	include_once(ABSPATH.'/st-system/formatters/creole.php');
+	$Supple->SyntaxParser->setSyntaxPath(ABSPATH.'/st-system/formatters/');
+	$Supple->SyntaxParser->loadSyntax();
 	$Supple->SyntaxParser->setText($in_text);
 	$Supple->SyntaxParser->applyAll();
 	return $Supple->SyntaxParser->getText();

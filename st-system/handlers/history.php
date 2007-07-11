@@ -18,7 +18,8 @@ $Show->registerActions();
 $Show->setPagename($Supple->getPagename());
 $Show->loadPage();
 
-include_once ABSPATH.'/st-system/formatters/creole.php';
+$Supple->SyntaxParser->setSyntaxPath(ABSPATH.'/st-system/formatters/');
+$Supple->SyntaxParser->loadSyntax();
 
 //Get list of revisions
 $revisions = $Revisions->getRevisionList();

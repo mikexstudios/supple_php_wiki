@@ -15,7 +15,10 @@ if(!empty($_GET['time']))
 $Show->loadPage();
 
 //Syntax formatting. Include syntax file:
-include_once ABSPATH.'/st-system/formatters/creole.php';
+$Supple->SyntaxParser->setSyntaxPath(ABSPATH.'/st-system/formatters/');
+$Supple->SyntaxParser->loadSyntax();
+//include_once ABSPATH.'/st-system/formatters/creole.php';
+//include_once ABSPATH.'/st-system/formatters/suppletext.php';
 $Supple->SyntaxParser->setText($Show->page['body']);
 $Supple->SyntaxParser->applyAll();
 $Show->page['body'] = $Supple->SyntaxParser->getText();

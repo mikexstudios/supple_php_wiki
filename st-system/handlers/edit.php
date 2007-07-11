@@ -17,10 +17,6 @@ $Show->loadPage();
 //we have the ability to edit old pages.
 
 
-
-
-
-
 //Get info from POST. We should secure this:
 //Also see edit.php (Wikka's) for more info how to better do this.
 if(strcmp($_POST['submit'], 'Store') == 0)

@@ -16,10 +16,33 @@ class SyntaxParser {
 	var $delimiter = "\xFF";
 	var $token_pattern;
 	var $hashed_text = array();
+	var $syntax_path, $syntax_path_loaded;
 
 	function SyntaxParser() {
 		$this->token_pattern = $this->delimiter.'([a-z0-9]+)'.$this->delimiter;
 	}	
+	
+	function setSyntaxPath($in_path) {
+		$this->syntax_path = $in_path;
+	}
+	
+	function loadSyntax($in_path = '') {
+		global $Supple;
+		
+		if(empty($in_path))
+		{
+			$in_path = $this->syntax_path;
+		}
+		
+		//Check if we already loaded the syntax path
+		if($this->syntax_path_loaded[md5($in_path)])
+		{
+			return;
+		}
+		
+		$Supple->loadFilesInDirectory($in_path);
+		$this->syntax_path_loaded[md5($in_path)] = true; //Set so we know it has already been loaded
+	}
 	
 	function setText($in_text) {
 		$this->text = $in_text;

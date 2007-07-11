@@ -121,7 +121,7 @@ class Supple {
 	 */
 	function loadAndAssociateCoreClasses() {
 		//Input class - sanitizes external input
-		include_once ABSPATH.'st-system/includes/Input.class.php';
+		include_once ABSPATH.'/st-system/includes/Input.class.php';
 		$this->Input = new Input();
 	
 		//Handler class
@@ -142,8 +142,43 @@ class Supple {
 		//-----------------------------------------------
 		
 		//Validation class
-		include_once ABSPATH.'st-system/includes/Validation.class.php';
+		include_once ABSPATH.'/st-system/includes/Validation.class.php';
 		$this->Validation = new Validation();
+	}
+	
+	/**
+	 * Scans the specified directory and includes all files in that directory. 
+	 *
+	 * @access private
+	 * @param string $inDir Directory of files to be loaded. NOTE: The directory should be input with the trailing slash.
+	 * @param string $ext the extention of files to be loaded (defaults to '.php')
+	 */
+	function loadFilesInDirectory($inDir, $ext = '.php') {
+		//Declare global here so that all of the action/included
+		//files do not have to do so.
+		global $Supple;
+
+		if ($handle = opendir($inDir)) 
+		{
+			//Need the !== so that directories called '0' don't break the loop
+			while (false !== ($file = readdir($handle)))
+			{
+			    if (is_dir($inDir.$file))
+			    {
+                    if ($file != '.' && $file != '..')
+                    {
+                        $this->loadFilesInDirectory($inDir.$file); // Recurse subdirectories
+                    }
+                    continue;
+          }
+				if (strpos($file, $ext) !== false) // Only php files, for safety.
+				{
+					//echo $inDir.$file."\n";
+					include_once($inDir.$file);
+				}
+			}
+			closedir($handle); 
+		}
 	}
 	
 	/**
@@ -155,6 +190,8 @@ class Supple {
 	 *
 	 */	 	 	
 	function parseUrlFragment($in_url_fragment) {
+		global $Supple;
+		
 		/**
 		 * Extract pagename and handler from URL. From wikka.php.
 		 */
@@ -205,44 +242,6 @@ class Supple {
 		//Ugly, so we should improve:
 		include_once ABSPATH.'/st-system/handlers/'.$this->handlerName.'.php';
 
-	}
-	
-	//The following are part of suppleText's new extensible features. Code based off of
-	//Wordpress (http://www.wordpress.org).
-	
-	/**
-	 * Scans the specified directory and includes all files in that directory. 
-	 *
-	 * This is intended for loading actions with each action file registering 
-	 * themselves with registerAction().
-	 *
-	 * @access private
-	 * @param string $inDir Directory of files to be loaded. NOTE: The directory should be input with the trailing slash.
-	 * @param string $ext the extention of files to be loaded (defaults to '.php')
-	 */
-	function loadFilesInDirectory($inDir, $ext = '.php') {
-		//Declare global here so that all of the action/included
-		//files do not have to do so.
-		global $xcomic;
-
-		if ($handle = opendir($inDir)) 
-		{
-			//Need the !== so that directories called '0' don't break the loop
-			while (false !== ($file = readdir($handle)))
-			{
-			    if (is_dir($inDir.$file))
-			    {
-                    if ($file != '.' && $file != '..')
-                        $xcomic->loadFilesInDirectory($inDir.$file); // Recurse subdirectories
-                    continue;
-                }
-				if (strpos($file, $ext) !== false) // Only php files, for safety.
-				{
-					include_once($inDir.$file);
-				}
-			}
-			closedir($handle); 
-		}
 	}
 
 	/**

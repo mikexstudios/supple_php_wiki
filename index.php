@@ -26,7 +26,7 @@
  */
 
 
-define('ABSPATH', dirname(__FILE__).'/'); 
+define('ABSPATH', dirname(__FILE__));  //No trailing slash
  
 //Initialize needed script elements
 require('./st-system/initialize.php');
