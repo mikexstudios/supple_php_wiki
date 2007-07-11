@@ -85,6 +85,9 @@ $Supple->SyntaxParser->addRule('escape', '/(\s)~(.)/', 'escape_callback', 105, t
 function escape_callback(&$matches) {
 	global $Supple;
 	
+	//Protect against some XSS
+	$matches[1] = htmlentities($matches[1]);
+	
 	//If \s is a space, we remove it
 	if(strcmp($matches[1], ' ')==0)
 	{
@@ -134,6 +137,13 @@ function snippets_callback(&$matches) {
 	
 	return $Supple->SyntaxParser->hash($Supple->SyntaxParser->doSnippet($action));
 }
+
+/**
+ * Escaping HTML
+ */
+$Supple->SyntaxParser->addRule('escape_html_1', '/</', '&lt;', 125);
+$Supple->SyntaxParser->addRule('escape_html_2', '/>/', '&gt;', 126);
+
 
 //Won't implement Raw, Footnote
 
@@ -575,6 +585,16 @@ function intentional_newline_callback(&$matches) {
 	return "\n".str_replace("\n", "<br />\n", $matches[1])."\n";
 }
 
+
+/**
+ * XSS Attacks Filtering
+ */
+$Supple->SyntaxParser->addRule('xss_filter', '/(.+)/', 'xss_filter_callback', 2100, true);
+function xss_filter_callback(&$matches) {
+	global $Supple;
+	
+	return $Supple->Input->xss_clean($matches[1]);
+} 
 
 /* Things to implement:
     var $rules = array(
