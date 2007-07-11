@@ -2,8 +2,8 @@
 /**
  * suppleText - slight modifications to the below code. Removed any
  * code referencing config and also removed log_message. Hard coded
- * two variables to true. Also change in line 171 to allow the @ char
- * in variable keys. 
+ * one variable to true. Also change in line 171 to allow the @ char
+ * in variable keys. Added session() method.
  * 
  * CodeIgniter
  *
@@ -32,9 +32,9 @@
  * @link		http://www.codeigniter.com/user_guide/libraries/input.html
  */
 class Input {
-	var $use_xss_clean		= true;
-	var $ip_address			= FALSE;
-	var $user_agent			= FALSE;
+	var $use_xss_clean	  = FALSE;
+	var $ip_address		  	= FALSE;
+	var $user_agent		  	= FALSE;
 	var $allow_get_array	= true;
 	
 	/**
@@ -47,10 +47,48 @@ class Input {
 	 */	
 	function Input()
 	{		
+		$this->_disable_magic_quotes();
 		$this->_sanitize_globals();
 	}
 	
 	// --------------------------------------------------------------------
+	
+	/**
+	 * Disable Magic Quotes
+	 * 
+	 * Workaround for the amazingly annoying magic quotes.
+	 * 
+	 * @author Wikka Project
+	 * @access private	 	 	 	 	 
+	 */
+	function _disable_magic_quotes() {
+		set_magic_quotes_runtime(0);
+		if (get_magic_quotes_gpc())
+		{
+			$this->_magic_quotes_workaround($_POST);
+			$this->_magic_quotes_workaround($_GET);
+			$this->_magic_quotes_workaround($_COOKIE);
+			$this->_magic_quotes_workaround($_SESSION);
+		}	 	
+	}	 
+	 
+	function _magic_quotes_workaround(&$a) {
+		if (is_array($a))
+		{
+			foreach ($a as $k => $v)
+			{
+				if (is_array($v))
+				{
+					$this->_magic_quotes_workaround($a[$k]);
+				}
+				else
+				{
+					$a[$k] = stripslashes($v);
+				}
+			}
+		}
+	}
+
 	
 	/**
 	 * Sanitize Globals
@@ -69,7 +107,7 @@ class Input {
 	function _sanitize_globals()
 	{
 		// Unset globals. This is effectively the same as register_globals = off
-		foreach (array($_GET, $_POST, $_COOKIE) as $global)
+		foreach (array($_GET, $_POST, $_COOKIE, $_SESSION) as $global)
 		{
 			if ( ! is_array($global))
 			{
@@ -117,6 +155,15 @@ class Input {
 			foreach($_COOKIE as $key => $val)
 			{			
 				$_COOKIE[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
+			}	
+		}
+		
+		// Clean $_SESSION Data
+		if (is_array($_SESSION) AND count($_SESSION) > 0)
+		{
+			foreach($_SESSION as $key => $val)
+			{			
+				$_SESSION[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
 			}	
 		}
 	}	
@@ -315,6 +362,42 @@ class Input {
 		}
 		
 		return $_SERVER[$index];
+	}
+
+
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Fetch an item from the SESSION array
+	 *
+	 * @access	public
+	 * @param	string
+	 * @param	bool
+	 * @return	string
+	 */
+	function session($index = '', $xss_clean = FALSE)
+	{		
+		if ( ! isset($_SESSION[$index]))
+		{
+			return FALSE;
+		}
+
+		if ($xss_clean === TRUE)
+		{
+			if (is_array($_SESSION[$index]))
+			{
+				foreach($_SESSION[$index] as $key => $val)
+				{					
+					$_SESSION[$index][$key] = $this->xss_clean($val);
+				}
+			}
+			else
+			{
+				return $this->xss_clean($_SESSION[$index]);
+			}
+		}
+
+		return $_SESSION[$index];
 	}
 	
 	// --------------------------------------------------------------------

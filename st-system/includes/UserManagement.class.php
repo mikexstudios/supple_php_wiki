@@ -249,11 +249,13 @@ class UserManagement extends Handler {
 	
 	function isLoggedIn()
 	{
+		global $Supple;
 		
 		//If cookies exists, set session variables with them
 		if (!empty($_COOKIE[COOKIE_USERNAME]) && !empty($_COOKIE[COOKIE_PASSWORD])) {
-			$_SESSION[SESSION_USERNAME] = $_COOKIE[COOKIE_USERNAME];
-			$_SESSION[SESSION_PASSWORD] = $_COOKIE[COOKIE_PASSWORD];
+			//Input validation. We let the password be anything.
+			$_SESSION[SESSION_USERNAME] = $Supple->Input->cookie(COOKIE_USERNAME, true);
+			$_SESSION[SESSION_PASSWORD] = $Supple->Input->cookie(COOKIE_PASSWORD, true);
 		}
 
 		//echo $_SESSION[SESSION_USERNAME];
@@ -263,8 +265,8 @@ class UserManagement extends Handler {
 		if (!empty($_SESSION[SESSION_USERNAME]) && !empty($_SESSION[SESSION_PASSWORD])) {
 			
 			//Set username and password
-			$this->setUsername($_SESSION[SESSION_USERNAME]);
-			$this->setMd5Password($_SESSION[SESSION_PASSWORD]);
+			$this->setUsername($Supple->Input->session(SESSION_USERNAME, true));
+			$this->setMd5Password($Supple->Input->session(SESSION_PASSWORD, true));
 			
 			//Authenticate user
 			if ($this->authUser()) {

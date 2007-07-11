@@ -13,8 +13,16 @@ $Show->registerActions();
 $Show->setPagename($Supple->getPagename());
 $Show->loadPage();
 
-$Diff->setRevisionA($_GET['a']);
-$Diff->setRevisionB($_GET['b']);
+//Secure input
+$a = $Supple->Input->get('a', true);
+$b = $Supple->Input->get('b', true);
+if(!$Supple->Validation->numeric($a) || !$Supple->Validation->numeric($b)) 
+{
+	die("Specified page id's are invalid."); //TODO: Make error messages pretty.
+}
+
+$Diff->setRevisionA($a);
+$Diff->setRevisionB($b);
 $Diff->computeDifferences();
 global $revision_a_data, $revision_b_data;
 $revision_a_data = $Diff->getRevisionAData();
