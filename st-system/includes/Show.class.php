@@ -29,10 +29,8 @@ class Show extends Handler {
 	var $page;
 	var $id;
 	
-	function Show() {
+	function __construct() {
 		parent::Handler();
-		
-
 		
 	}
 	
@@ -90,8 +88,16 @@ class Show extends Handler {
 			LIMIT 1';
 		
 		$stmt = $this->Db->prepare($sql);
-		$stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
-		$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+		#Ugly hack to work around PHP 5.2.1 upgrade which forces all bound Params to
+		#exist in the query.
+		if(!empty($this->id))
+		{
+			$stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+		}
+		else if(!empty($this->pagename))
+		{
+			$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+		}
 		$stmt->execute();
 		$this->page = $stmt->fetch(PDO::FETCH_ASSOC);
 		
@@ -120,8 +126,16 @@ class Show extends Handler {
 				AND time = :time 
 				LIMIT 1';
 			$stmt = $this->Db->prepare($sql);
-			$stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
-			$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+			#Ugly hack to work around PHP 5.2.1 upgrade which forces all bound Params to
+			#exist in the query.
+			if(!empty($this->id))
+			{
+				$stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+			}
+			else if(!empty($this->pagename))
+			{
+				$stmt->bindParam(':tag', $this->pagename, PDO::PARAM_STR);
+			}
 			$stmt->bindParam(':time', $this->time); //MySQL Datetime data type.
 			$stmt->execute();
 			$this->page = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -147,6 +161,10 @@ class Show extends Handler {
 		}
 		
 		return $this->page['tag'];
+	}
+	
+	function getPageAuthor() {
+		return $this->page['user'];
 	}
 	
 	function getPageTime() {
