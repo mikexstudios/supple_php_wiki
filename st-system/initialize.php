@@ -43,9 +43,9 @@ $tstart = substr(microtime(),11).substr(microtime(),1,9);
 /**
  * Include main library if it exists.
  */
-if (file_exists('st-system/Supple.class.php'))
+if (file_exists(ABSPATH.'/st-system/Supple.class.php'))
 {
-	require_once('st-system/Supple.class.php');
+	require_once(ABSPATH.'/st-system/Supple.class.php');
 }
 else
 {
@@ -57,7 +57,7 @@ else
  */
 //For now, just include the config file. Soon, we want to revamp the config
 //options.
-include(ABSPATH.'/st-external/st-config.php'); //Maybe should ABSPATH this.
+require(ABSPATH.'/st-external/st-config.php'); //Maybe should ABSPATH this.
 //define('SITEURL', '/suppleText');
 
 //Installer check?

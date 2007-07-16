@@ -93,16 +93,19 @@ function inlineimage_callback(&$matches) {
 	//'just external url case' since \S+ also matches the | character.
 	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
-		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
-		return '<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />';
+		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		//$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		//return '<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />'));
 	}
 	
 	//Match just external url.
 	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
-		return '<img src="'.$url_matches[1].'" />';
+		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		//return '<img src="'.$url_matches[1].'" />';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<img src="'.$url_matches[1].'" />'));
+		
 	}
 	
 	//For everything else that doesn't seem to match.
@@ -127,43 +130,49 @@ function links_callback(&$matches) {
 	//'just external url case' since \S+ also matches the | character.
 	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
-		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
-		return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
+		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
+		//$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		//return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
 	}
 	
 	//Match just external url.
 	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
-		return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
+		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		//return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
 	}
 	
 	//Match mailto: type links. NOTE: This could be dangerous if we don't check well.
 	//javascript injection possible! This is crude!
 	if(preg_match('/([a-z]+:\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
-		$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
-		return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
+		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
+		//$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		//return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
 	}
 		if(preg_match('/([a-z]+:\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
-		return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
+		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
+		//return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
 	}
 	
 	//Match WikiLinks (The regex for these should be better...and safer)
 	if(preg_match('/(\S+)\|(.+)/', $matches[1], $link_matches))
 	{
-		$link_matches[2] = $Supple->SyntaxParser->hash($link_matches[2]);
-		return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[2].'</a>';
+		//$link_matches[2] = $Supple->SyntaxParser->hash($link_matches[2]);
+		//return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[2].'</a>';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>'));
 	}	
 	
 	if(preg_match('/(\S+)/', $matches[1], $link_matches))
 	{
-		$link_matches[1] = $Supple->SyntaxParser->hash($link_matches[1]); //Crude hack since we nest hashes. Should fix this up later.
-		return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[1].'</a>';
+		//$link_matches[1] = $Supple->SyntaxParser->hash($link_matches[1]); //Crude hack since we nest hashes. Should fix this up later.
+		//return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[1].'</a>';
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[1].'</a>'));
 	}	
 	
 	//For everything else that doesn't seem to match.
@@ -194,7 +203,8 @@ function wikiwordlink_callback(&$matches) {
 	global $Supple;
 	
 	//$matches[1] includes the whitespace characters.
-	return $matches[1].'<a href="'.$Supple->SyntaxParser->hash(construct_page_url($matches[2])).'">'.$matches[2].'</a>';
+	//return $matches[1].'<a href="'.$Supple->SyntaxParser->hash(construct_page_url($matches[2])).'">'.$matches[2].'</a>';
+	return $matches[1].$Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.construct_page_url($matches[2]).'">'.$matches[2].'</a>'));
 }
 
 /**
@@ -218,7 +228,7 @@ function raw_url_callback(&$matches) {
 	if(!empty($matches[1])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
 	{
 		$matches[1] = $Supple->SyntaxParser->unhash($matches[1]);
-		return $matches[1].$matches[2].$matches[3];
+		return $Supple->Input->xss_clean($matches[1].$matches[2].$matches[3]);
 	}
 	
 	//We won't consider single punctuation characters at the end of the URL
@@ -229,15 +239,21 @@ function raw_url_callback(&$matches) {
 		//For cases like: http://www.another.rawlink.org where .org is in the second (\S+)
 		if(!empty($raw_url_matches[3])) 
 		{
-			$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
-			return '<a href="'.$url.'">'.$url.'</a>';
+			//$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
+			//return '<a href="'.$url.'">'.$url.'</a>';
+			$url = $matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3];
+			return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
 		}
-		$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1]);
-		return '<a href="'.$url.'">'.$url.'</a>'.$raw_url_matches[2]; //We keep the punctuation on the end.
+		//$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1]);
+		//return '<a href="'.$url.'">'.$url.'</a>'.$raw_url_matches[2]; //We keep the punctuation on the end.
+		$url = $matches[2].$raw_url_matches[1];
+		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url.'">'.$url.'</a>')).$raw_url_matches[2]; //We keep the punctuation on the end.
 	}
 	
-	$url = $Supple->SyntaxParser->hash($matches[2].$matches[3]);
-	return '<a href="'.$url.'">'.$url.'</a>';
+	//$url = $Supple->SyntaxParser->hash($matches[2].$matches[3]);
+	//return '<a href="'.$url.'">'.$url.'</a>';
+	$url = $matches[2].$matches[3];
+	return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
 }
 
 /**
@@ -351,8 +367,8 @@ function lists($in_text, $type) {
 }
 
 //Ugly hack to connect the lists (inner lists). Later on, we should indent lists inside of lists.
-$Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
-$Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n\n(<ol>.+?<\/ol>)\n/s', "\n".'$1', 238);
+$Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
+$Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n(<ol>.+?<\/ol>)\n/s', "\n".'$1', 238);
 
 
 /**

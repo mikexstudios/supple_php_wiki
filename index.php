@@ -26,10 +26,11 @@
  */
 
 
-define('ABSPATH', dirname(__FILE__));  //No trailing slash
- 
+//define('ABSPATH', dirname(__FILE__));  //No trailing slash
+define('ABSPATH', dirname($_SERVER['SCRIPT_FILENAME'])); //Only SCRIPT_FILENAME seems to take into account symlink paths
+
 //Initialize needed script elements
-require('./st-system/initialize.php');
+require(ABSPATH.'/st-system/initialize.php');
 
 /**
  * Create Supple object

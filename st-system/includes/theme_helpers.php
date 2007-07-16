@@ -237,7 +237,7 @@ function get_theme_url_path($file='') {
 	
 	if(empty($file))
 	{
-		return $Supple->Settings->getSetting('site_url').'/st-external/themes/'.$Supple->Settings->getSetting('use_theme');
+		return SITE_URL.'/st-external/themes/'.$Supple->Settings->getSetting('use_theme');
 	}
 	return get_theme_url_path().'/'.$file;
 }
@@ -298,11 +298,11 @@ function construct_page_url($page, $handler='', $args='') {
 	//Construct URL:
 	if($Supple->Settings->getSetting('is_rewrite'))
 	{
-		$url = $Supple->Settings->getSetting('site_url').'/'.$page;
+		$url = SITE_URL.'/'.$page;
 	}
 	else
 	{
-		$url = $Supple->Settings->getSetting('site_url').'/index.php?wiki='.$page;
+		$url = SITE_URL.'/index.php?wiki='.$page;
 	}
 	if(!empty($handler))
 	{
@@ -317,7 +317,7 @@ function construct_page_url($page, $handler='', $args='') {
 }
 
 function include_buffered($filename) {
-		ob_start();
+		ob_start(); 
 		include($filename);
 		$output = ob_get_contents();
 		ob_end_clean();

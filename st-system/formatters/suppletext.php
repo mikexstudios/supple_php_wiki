@@ -60,7 +60,7 @@ function snippets_callback(&$matches) {
 		preg_match('/^([A-Za-z0-9]*)\s+(.*)$/s', $action, $matches);
 		// extract $action and $vars_temp ("raw" attributes)
 		list(, $action, $args) = $matches;
-
+		
 		//Call action, pass the args to it
 		return $Supple->SyntaxParser->doSnippet($action, $args);
 		
@@ -69,7 +69,7 @@ function snippets_callback(&$matches) {
 	{
 		return '<em class="error">Unknown action; the action name must not contain special characters.</em>';
 	}
-	
+
 	return $Supple->SyntaxParser->hash($Supple->SyntaxParser->doSnippet($action));
 }
 
@@ -164,16 +164,17 @@ function intentional_newline_callback(&$matches) {
 	return "\n".str_replace("\n", "<br />\n", $matches[1])."\n";
 }
 
-
 /**
- * XSS Attacks Filtering
+ * XSS Attacks Filtering. Okay, we'll disable it here.
  */
+/*
 $Supple->SyntaxParser->addRule('xss_filter', '/(.+)/', 'xss_filter_callback', 2100, true);
 function xss_filter_callback(&$matches) {
 	global $Supple;
 	
 	return $Supple->Input->xss_clean($matches[1]);
 } 
+*/
 
 /* Things to implement:
     var $rules = array(
