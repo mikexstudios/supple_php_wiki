@@ -57,7 +57,7 @@ else
  */
 //For now, just include the config file. Soon, we want to revamp the config
 //options.
-include('st-config.php'); //Maybe should ABSPATH this.
+include(ABSPATH.'/st-external/st-config.php'); //Maybe should ABSPATH this.
 //define('SITEURL', '/suppleText');
 
 //Installer check?
