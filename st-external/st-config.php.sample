@@ -1,4 +1,7 @@
 <?php
+// ** Site URL ** //
+define('SITE_URL', 'http://yoursite.com'); //No trailing slash
+
 // ** MySQL settings ** //
 define('DB_NAME', 'putyourdbnamehere');    // The name of the database
 define('DB_USER', 'usernamehere');     // Your MySQL username
