@@ -25,16 +25,15 @@ class Show extends Controller {
 	
 	function index()
 	{
-		$this->pages_model->pagename = $this->config->item('default_page');
-		//$this->pages_model->setPagename($this->config->item('default_page'));
-		$this->pages_model->loadPage();
-		$data['page_content'] = $this->pages_model->get_content();
-		$this->load->view('show', $data);
+		$this->display($this->config->item('default_page'));
 	}
 	
 	function display($pagename) {
-		$data['x'] = $pagename;
-		$this->load->view('test_success_message', $data);
+		$this->pages_model->register_functions();
+		
+		$this->pages_model->pagename = $pagename;
+		$this->pages_model->loadPage();
+		$this->load->view('show');
 	}
 	
 

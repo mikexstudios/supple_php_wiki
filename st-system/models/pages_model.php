@@ -10,8 +10,13 @@ class Pages_model extends Model {
 		parent::Model();	
 	}
 	
-	function setPagename($in) {
-		$this->pagename = $in;
+	function register_functions() {
+		//Add functions to be used by themes.
+		//@todo Add a hook here so that plugin files can add theme functions too.
+		$this->template->add_function('page_content', array(&$this, 'get_content'));
+		$this->template->add_function('page_tag', array(&$this, 'get_tag'));
+		$this->template->add_function('page_time', array(&$this, 'get_time'));
+		$this->template->add_function('page_id', array(&$this, 'get_id'));	
 	}
 	
 	/**

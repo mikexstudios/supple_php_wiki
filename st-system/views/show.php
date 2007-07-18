@@ -3,7 +3,7 @@
 <!--starting page content-->
 <div id="page">
 
-<?php echo $page_content; ?>
+<?php out('page_content'); ?>
 	
 </div>
 <!--closing page content-->
