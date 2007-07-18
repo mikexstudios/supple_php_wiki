@@ -48,9 +48,10 @@ function get_theme_system_path($file='') {
 	
 	if(empty($file))
 	{
-		return ABSPATH.'/st-external/themes/'.$CI->settings->get('use_theme');
+		return $CI->load->_ci_view_path;
+		//return ABSPATH.'/st-external/themes/'.$CI->settings->get('use_theme');
 	}
-	return get_theme_system_path().'/'.$file;
+	return get_theme_system_path().$file;
 }
 
 //Registering as Action eliminates the need for separate out_* functions.
@@ -60,7 +61,7 @@ function get_theme_url_path($file='') {
 	
 	if(empty($file))
 	{
-		return base_url().'/st-external/themes/'.$CI->settings->get('use_theme');
+		return site_url(THEMES_DIR.$CI->settings->get('use_theme'));
 	}
 	return get_theme_url_path().'/'.$file;
 }
@@ -92,12 +93,10 @@ function construct_page_url($page, $handler='', $args='') {
 	return site_url($segments);
 }
 
-function include_buffered($filename) {
-		ob_start(); 
-		include($filename);
-		$output = ob_get_contents();
-		ob_end_clean();
-		return $output;
+function include_buffered($filename, $vars=array()) {
+		global $CI;
+		
+		return $CI->load->view($filename, $vars, TRUE); //True means buffered
 }
 
 $CI->template->add_function('site_name', 'get_site_name');

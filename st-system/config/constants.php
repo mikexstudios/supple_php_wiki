@@ -9,4 +9,8 @@ define('ST_ARCHIVES_TABLE', 'archives');
 define('ST_CONFIG_TABLE', 'config');
 define('ST_CACHE_TABLE', 'cache');
 
+//FILE STRUCTURE
+define('EXTERNAL_DIR', 'st-external/'); //Always have trailing slash to keep in CI convention.
+define('THEMES_DIR', EXTERNAL_DIR.'themes/');
+
 ?>

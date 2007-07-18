@@ -89,7 +89,7 @@ if (strpos($system_folder, '/') != 0) //We assume that the full path is specifie
 define('EXT', '.'.pathinfo(__FILE__, PATHINFO_EXTENSION));
 define('FCPATH', __FILE__);
 define('SELF', pathinfo(__FILE__, PATHINFO_BASENAME));
-define('BASEPATH', $system_folder.'/');
+define('BASEPATH', $system_folder.'/'); //NOTE: This is not the *real* base path of our script. Use ABSPATH instead!
 define('ABSPATH', dirname($_SERVER['SCRIPT_FILENAME']).'/'); //A weird hack for URL Rewriting...
 
 if (is_dir(ABSPATH.$application_folder)) //Had to add ABSPATH here.

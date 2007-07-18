@@ -26,6 +26,7 @@ class Pages_model extends Model {
 	 * @return mixed Page table row containing content, author, etc.
 	 */
 	function loadPage() {
+		
 		//Possibly add AND clauses in the future.
 		if(!empty($this->id))
 			{ $this->db->where('id', $this->id); }

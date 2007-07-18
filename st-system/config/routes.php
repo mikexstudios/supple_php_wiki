@@ -54,4 +54,5 @@ $route['(['.$this->config->item('permitted_uri_chars').']+)/(['.$this->config->i
 $route['(['.$this->config->item('permitted_uri_chars').']+)/(['.$this->config->item('permitted_uri_chars').']+)/(.+)'] = "$2/$1/$3";
 
 
+
 ?>
