@@ -19,6 +19,19 @@ class Pages_model extends Model {
 		$this->template->add_function('page_id', array(&$this, 'get_id'));	
 	}
 	
+	function _set_where_clauses() {
+	
+		//And clauses are automatically added
+		if(!empty($this->id))
+			{ $this->db->where('id', $this->id); }
+		else if(!empty($this->pagename))
+			{ $this->db->where('tag', $this->pagename); }
+		else
+			{ return false; } //Nothing can happen since page identifiers aren't set.
+		
+		return true; //Something was set.
+	}
+	
 	/**
 	 * loadPage gets the page information from the database.
 	 * 
@@ -27,39 +40,37 @@ class Pages_model extends Model {
 	 */
 	function loadPage() {
 		
-		//Possibly add AND clauses in the future.
-		if(!empty($this->id))
-			{ $this->db->where('id', $this->id); }
-		else if(!empty($this->pagename))
-			{ $this->db->where('tag', $this->pagename); }
-		else
+		//Set where clauses
+		if($this->_set_where_clauses() == false)
 			{ return; } //Nothing can happen since page identifiers aren't set.
 		
-		
-		//Could probably do this a little better
 		//We load the latest page first just so we can load information from the latest page.
 		$this->db->select('*');
 		$this->db->from(ST_PAGES_TABLE);
 		$this->db->limit(1);
-		
 		$query = $this->db->get();
 		$this->page = $query->row_array();
 		
-		//If the ID that we want isn't the latest page id, we look in the archives table.
-		if(!empty($this->id) && $this->page['id'] != $this->id)
+		
+		//If we don't find the page in the latest table, then we also check
+		//the archives table.
+		if(empty($this->page))
 		{
+			$this->_set_where_clauses(); //Must do this each time.
 			$this->db->from(ST_ARCHIVES_TABLE);
 			$query = $this->db->get();
 			$this->page = $query->row_array();
-		}														
-		
-		//Then we check if we need to grab an older copy.														
-		if(!empty($this->time) && (strcmp($this->page['time'], $this->time)!=0)) //The latest page time and the specified time are not the same.
-		{
-			$this->db->from(ST_ARCHIVES_TABLE);
-			$this->db->where('time', $this->time);
-			$this->page = $query->row_array();
 		}
+		
+		//If the page id is still empty, then the page did not exist!
+		//We prompt user to create if no id is set. Otherwise, we error.
+		if(empty($this->page))
+		{
+			//Temporary hack
+			$this->page['body']='';
+			$this->page['time']='';
+		}	
+															
 		
 		$query->free_result(); //Cut down on memory consumption
 	}

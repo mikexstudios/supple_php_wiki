@@ -148,7 +148,7 @@ $config['permitted_uri_chars'] = 'A-Za-z 0-9~%.:_-'; //Added Capital letters for
 | use segment based URLs.
 |
 */
-$config['enable_query_strings'] = FALSE;
+$config['enable_query_strings'] = TRUE; //Enable $_GET. We need this for time revisions.
 $config['controller_trigger'] = 'c';
 $config['function_trigger'] = 'm';
 
@@ -229,11 +229,11 @@ $config['encryption_key'] = "";
 |  by default sessions last 7200 seconds (two hours).  Set to zero for no expiration.
 |
 */
-$config['sess_cookie_name']		= 'ci_session';
+$config['sess_cookie_name']		= 'st_session';
 $config['sess_expiration']		= 7200;
 $config['sess_encrypt_cookie']	= FALSE;
 $config['sess_use_database']	= FALSE;
-$config['sess_table_name']		= 'ci_sessions';
+$config['sess_table_name']		= 'st_sessions';
 $config['sess_match_ip']		= FALSE;
 $config['sess_match_useragent']	= TRUE;
 
@@ -247,7 +247,7 @@ $config['sess_match_useragent']	= TRUE;
 | 'cookie_path'   =  Typically will be a forward slash
 |
 */
-$config['cookie_prefix']	= "";
+$config['cookie_prefix']	= "st_";
 $config['cookie_domain']	= "";
 $config['cookie_path']		= "/";
 

@@ -113,14 +113,24 @@ function get_default_page() {
 	return $CI->settings->get('root_page');
 }
 
+function base_path($in_file='') {
+	if(empty($in_file))
+		{ return ABSPATH; }
+	
+	return ABSPATH.$in_file;
+}
+
 $CI->template->add_function('format', 'format_text');
 function format_text($in_text) {
 	global $CI;
-	$CI->SyntaxParser->setSyntaxPath(ABSPATH.'/st-system/formatters/');
-	$CI->SyntaxParser->loadSyntax();
-	$CI->SyntaxParser->setText($in_text);
-	$CI->SyntaxParser->applyAll();
-	return $CI->SyntaxParser->getText();
+	
+	$CI->load->library('syntaxparser');
+	$CI->load->helper('misc');
+	$CI->syntaxparser->setSyntaxPath(base_path('/st-system/formatters/'));
+	$CI->syntaxparser->loadSyntax();
+	$CI->syntaxparser->setText($in_text);
+	$CI->syntaxparser->applyAll();
+	return $CI->syntaxparser->getText();
 }
 
 
