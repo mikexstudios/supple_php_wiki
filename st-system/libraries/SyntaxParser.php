@@ -125,11 +125,14 @@ class SyntaxParser {
 		
 		# Then hash the block.
 		$key = md5($text);
+		//die('orig: '.$key);
 		$this->hashed_text[$key] = $text;
+
 		return $this->delimiter.$key.$this->delimiter; # String that will replace the tag.
 	}
 
 	function unhash($key) {
+	
 		if(!empty($this->hashed_text[$key]))
 		{
 			return $this->hashed_text[$key];			
@@ -161,13 +164,13 @@ class SyntaxParser {
 	
 
 	//Actions: <<<actionname parameters parameter2>>>
-	function doSnippet($in_action, $in_args='')
+	function doAction($in_action, $in_args='')
 	{
 		global $action, $args; //Set these to global so that the included file can use them.
 		$action = $in_action;
 		$args = $in_args;
 		
-		return include_buffered(ABSPATH.'/st-system/actions/'.$action.'.php');
+		return include_buffered(base_path('st-system/actions/'.$action.'.php'));
 	}
 
 }

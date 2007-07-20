@@ -102,7 +102,7 @@ else
 	{
 		$application_folder = 'application';
 	}
-	die('here');
+
 	define('APPPATH', BASEPATH.$application_folder.'/');
 }
 

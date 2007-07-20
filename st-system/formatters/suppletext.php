@@ -64,7 +64,7 @@ function snippets_callback(&$matches) {
 		list(, $action, $args) = $matches;
 		
 		//Call action, pass the args to it
-		return $CI->syntaxparser->doSnippet($action, $args);
+		return $CI->syntaxparser->doAction($action, $args);
 		
 	}
 	if (!preg_match('/^[a-zA-Z0-9]+$/', $action))
@@ -91,8 +91,8 @@ $CI->syntaxparser->addRule('escape_html_2', '/>/', '&gt;', 126);
 $CI->syntaxparser->addRule('remove_last_br', '/<br \/>$/', '', 2000);
 
 //Unhash everything. This is absolutely necessary to reverse all of the hiding done by other functions.
-$CI->syntaxparser->addRule('unhash_all', '/'.$CI->syntaxparser->getTokenPattern().'/', 'unhash_call_callback', 2010, true);
-function unhash_call_callback(&$matches) {
+$CI->syntaxparser->addRule('unhash_all', '/'.$CI->syntaxparser->getTokenPattern().'/', 'unhash_all_callback', 2010, true);
+function unhash_all_callback(&$matches) {
 	global $CI;
 	
 	return $CI->syntaxparser->unhash($matches[1]);
@@ -174,7 +174,7 @@ $CI->syntaxparser->addRule('xss_filter', '/(.+)/', 'xss_filter_callback', 2100, 
 function xss_filter_callback(&$matches) {
 	global $CI;
 	
-	return $CI->validation->xss_clean($matches[1]);
+	return $CI->input->xss_clean($matches[1]);
 } 
 */
 

@@ -1,4 +1,3 @@
-<? header("Content-Type: text/html; charset=UTF-8"); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
@@ -13,6 +12,6 @@
 	<h1><?php out('page_tag'); ?> : <a href="<?php out('page_url', get('root_page')); ?>"><?php out('site_name'); ?></a></h1>
 	
 	<div class="pagenavigation">
-		<?php //out('format', '<<<include NavigationLinks>>>'); ?> 	
+		<?php out('format', '<<<include NavigationLinks>>>'); ?> 	
 	</div>
 </div>

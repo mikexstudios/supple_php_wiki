@@ -98,7 +98,7 @@ function inlineimage_callback(&$matches) {
 		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]);
 		//$url_matches[2] = $CI->syntaxparser->hash($url_matches[2]);
 		//return '<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />'));
 	}
 	
 	//Match just external url.
@@ -106,7 +106,7 @@ function inlineimage_callback(&$matches) {
 	{
 		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]);
 		//return '<img src="'.$url_matches[1].'" />';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<img src="'.$url_matches[1].'" />'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<img src="'.$url_matches[1].'" />'));
 		
 	}
 	
@@ -135,7 +135,7 @@ function links_callback(&$matches) {
 		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]); 
 		//$url_matches[2] = $CI->syntaxparser->hash($url_matches[2]);
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
 	}
 	
 	//Match just external url.
@@ -143,7 +143,7 @@ function links_callback(&$matches) {
 	{
 		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]);
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
 	}
 	
 	//Match mailto: type links. NOTE: This could be dangerous if we don't check well.
@@ -153,13 +153,13 @@ function links_callback(&$matches) {
 		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]); 
 		//$url_matches[2] = $CI->syntaxparser->hash($url_matches[2]);
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
 	}
 		if(preg_match('/([a-z]+:\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]); 
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
 	}
 	
 	//Match WikiLinks (The regex for these should be better...and safer)
@@ -167,14 +167,14 @@ function links_callback(&$matches) {
 	{
 		//$link_matches[2] = $CI->syntaxparser->hash($link_matches[2]);
 		//return '<a href="'.$CI->syntaxparser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[2].'</a>';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>'));
 	}	
 	
 	if(preg_match('/(\S+)/', $matches[1], $link_matches))
 	{
 		//$link_matches[1] = $CI->syntaxparser->hash($link_matches[1]); //Crude hack since we nest hashes. Should fix this up later.
 		//return '<a href="'.$CI->syntaxparser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[1].'</a>';
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[1].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[1].'</a>'));
 	}	
 	
 	//For everything else that doesn't seem to match.
@@ -206,7 +206,7 @@ function wikiwordlink_callback(&$matches) {
 	
 	//$matches[1] includes the whitespace characters.
 	//return $matches[1].'<a href="'.$CI->syntaxparser->hash(construct_page_url($matches[2])).'">'.$matches[2].'</a>';
-	return $matches[1].$CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.construct_page_url($matches[2]).'">'.$matches[2].'</a>'));
+	return $matches[1].$CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($matches[2]).'">'.$matches[2].'</a>'));
 }
 
 /**
@@ -230,7 +230,7 @@ function raw_url_callback(&$matches) {
 	if(!empty($matches[1])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
 	{
 		$matches[1] = $CI->syntaxparser->unhash($matches[1]);
-		return $CI->validation->xss_clean($matches[1].$matches[2].$matches[3]);
+		return $CI->input->xss_clean($matches[1].$matches[2].$matches[3]);
 	}
 	
 	//We won't consider single punctuation characters at the end of the URL
@@ -244,18 +244,18 @@ function raw_url_callback(&$matches) {
 			//$url = $CI->syntaxparser->hash($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
 			//return '<a href="'.$url.'">'.$url.'</a>';
 			$url = $matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3];
-			return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
+			return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
 		}
 		//$url = $CI->syntaxparser->hash($matches[2].$raw_url_matches[1]);
 		//return '<a href="'.$url.'">'.$url.'</a>'.$raw_url_matches[2]; //We keep the punctuation on the end.
 		$url = $matches[2].$raw_url_matches[1];
-		return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.$url.'">'.$url.'</a>')).$raw_url_matches[2]; //We keep the punctuation on the end.
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url.'">'.$url.'</a>')).$raw_url_matches[2]; //We keep the punctuation on the end.
 	}
 	
 	//$url = $CI->syntaxparser->hash($matches[2].$matches[3]);
 	//return '<a href="'.$url.'">'.$url.'</a>';
 	$url = $matches[2].$matches[3];
-	return $CI->syntaxparser->hash($CI->validation->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
+	return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
 }
 
 /**

@@ -96,7 +96,7 @@ function construct_page_url($page, $handler='', $args='') {
 function include_buffered($filename, $vars=array()) {
 		global $CI;
 		
-		return $CI->load->view($filename, $vars, TRUE); //True means buffered
+		return $CI->load->file($filename, TRUE); //True means buffered
 }
 
 $CI->template->add_function('site_name', 'get_site_name');
@@ -118,6 +118,13 @@ function base_path($in_file='') {
 		{ return ABSPATH; }
 	
 	return ABSPATH.$in_file;
+}
+
+function get_current_pagename() {
+	global $CI;
+	
+	//NOTE: URI automatically initialized by the system.
+	return $CI->uri->segment(1);
 }
 
 $CI->template->add_function('format', 'format_text');
