@@ -89,8 +89,8 @@ $Supple->SyntaxParser->addRule('escape_html_2', '/>/', '&gt;', 126);
 $Supple->SyntaxParser->addRule('remove_last_br', '/<br \/>$/', '', 2000);
 
 //Unhash everything. This is absolutely necessary to reverse all of the hiding done by other functions.
-$Supple->SyntaxParser->addRule('unhash_all', '/'.$Supple->SyntaxParser->getTokenPattern().'/', 'unhash_call_callback', 2010, true);
-function unhash_call_callback(&$matches) {
+$Supple->SyntaxParser->addRule('unhash_all', '/'.$Supple->SyntaxParser->getTokenPattern().'/', 'unhash_all_callback', 2010, true);
+function unhash_all_callback(&$matches) {
 	global $Supple;
 	
 	return $Supple->SyntaxParser->unhash($matches[1]);

@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Jul 15, 2007 at 12:55 PM
--- Server version: 5.0.38
--- PHP Version: 5.2.1
+-- Generation Time: Jul 19, 2007 at 11:16 PM
+-- Server version: 5.0.45
+-- PHP Version: 5.2.3
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -252,7 +252,7 @@ INSERT INTO `wikka_config` (`order`, `option`, `value`, `vartype`, `displaycode`
 (1, 'root_page', 'HomePage', 'string', 'string', 'Default Page', 'The page that is displayed when no page is specified.'),
 (0, 'site_name', 'My suppleText wiki', 'string', 'text', 'Wiki Site Name', 'A title for your wiki'),
 (5, 'site_url', '/suppleText', 'string', 'text', 'Site URL', 'Absolute or relative path to script location. No trailing slash.'),
-(6, 'use_cache', 'true', 'boolean', 'yesno', 'Use Page Caching', 'If set to true, stores syntax parsed pages in database and loads the cached version to users.'),
+(6, 'use_cache', 'false', 'boolean', 'yesno', 'Use Page Caching', 'If set to true, stores syntax parsed pages in database and loads the cached version to users.'),
 (2, 'use_theme', 'supple', 'string', 'text', 'Use Theme', 'The theme used to display pages');
 
 -- --------------------------------------------------------
@@ -393,7 +393,7 @@ CREATE TABLE `wikka_users` (
   `password` varchar(32) NOT NULL default '',
   `email` varchar(80) NOT NULL default '',
   PRIMARY KEY  (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 -- 
 -- Dumping data for table `wikka_users`
