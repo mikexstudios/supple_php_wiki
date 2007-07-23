@@ -80,7 +80,10 @@ function theme_include($file) {
 
 $CI->template->add_function('current_url', 'get_current_url');
 function get_current_url($prefix='http://', $postfix='') {
-	return $prefix.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].$postfix;
+	global $CI;
+	
+  return site_url($CI->uri->uri_string());
+	//return $prefix.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].$postfix;
 }
 
 function redirect_page($page, $handler='', $args='') {
@@ -146,6 +149,19 @@ function get_execution_time() {
 	global $CI;
 	
 	return $CI->benchmark->elapsed_time();
+}
+
+$CI->template->add_function('form_value', 'get_form_value');
+function get_form_value($in_name, $escape=true) {
+	global $CI;
+
+	if($escape === true)
+	{
+		$CI->load->helper('form');
+		return form_prep($CI->validation->$in_name);
+	}
+	
+	return $CI->validation->$in_name;
 }
 
 ?>

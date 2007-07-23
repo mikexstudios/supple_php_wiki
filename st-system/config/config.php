@@ -11,7 +11,7 @@
 |	http://www.your-site.com/
 |
 */
-$config['base_url']	= "http://localhost/suppleText_CI/";
+$config['base_url']	= "http://dev.suppletext.org/suppleText_CI/";
 
 /*
 |--------------------------------------------------------------------------

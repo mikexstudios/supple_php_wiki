@@ -1,10 +1,14 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 class Pages_model extends Model {
+	var $id;
 	var $pagename;
 	var $time;
-	var $page;
-	var $id;
+	var $author;
+	var $body;
+	
+	var $page; //Contains all page information (array). Result from query.
+
 	
 	function Pages_model() {
 		parent::Model();	
@@ -75,6 +79,46 @@ class Pages_model extends Model {
 		$query->free_result(); //Cut down on memory consumption
 	}
 	
+	function copy_to_archives() {
+		//global $db;
+		
+		//Since we are not using Active Record, we don't use the
+		//set_where function.
+		if(empty($this->pagename))
+			{ return; }
+		
+		$sql = '
+			INSERT INTO '.$this->db->dbprefix.ST_ARCHIVES_TABLE.'
+			SELECT *  
+			FROM '.$this->db->dbprefix.ST_PAGES_TABLE.' 
+			WHERE tag = ?';
+		$this->db->query($sql, array($this->pagename));
+
+	}
+	
+	/**
+	 * Note: Deletes only from the PAGES_TABLE. Not the archives table.
+	 */	 	
+	function delete() {
+		//Set where clauses
+		if($this->_set_where_clauses() == false)
+			{ return; } //Nothing can happen since page identifiers aren't set.
+		
+		//$this->db->from();
+		$this->db->delete(ST_PAGES_TABLE);
+	}
+	
+	function insert() {
+		//Doing the INSERT
+		$data['tag'] = $this->pagename;
+		$data['time'] = $this->time;
+		$data['user'] = $this->author;
+		$data['note'] = $this->note;
+		$data['body'] = $this->body;
+		
+		$this->db->insert(ST_PAGES_TABLE, $data);
+	}
+	
 	function get_all() {
 		return $this->page;
 	}
@@ -83,7 +127,7 @@ class Pages_model extends Model {
 		return $this->page['id'];
 	}
 	
-	function get_content() {
+	function get_content() {		
 		return $this->page['body'];
 	}
 	

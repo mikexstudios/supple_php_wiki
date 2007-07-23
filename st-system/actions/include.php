@@ -21,7 +21,9 @@ if ($page != get_current_pagename())
 	
 	echo $CI->pages_model_include->page['body'];
 	
-	unset($CI->pages_model_include);
+	//NOTE: Since CI does its own thing with loading files,
+	//we can't unset the model using unset().
+	//unset($CI->pages_model_include);
 } 
 else print '<em class="error">Circular reference.</em>';
 

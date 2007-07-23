@@ -58,6 +58,17 @@ code, pre	{
 	color: #666;
 }
 
+.error {
+	font-size: 70%;
+	margin: 0;
+	margin-bottom: 5px;
+	padding: 0;
+ 	background: #FBE6F2;
+ 	border: 1px solid #D893A1;
+ 	color: #333;
+	padding: 2px;
+}
+
 
 
 /*-------------------------------------------------

@@ -13,7 +13,6 @@ class Show extends Controller {
 	 * to the pagename.
 	 */	 	 	
 	function _remap($method) {
-		
 		if($method === 'index')
 		{
 			$this->index();
@@ -29,7 +28,7 @@ class Show extends Controller {
 		$this->display($this->config->item('default_page'));
 	}
 	
-	function display($pagename) {
+	function _set_page_info($pagename) {
 		$this->pages_model->register_functions();
 		
 		//Check to see if id param is set in URL:
@@ -43,9 +42,14 @@ class Show extends Controller {
 		$this->pages_model->pagename = $pagename;
 		$this->pages_model->loadPage();
 		
+	}
+	
+	function display($pagename) {
+		
+		$this->_set_page_info($pagename);
+		
 		//Syntax formatting. 
 		$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
-		
 		$this->load->view('show');
 	}
 	
