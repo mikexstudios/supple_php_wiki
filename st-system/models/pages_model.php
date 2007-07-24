@@ -8,6 +8,7 @@ class Pages_model extends Model {
 	var $body;
 	
 	var $page; //Contains all page information (array). Result from query.
+	var $revisions_data;
 
 	
 	function Pages_model() {
@@ -21,6 +22,7 @@ class Pages_model extends Model {
 		$this->template->add_function('page_tag', array(&$this, 'get_tag'));
 		$this->template->add_function('page_time', array(&$this, 'get_time'));
 		$this->template->add_function('page_id', array(&$this, 'get_id'));	
+		$this->template->add_function('revision_list', array(&$this, 'get_all_revisions_data'));
 	}
 	
 	function _set_where_clauses() {
@@ -61,6 +63,7 @@ class Pages_model extends Model {
 		if(empty($this->page))
 		{
 			$this->_set_where_clauses(); //Must do this each time.
+			$this->db->select('*');
 			$this->db->from(ST_ARCHIVES_TABLE);
 			$query = $this->db->get();
 			$this->page = $query->row_array();
@@ -118,6 +121,36 @@ class Pages_model extends Model {
 		
 		$this->db->insert(ST_PAGES_TABLE, $data);
 	}
+	
+	function get_all_revisions_data() {
+		//Set where clauses
+		if($this->_set_where_clauses() == false)
+			{ return; } //Nothing can happen since page identifiers aren't set.
+		
+		//We load the latest page first just so we can load information from the latest page.
+		$this->db->select('*');
+		$this->db->from(ST_PAGES_TABLE);
+		$this->db->limit(1);
+		$query = $this->db->get();
+		$this->revisions_data[] = $query->row_array();
+	
+		$this->_set_where_clauses(); //Must do this each time.
+		$this->db->select('*');
+		$this->db->from(ST_ARCHIVES_TABLE);
+		$this->db->orderby('id', 'desc');
+		$query = $this->db->get();
+		$results = $query->result_array();
+		
+		if(!empty($results))
+		{
+			foreach($results as $each_row)
+			{
+				array_push($this->revisions_data, $each_row);
+			}
+		}
+		
+		return $this->revisions_data;
+	}	
 	
 	function get_all() {
 		return $this->page;
