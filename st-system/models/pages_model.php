@@ -29,7 +29,7 @@ class Pages_model extends Model {
 	
 		//And clauses are automatically added
 		if(!empty($this->id))
-			{ $this->db->where('id', $this->id); }
+			{ $this->db->where('id', $this->id); } // echo $this->id; 
 		else if(!empty($this->pagename))
 			{ $this->db->where('tag', $this->pagename); }
 		else

@@ -13,7 +13,7 @@ class Edit extends Show {
 	//Inherits _remap(), _set_page_info(...) from Show 
 	
 	function _prepForm() {
-		$this->load->library('validation');
+		//$this->load->library('validation');
 		$this->validation->set_error_delimiters('<div class="error">', '</div>');
 		
 		//Set validation rules

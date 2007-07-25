@@ -14,8 +14,6 @@ class Revisions extends Show {
 	
 	function display($pagename) {
 		$this->_set_page_info($pagename);
-	
-		$this->load->helper('string'); //For alternator
 		
 		$this->load->view('revisions');
 	}
