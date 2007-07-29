@@ -67,12 +67,12 @@ function snippets_callback(&$matches) {
 		return $CI->syntaxparser->doAction($action, $args);
 		
 	}
-	if (!preg_match('/^[a-zA-Z0-9]+$/', $action))
+	if (!preg_match('/^[a-zA-Z0-9_]+$/', $action))
 	{
-		return '<em class="error">Unknown action; the action name must not contain special characters.</em>';
+		return 'Unknown action; the action name must not contain special characters.';
 	}
 
-	return $CI->syntaxparser->hash($CI->syntaxparser->doSnippet($action));
+	return $CI->syntaxparser->doAction($action);
 }
 
 

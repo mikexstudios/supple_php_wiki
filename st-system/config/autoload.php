@@ -38,7 +38,7 @@
 |	$autoload['libraries'] = array('database', 'session', 'xmlrpc');
 */
 
-$autoload['libraries'] = array('database', 'template', 'settings', 'validation');
+$autoload['libraries'] = array('database', 'template', 'settings', 'validation', 'session');
 
 
 /*

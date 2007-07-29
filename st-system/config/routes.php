@@ -43,6 +43,10 @@
 $route['default_controller'] = "show";
 $route['scaffolding_trigger'] = "";
 
+//For admin stuff
+$route['st-admin'] = 'st-admin/welcome'; 
+$route['st-admin/(.+)'] = "st-admin/$1";
+
 //Our custom routing solution. We want:
 //PageName/Handler/otherstuff
 //NOTE: We include permitted_uri_chars since so that . doesn't match the / in the URI.

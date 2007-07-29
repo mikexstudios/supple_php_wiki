@@ -87,7 +87,8 @@ function get_current_url($prefix='http://', $postfix='') {
 }
 
 function redirect_page($page, $handler='', $args='') {
-	redirect(construct_page_url($page, $handler, $args));
+	redirect ($page.'/'.$handler.'/'.$args);
+	//redirect(construct_page_url($page, $handler, $args));
 }
 
 $CI->template->add_function('page_url', 'construct_page_url');

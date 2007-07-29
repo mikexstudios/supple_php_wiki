@@ -1,11 +1,11 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 class Pages_model extends Model {
-	var $id;
-	var $pagename;
-	var $time;
-	var $author;
-	var $body;
+	var $id = '';
+	var $pagename = '';
+	var $time = '';
+	var $author = '';
+	var $body = '';
 	
 	var $page; //Contains all page information (array). Result from query.
 	var $revisions_data;

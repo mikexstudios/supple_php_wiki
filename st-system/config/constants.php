@@ -8,6 +8,7 @@ define('ST_USERS_TABLE', 'users');
 define('ST_ARCHIVES_TABLE', 'archives');
 define('ST_CONFIG_TABLE', 'config');
 define('ST_CACHE_TABLE', 'cache');
+define('ST_SESSIONS_TABLE', 'sessions');
 
 //FILE STRUCTURE
 define('EXTERNAL_DIR', 'st-external/'); //Always have trailing slash to keep in CI convention.
