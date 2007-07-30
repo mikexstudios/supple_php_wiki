@@ -1,6 +1,5 @@
 <IfModule mod_rewrite.c>
- RewriteEngine on
- RewriteCond %{REQUEST_FILENAME} -d
- RewriteRule ^(.*/[^\./]*[^/])$ $1/
- RewriteRule ^(.*)$ index.php?wiki=$1 [QSA,L]
+	RewriteEngine on
+	RewriteCond $1 !^(index\.php|images|robots\.txt)
+	RewriteRule ^(.*)$ index.php/$1 [L]
 </IfModule>

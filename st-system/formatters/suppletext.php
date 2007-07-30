@@ -9,6 +9,8 @@
  * 
  */
 
+$CI =& get_instance();
+
 /** 
  * Prefilter things 
  * (well, these things should be moved out of this creole class)
@@ -17,12 +19,12 @@
 //str_replace in this case is faster, but oh well, we sacrifice some.
 //Also, I've seen this done with (\r|\r\n), but this is slower since two
 //checks are done at each step.
-$Supple->SyntaxParser->addRule('to_unix_lineendings', '/\r\n?/', "\n", 10);
+$CI->syntaxparser->addRule('to_unix_lineendings', '/\r\n?/', "\n", 10);
 
 //Replace 4 consecutive spaces at the beginning of a line with tab character.
 //Since the text is all one long string, we find the start of lines by the \n
 //and then we count four consecutive spaces.
-$Supple->SyntaxParser->addRule('spaces_to_tab', '/\n[ ]{4}/', "\n\t", 20); 
+$CI->syntaxparser->addRule('spaces_to_tab', '/\n[ ]{4}/', "\n\t", 20); 
 
 /**
  * Trim
@@ -32,14 +34,14 @@ $Supple->SyntaxParser->addRule('spaces_to_tab', '/\n[ ]{4}/', "\n\t", 20);
  * (But below implementation could be a little slow)
  * NOTE: Trim conflicts with spaces_to_tab! 
  */ 
-$Supple->SyntaxParser->addRule('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30, true);
+$CI->syntaxparser->addRule('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30, true);
 function trim_spaces_callback(&$matches) {
 	return trim($matches[1]);
 } 
 
 //Insert a newline at the beginning and end of the text. This will help
 //in regex later since we can assume lines start and end with \n
-$Supple->SyntaxParser->addRule('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40);
+$CI->syntaxparser->addRule('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40);
 
 
 /**
@@ -47,9 +49,9 @@ $Supple->SyntaxParser->addRule('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40)
  * well, they are the Wikka/Wakka "actions", but we don't have a better 
  * name for them yet.
  */
-$Supple->SyntaxParser->addRule('snippets', '/<<<(.+)>>>/U', 'snippets_callback', 120, true); 
+$CI->syntaxparser->addRule('snippets', '/<<<(.+)>>>/U', 'snippets_callback', 120, true); 
 function snippets_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
 	$action = trim($matches[1]);
 
@@ -62,23 +64,23 @@ function snippets_callback(&$matches) {
 		list(, $action, $args) = $matches;
 		
 		//Call action, pass the args to it
-		return $Supple->SyntaxParser->doSnippet($action, $args);
+		return $CI->syntaxparser->doAction($action, $args);
 		
 	}
-	if (!preg_match('/^[a-zA-Z0-9]+$/', $action))
+	if (!preg_match('/^[a-zA-Z0-9_]+$/', $action))
 	{
-		return '<em class="error">Unknown action; the action name must not contain special characters.</em>';
+		return 'Unknown action; the action name must not contain special characters.';
 	}
 
-	return $Supple->SyntaxParser->hash($Supple->SyntaxParser->doSnippet($action));
+	return $CI->syntaxparser->doAction($action);
 }
 
 
 /**
  * Escaping HTML
  */
-$Supple->SyntaxParser->addRule('escape_html_1', '/</', '&lt;', 125);
-$Supple->SyntaxParser->addRule('escape_html_2', '/>/', '&gt;', 126);
+$CI->syntaxparser->addRule('escape_html_1', '/</', '&lt;', 125);
+$CI->syntaxparser->addRule('escape_html_2', '/>/', '&gt;', 126);
 
 
 /**
@@ -86,24 +88,24 @@ $Supple->SyntaxParser->addRule('escape_html_2', '/>/', '&gt;', 126);
  */ 
  
 //Remove the last <br />. Not totally sure why we need this right now.
-$Supple->SyntaxParser->addRule('remove_last_br', '/<br \/>$/', '', 2000);
+$CI->syntaxparser->addRule('remove_last_br', '/<br \/>$/', '', 2000);
 
 //Unhash everything. This is absolutely necessary to reverse all of the hiding done by other functions.
-$Supple->SyntaxParser->addRule('unhash_all', '/'.$Supple->SyntaxParser->getTokenPattern().'/', 'unhash_all_callback', 2010, true);
+$CI->syntaxparser->addRule('unhash_all', '/'.$CI->syntaxparser->getTokenPattern().'/', 'unhash_all_callback', 2010, true);
 function unhash_all_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
-	return $Supple->SyntaxParser->unhash($matches[1]);
+	return $CI->syntaxparser->unhash($matches[1]);
 }
 
 /**
  * Paragraph
  * (put <p> and </p>)
  */
-//$Supple->SyntaxParser->addRule('paragraph', '/(.+?)\n\n/s', '<p>\1</p>'."\n\n", 300);  
-//$Supple->SyntaxParser->addRule('paragraph', '/(.+)/s', 'wpautop', 300, true);  
-//$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', "<p>$1</p>\n\n", 2020); // make paragraphs, including one at the end
-$Supple->SyntaxParser->addRule('paragraph', '/\n?(.+?)(\n\s*\n|\z)/s', 'paragraph_callback', 2020, true);
+//$CI->syntaxparser->addRule('paragraph', '/(.+?)\n\n/s', '<p>\1</p>'."\n\n", 300);  
+//$CI->syntaxparser->addRule('paragraph', '/(.+)/s', 'wpautop', 300, true);  
+//$CI->syntaxparser->addRule('paragraph', '/\n?(.+?)(?:\n\s*\n|\z)/s', "<p>$1</p>\n\n", 2020); // make paragraphs, including one at the end
+$CI->syntaxparser->addRule('paragraph', '/\n?(.+?)(\n\s*\n|\z)/s', 'paragraph_callback', 2020, true);
 /**
  * @author Wordpress
  * $matches[2] contains the newlines 
@@ -128,9 +130,9 @@ function paragraph_callback(&$matches) {
  * Paragraph Newlines
  * Convert all \n in paragraphs to <br />. 
  */  
-$Supple->SyntaxParser->addRule('paragraph_newline', '/<p>(.*)<\/p>/Us', 'paragraph_newline_callback', 2030, true);
+$CI->syntaxparser->addRule('paragraph_newline', '/<p>(.*)<\/p>/Us', 'paragraph_newline_callback', 2030, true);
 function paragraph_newline_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
 	//Rehash certain elements in the paragraph so that newlines are not
 	//converted. Like <pre> tags
@@ -148,18 +150,18 @@ function paragraph_newline_callback(&$matches) {
 	$matches[1] = '<p>'.preg_replace('/\n/', '<br />'."\n", $matches[1]).'</p>';
 	
 	//Now we unhash everything
-	return $Supple->SyntaxParser->unhash_contents($matches[1]);
+	return $CI->syntaxparser->unhash_contents($matches[1]);
 } 
 function paragraph_newline_hash_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
-	return $Supple->SyntaxParser->hash($matches[1]);
+	return $CI->syntaxparser->hash($matches[1]);
 }
 
 //When non-paragraph items are separated by more than one newline, then we
 //assume that the user is intentionally inserting a newline:
 //See #10: http://dev.suppletext.org/ticket/10
-$Supple->SyntaxParser->addRule('intentional_newline', '/\n\n(\n+)\n/', 'intentional_newline_callback', 2050, true);
+$CI->syntaxparser->addRule('intentional_newline', '/\n\n(\n+)\n/', 'intentional_newline_callback', 2050, true);
 function intentional_newline_callback(&$matches) {
 	return "\n".str_replace("\n", "<br />\n", $matches[1])."\n";
 }
@@ -168,11 +170,11 @@ function intentional_newline_callback(&$matches) {
  * XSS Attacks Filtering. Okay, we'll disable it here.
  */
 /*
-$Supple->SyntaxParser->addRule('xss_filter', '/(.+)/', 'xss_filter_callback', 2100, true);
+$CI->syntaxparser->addRule('xss_filter', '/(.+)/', 'xss_filter_callback', 2100, true);
 function xss_filter_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
-	return $Supple->Input->xss_clean($matches[1]);
+	return $CI->input->xss_clean($matches[1]);
 } 
 */
 

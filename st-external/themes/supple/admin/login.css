@@ -1,0 +1,105 @@
+/*-------------------------------------------------
+PAGE BODY
+-------------------------------------------------*/
+
+body {
+	margin: 0 auto;
+	padding: 0;
+	font-family: "Lucida Grande", verdana, arial, helvetica, sans-serif;
+		font-size: small; line-height: 1.3em;
+	color: #000;
+  background: #fff;
+  width: 360px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Make sure the table cells show the right font */
+td { font-family: "Lucida Grande", verdana, arial, helvetica, sans-serif; }
+
+
+/*-------------------------------------------------
+GLOBALS & GENERAL CASES
+-------------------------------------------------*/
+
+a {text-decoration: underline; padding: 1px; }
+a:link { color: #006600; }
+a:visited { color: #006600; }
+a:hover { color: #ccc; background-color: #fff; text-decoration: none; }
+a img { border: 0; }
+
+ins {
+	background-color: #cfc;
+	text-decoration: none;
+}
+
+del {
+	color: #999;
+}
+
+code, pre	{
+	font-family: "Bitstream Vera Sans Mono", monaco, "Courier New", courier, monospace;
+	background: inherit;
+	color: #333;
+	font-size: 80%
+}
+
+	/*  Work around IE/Win code size bug - courtesy Jesper, waffle.wootest.net  */
+
+* html code	{
+	font-size : 105%; 
+}
+
+.smaller {
+	font-size: smaller;
+}
+
+.pagenote {
+	color: #666;
+}
+
+.error {
+	font-size: 70%;
+	margin: 0;
+	margin-bottom: 5px;
+	padding: 0;
+ 	background: #FBE6F2;
+ 	border: 1px solid #D893A1;
+ 	color: #333;
+	padding: 2px;
+}
+
+/*-------------------------------------------------
+LOGIN PAGE
+-------------------------------------------------*/
+#login {
+	margin-top: 50px;
+	border: 1px solid #ccc;
+	padding: 5px 30px 5px 30px;
+	
+}
+
+#login h1 {
+	padding: 0;
+	margin-top: 7px;
+	line-height: 1.2em;
+	text-align: center;
+}
+
+#login .input {
+	font-size: 1.8em;
+	margin-top: 3px;
+	width: 97%;
+}
+
+#login .submit {
+	text-align: right;
+}
+
+#login .submit .submit_button {
+	margin-top: 10px;
+	background: #EEEEEE;
+	border: 1px solid #CCCCCC;
+	width: 40%;
+	height: 30px;
+}

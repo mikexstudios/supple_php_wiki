@@ -1,90 +1,133 @@
 <?php
-/**
- * suppleText main script
- * 
- * This file is called each time a request is made from the browser. Its
- * purpose is to initialize the script, call the supple core, and load
- * themes.  
- *  
- * @package suppleText
- * @version $Id: $
- * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License
- * 
- * @author Hendrik Mans <hendrik@mans.de>
- * @author Jason Tourtelotte <wikka-admin@jsnx.com>
- * @author {@link http://wikkawiki.org/JavaWoman Marjolein Katsma}
- * @author {@link http://wikkawiki.org/NilsLindenberg Nils Lindenberg}
- * @author {@link http://wikkawiki.org/DotMG Mahefa Randimbisoa}
- * @author {@link http://wikkawiki.org/DarTar Dario Taraborelli}
- * @author Michael Huynh <mike@mikexstudios.com> 
- * 
- * @copyright Copyright 2002-2003, Hendrik Mans <hendrik@mans.de>
- * @copyright Copyright 2004-2005, Jason Tourtelotte <wikka-admin@jsnx.com>
- * @copyright Copyright 2006, {@link http://wikkawiki.org/CreditsPage Wikka Development Team}
- * @copyright Copyright 2007, suppleText Development Team
- * 
- */
 
+/*
+|---------------------------------------------------------------
+| PHP ERROR REPORTING LEVEL
+|---------------------------------------------------------------
+|
+| By default CI runs with error reporting set to ALL.  For security
+| reasons you are encouraged to change this when your site goes live.
+| For more info visit:  http://www.php.net/error_reporting
+|
+*/
+	error_reporting(E_ALL);
 
-//define('ABSPATH', dirname(__FILE__));  //No trailing slash
-define('ABSPATH', dirname($_SERVER['SCRIPT_FILENAME'])); //Only SCRIPT_FILENAME seems to take into account symlink paths
+/*
+|---------------------------------------------------------------
+| APPLICATION FOLDER NAME
+|---------------------------------------------------------------
+|
+| If you want this front controller to use a different "application"
+| folder then the default one you can set its name here. The folder 
+| can also be renamed or relocated anywhere on your server.
+| For more info please see the user guide:
+| http://www.codeigniter.com/user_guide/general/managing_apps.html
+|
+|
+| NO TRAILING SLASH!
+|
+*/
+	$application_folder = "st-system";
 
-//Initialize needed script elements
-require(ABSPATH.'/st-system/initialize.php');
+/*
+|---------------------------------------------------------------
+| SYSTEM FOLDER NAME
+|---------------------------------------------------------------
+|
+| This variable must contain the name of your "system" folder.
+| Include the path if the folder is not in the same  directory
+| as this file.
+|
+| NO TRAILING SLASH!
+|
+*/
+	$system_folder = $application_folder.'/framework';
 
-/**
- * Create Supple object
- */
-//print_r($suppleConfig);
-$Supple = new Supple($Stdb);
+/*
+|===============================================================
+| END OF USER CONFIGURABLE SETTINGS
+|===============================================================
+*/
 
-//Get input. Since Supple calls Input, we know
-//that any input variables are already sanitized.
-$wiki = $Supple->Input->get('wiki', true); //We want XSS clean
-
-/**
- * Remove leading slash.
- */
-$wiki = preg_replace('/^\//', '', $wiki);
-
-/**
- * Extract pagename and handler from URL. This will be removed.
- */
- 
-$parsed_url = $Supple->parseUrlFragment($wiki); 
-$page = $parsed_url['page'];
-$handler = $parsed_url['handler'];
-
-//Theme helpers
-require_once ABSPATH.'/st-system/includes/theme_helpers.php';
-
-/** 
- * Run the engine.
- */
-if (empty($handler))
+/*
+|---------------------------------------------------------------
+| SET THE SERVER PATH
+|---------------------------------------------------------------
+|
+| Let's attempt to determine the full-server path to the "system"
+| folder in order to reduce the possibility of path problems.
+| Note: We only attempt this if the user hasn't specified a 
+| full server path.
+|
+*/
+//if (strpos($system_folder, '/') === FALSE)
+if (strpos($system_folder, '/') != 0) //We assume that the full path is specified if the sys-folder starts with a /. ie. /home/username
 {
-	$handler='show'; //Default to the show handler
+	if (function_exists('realpath') AND @realpath(dirname(__FILE__)) !== FALSE)
+	{
+		$system_folder = realpath(dirname(__FILE__)).'/'.$system_folder;
+	}
+}
+//else
+//{
+	// Swap directory separators to Unix style for consistency
+	$system_folder = str_replace("\\", "/", $system_folder); 
+//}
+
+/*
+|---------------------------------------------------------------
+| DEFINE APPLICATION CONSTANTS
+|---------------------------------------------------------------
+|
+| EXT		- The file extension.  Typically ".php"
+| FCPATH	- The full server path to THIS file
+| SELF		- The name of THIS file (typically "index.php)
+| BASEPATH	- The full server path to the "system" folder
+| APPPATH	- The full server path to the "application" folder
+|
+*/
+define('EXT', '.'.pathinfo(__FILE__, PATHINFO_EXTENSION));
+define('FCPATH', __FILE__);
+define('SELF', pathinfo(__FILE__, PATHINFO_BASENAME));
+define('BASEPATH', $system_folder.'/'); //NOTE: This is not the *real* base path of our script. Use ABSPATH instead!
+define('ABSPATH', dirname($_SERVER['SCRIPT_FILENAME']).'/'); //A weird hack for URL Rewriting...
+
+if (is_dir(ABSPATH.$application_folder)) //Had to add ABSPATH here.
+{
+	define('APPPATH', ABSPATH.$application_folder.'/');
+}
+else
+{
+	if ($application_folder == '')
+	{
+		$application_folder = 'application';
+	}
+
+	define('APPPATH', BASEPATH.$application_folder.'/');
 }
 
-if(empty($page))
+/*
+|---------------------------------------------------------------
+| DEFINE E_STRICT
+|---------------------------------------------------------------
+|
+| Some older versions of PHP don't support the E_STRICT constant
+| so we need to explicitly define it otherwise the Exception class 
+| will generate errors.
+|
+*/
+if ( ! defined('E_STRICT'))
 {
-	$page = $Supple->Settings->getSetting('root_page'); //Default to the what is set in the database config for default page
+	define('E_STRICT', 2048);
 }
 
-//Perform some verification on $page and $handler:
-//200 characters length is reasonable, right? We allow alpha-numerics, dashes, 
-//underscores and colons (and other special chars).
-if(!$Supple->Validation->max_length($page, 200) || !$Supple->Validation->alpha_special($page)) 
-{
-	die('The specified page does not exist.'); //TODO: Make error messages pretty.
-}
-//70 characters length is reasonable, right? Handlers must be alphanumeric.
-if(!$Supple->Validation->max_length($handler, 70) || !$Supple->Validation->alpha_numeric($handler)) 
-{
-	die('The specified handler does not exist.');
-}
-
-$Supple->setPagename($page);
-$Supple->callHandler($handler);
-
+/*
+|---------------------------------------------------------------
+| LOAD THE FRONT CONTROLLER
+|---------------------------------------------------------------
+|
+| And away we go...
+|
+*/
+require_once BASEPATH.'codeigniter/CodeIgniter'.EXT;
 ?>

@@ -9,6 +9,8 @@
  * 
  */
 
+$CI =& get_instance();
+
 //We add rules to the SyntaxParser in a certain order
 
 /**
@@ -21,9 +23,9 @@
  *  characters including newlines.)  
  */
 
-$Supple->SyntaxParser->addRule('preformatted', '/\n{{{\n(.*)\n}}}\n/Us', 'preformatted_callback', 100, true);
+$CI->syntaxparser->addRule('preformatted', '/\n{{{\n(.*)\n}}}\n/Us', 'preformatted_callback', 100, true);
 function preformatted_callback(&$matches) {
-	global $Supple;
+	global $CI;
 
 	//Currently taken from Preformatted.php from Creole of Pear::Text_wiki
 	//@author Tomaiuolo Michele <tomamic@yahoo.it>
@@ -44,14 +46,14 @@ function preformatted_callback(&$matches) {
 	
 	//There is more, but I didn't include it.
 	
-	return "\n".$Supple->SyntaxParser->hash("<pre>\n".$matches[1]."\n</pre>")."\n";
+	return "\n".$CI->syntaxparser->hash("<pre>\n".$matches[1]."\n</pre>")."\n";
 }  
 
 //Escape character here. We parse the escape character only if it is at the start
 //of some word (so we have a whitespace char in front).
-$Supple->SyntaxParser->addRule('escape', '/(\s)~(.)/', 'escape_callback', 105, true);
+$CI->syntaxparser->addRule('escape', '/(\s)~(.)/', 'escape_callback', 105, true);
 function escape_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
 	//Protect against some XSS
 	$matches[1] = htmlentities($matches[1]);
@@ -59,20 +61,20 @@ function escape_callback(&$matches) {
 	//If \s is a space, we remove it
 	if(strcmp($matches[1], ' ')==0)
 	{
-		return $Supple->SyntaxParser->hash($matches[2]);
+		return $CI->syntaxparser->hash($matches[2]);
 	}
 	
-	return $matches[1].$Supple->SyntaxParser->hash($matches[2]);
+	return $matches[1].$CI->syntaxparser->hash($matches[2]);
 } 
 
 //Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
 //NOTE: This should be checked VERY carefully against the Creole specification.
 //      I have a feeling that this is currently wrong.
 //Creole 1.0 says that this doesn't HAVE to be monospace.
-$Supple->SyntaxParser->addRule('tt', '/{{{({*?.*?}*)}}}/', 'tt_callback', 110, true); //Removed the U modifier. Seems to still work.
+$CI->syntaxparser->addRule('tt', '/{{{({*?.*?}*)}}}/', 'tt_callback', 110, true); //Removed the U modifier. Seems to still work.
 function tt_callback(&$matches) {
-	global $Supple;
-	return $Supple->SyntaxParser->hash('<tt>'.$matches[1].'</tt>');
+	global $CI;
+	return $CI->syntaxparser->hash('<tt>'.$matches[1].'</tt>');
 }
 
 //Won't implement Raw, Footnote
@@ -81,10 +83,10 @@ function tt_callback(&$matches) {
  * Image (inline)
  * {{myimage.png|text}} -> <img src="myimage.png" alt="text"> 
  */ 
-//$Supple->SyntaxParser->addRule('inlineimage', '/{{(.+)(?:\|(.*))?}}/U', '<img src="$1" alt="$2" />', 180); 
-$Supple->SyntaxParser->addRule('inlineimage', '/\{\{(.+?)\}\}/', 'inlineimage_callback', 130, true);
+//$CI->syntaxparser->addRule('inlineimage', '/{{(.+)(?:\|(.*))?}}/U', '<img src="$1" alt="$2" />', 180); 
+$CI->syntaxparser->addRule('inlineimage', '/\{\{(.+?)\}\}/', 'inlineimage_callback', 130, true);
 function inlineimage_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
 	//NOTE: Maybe we should add check for image format so that people don't
 	//include scripts or other malicious stuff.
@@ -93,18 +95,18 @@ function inlineimage_callback(&$matches) {
 	//'just external url case' since \S+ also matches the | character.
 	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
-		//$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]);
+		//$url_matches[2] = $CI->syntaxparser->hash($url_matches[2]);
 		//return '<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />'));
 	}
 	
 	//Match just external url.
 	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
-		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]);
 		//return '<img src="'.$url_matches[1].'" />';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<img src="'.$url_matches[1].'" />'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<img src="'.$url_matches[1].'" />'));
 		
 	}
 	
@@ -117,9 +119,9 @@ function inlineimage_callback(&$matches) {
  * Links
  *  
  */
-$Supple->SyntaxParser->addRule('links', '/\[\[(.+?)\]\]/', 'links_callback', 140, true);
+$CI->syntaxparser->addRule('links', '/\[\[(.+?)\]\]/', 'links_callback', 140, true);
 function links_callback(&$matches) {
-	global $Supple;
+	global $CI;
 
 	//I'm not sure if we can do a if(  = preg_replace) so we will just do a
 	//preg_match first.
@@ -130,49 +132,49 @@ function links_callback(&$matches) {
 	//'just external url case' since \S+ also matches the | character.
 	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
-		//$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]); 
+		//$url_matches[2] = $CI->syntaxparser->hash($url_matches[2]);
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
 	}
 	
 	//Match just external url.
 	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
-		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]);
+		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]);
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
 	}
 	
 	//Match mailto: type links. NOTE: This could be dangerous if we don't check well.
 	//javascript injection possible! This is crude!
 	if(preg_match('/([a-z]+:\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
-		//$url_matches[2] = $Supple->SyntaxParser->hash($url_matches[2]);
+		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]); 
+		//$url_matches[2] = $CI->syntaxparser->hash($url_matches[2]);
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>'));
 	}
 		if(preg_match('/([a-z]+:\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
-		//$url_matches[1] = $Supple->SyntaxParser->hash($url_matches[1]); 
+		//$url_matches[1] = $CI->syntaxparser->hash($url_matches[1]); 
 		//return '<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
 	}
 	
 	//Match WikiLinks (The regex for these should be better...and safer)
 	if(preg_match('/(\S+)\|(.+)/', $matches[1], $link_matches))
 	{
-		//$link_matches[2] = $Supple->SyntaxParser->hash($link_matches[2]);
-		//return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[2].'</a>';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>'));
+		//$link_matches[2] = $CI->syntaxparser->hash($link_matches[2]);
+		//return '<a href="'.$CI->syntaxparser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[2].'</a>';
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>'));
 	}	
 	
 	if(preg_match('/(\S+)/', $matches[1], $link_matches))
 	{
-		//$link_matches[1] = $Supple->SyntaxParser->hash($link_matches[1]); //Crude hack since we nest hashes. Should fix this up later.
-		//return '<a href="'.$Supple->SyntaxParser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[1].'</a>';
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[1].'</a>'));
+		//$link_matches[1] = $CI->syntaxparser->hash($link_matches[1]); //Crude hack since we nest hashes. Should fix this up later.
+		//return '<a href="'.$CI->syntaxparser->hash(construct_page_url($link_matches[1])).'">'.$link_matches[1].'</a>';
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[1].'</a>'));
 	}	
 	
 	//For everything else that doesn't seem to match.
@@ -198,13 +200,13 @@ $wikiword_regex =
             "[$upper]" .       // 1 upper
             "[$either]*" .     // 0+ or more alpha or digit
             ")/";               // END WikiPage pattern (/1)
-$Supple->SyntaxParser->addRule('wikiwordlink', $wikiword_regex, 'wikiwordlink_callback', 150, true);
+$CI->syntaxparser->addRule('wikiwordlink', $wikiword_regex, 'wikiwordlink_callback', 150, true);
 function wikiwordlink_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
 	//$matches[1] includes the whitespace characters.
-	//return $matches[1].'<a href="'.$Supple->SyntaxParser->hash(construct_page_url($matches[2])).'">'.$matches[2].'</a>';
-	return $matches[1].$Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.construct_page_url($matches[2]).'">'.$matches[2].'</a>'));
+	//return $matches[1].'<a href="'.$CI->syntaxparser->hash(construct_page_url($matches[2])).'">'.$matches[2].'</a>';
+	return $matches[1].$CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($matches[2]).'">'.$matches[2].'</a>'));
 }
 
 /**
@@ -220,15 +222,15 @@ function wikiwordlink_callback(&$matches) {
  * we have ~ and the hashed pattern. Since the hash pattern can change, we get
  * the regex from the SyntaxParser class. It's really inelegant.     
  */
-$Supple->SyntaxParser->addRule('raw_url', '/(?:'.$Supple->SyntaxParser->getTokenPattern().')?([a-z]+:\/\/)(\S+)/', 'raw_url_callback', 185, true); //The lesser complex version is: '([a-z]+:\/\/)(\S+)/'
+$CI->syntaxparser->addRule('raw_url', '/(?:'.$CI->syntaxparser->getTokenPattern().')?([a-z]+:\/\/)(\S+)/', 'raw_url_callback', 185, true); //The lesser complex version is: '([a-z]+:\/\/)(\S+)/'
 function raw_url_callback(&$matches) {
-	global $Supple;
+	global $CI;
 	
 	//Check for escaped URL. If found, just return unlinked URL.
 	if(!empty($matches[1])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
 	{
-		$matches[1] = $Supple->SyntaxParser->unhash($matches[1]);
-		return $Supple->Input->xss_clean($matches[1].$matches[2].$matches[3]);
+		$matches[1] = $CI->syntaxparser->unhash($matches[1]);
+		return $CI->input->xss_clean($matches[1].$matches[2].$matches[3]);
 	}
 	
 	//We won't consider single punctuation characters at the end of the URL
@@ -239,21 +241,21 @@ function raw_url_callback(&$matches) {
 		//For cases like: http://www.another.rawlink.org where .org is in the second (\S+)
 		if(!empty($raw_url_matches[3])) 
 		{
-			//$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
+			//$url = $CI->syntaxparser->hash($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
 			//return '<a href="'.$url.'">'.$url.'</a>';
 			$url = $matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3];
-			return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
+			return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
 		}
-		//$url = $Supple->SyntaxParser->hash($matches[2].$raw_url_matches[1]);
+		//$url = $CI->syntaxparser->hash($matches[2].$raw_url_matches[1]);
 		//return '<a href="'.$url.'">'.$url.'</a>'.$raw_url_matches[2]; //We keep the punctuation on the end.
 		$url = $matches[2].$raw_url_matches[1];
-		return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url.'">'.$url.'</a>')).$raw_url_matches[2]; //We keep the punctuation on the end.
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url.'">'.$url.'</a>')).$raw_url_matches[2]; //We keep the punctuation on the end.
 	}
 	
-	//$url = $Supple->SyntaxParser->hash($matches[2].$matches[3]);
+	//$url = $CI->syntaxparser->hash($matches[2].$matches[3]);
 	//return '<a href="'.$url.'">'.$url.'</a>';
 	$url = $matches[2].$matches[3];
-	return $Supple->SyntaxParser->hash($Supple->Input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
+	return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url.'">'.$url.'</a>'));
 }
 
 /**
@@ -267,7 +269,7 @@ function raw_url_callback(&$matches) {
  * @author Michael Huynh (http://www.mikexstudios.com) 
  */
 
-$Supple->SyntaxParser->addRule('headings', '/^(={1,6}) *(.*?) *=*$/m', 'headings_callback', 190, true);
+$CI->syntaxparser->addRule('headings', '/^(={1,6}) *(.*?) *=*$/m', 'headings_callback', 190, true);
 function headings_callback(&$matches) {
 	$level = strlen($matches[1]);
   $text = trim($matches[2]);
@@ -279,7 +281,7 @@ function headings_callback(&$matches) {
  * Horizontal Rule
  * ---- -> <hr />
  */
-$Supple->SyntaxParser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />', 200);
+$CI->syntaxparser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />', 200);
 
 /**
  * Lists
@@ -287,8 +289,8 @@ $Supple->SyntaxParser->addRule('horizontalrule', '/^[-]{4,}$/m', '<hr />', 200);
  */
 //Watch out for the \n at the beginning and the \n at the end of the regex. The list could be at the
 //beginning or end of the long string so we should insert \n at the beginning and end of the string.
-$Supple->SyntaxParser->addRule('unordered_lists', '/\n(?:\*.+?\n)+/s', 'unordered_lists_callback', 235, true);
-$Supple->SyntaxParser->addRule('ordered_lists', '/\n(?:\#.+?\n)+/s', 'ordered_lists_callback', 236, true);
+$CI->syntaxparser->addRule('unordered_lists', '/\n(?:\*.+?\n)+/s', 'unordered_lists_callback', 235, true);
+$CI->syntaxparser->addRule('ordered_lists', '/\n(?:\#.+?\n)+/s', 'ordered_lists_callback', 236, true);
 function unordered_lists_callback(&$matches) {
 
 	return lists($matches[0], 'unordered');	
@@ -301,7 +303,7 @@ function ordered_lists_callback(&$matches) {
 
 } 
 function lists($in_text, $type) {
-	global $Supple;
+	global $CI;
 	
 	$inner_list = ''; //Make empty
 	
@@ -367,14 +369,14 @@ function lists($in_text, $type) {
 }
 
 //Ugly hack to connect the lists (inner lists). Later on, we should indent lists inside of lists.
-$Supple->SyntaxParser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
-$Supple->SyntaxParser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n(<ol>.+?<\/ol>)\n/s', "\n".'$1', 238);
+$CI->syntaxparser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
+$CI->syntaxparser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n(<ol>.+?<\/ol>)\n/s', "\n".'$1', 238);
 
 
 /**
  * Tables
  */
-$Supple->SyntaxParser->addRule('tables', '/\n(?:\|.+?\n)+/s', 'tables_callback', 250, true);
+$CI->syntaxparser->addRule('tables', '/\n(?:\|.+?\n)+/s', 'tables_callback', 250, true);
 function tables_callback(&$matches) {
 	$table_html = "\n".'<table class="wiki_syntax_table">'."\n";
 	
@@ -417,9 +419,9 @@ function tables_callback(&$matches) {
  *       over lines and paragraphs after we do the normal inline stuff.  
  * Italics *MUST* be loaded before Bold according to Creole specifications. 
  */
-$Supple->SyntaxParser->addRule('emphasis_inline', '/\/\/(.+?)\/\//', '<em>$1</em>', 339); //Maybe we need to make this ungreedy
-$Supple->SyntaxParser->addRule('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>', 340);
-$Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', '<em>$1</em>'."\n\n", 345);
+$CI->syntaxparser->addRule('emphasis_inline', '/\/\/(.+?)\/\//', '<em>$1</em>', 339); //Maybe we need to make this ungreedy
+$CI->syntaxparser->addRule('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>', 340);
+$CI->syntaxparser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', '<em>$1</em>'."\n\n", 345);
 
 
 /**
@@ -427,9 +429,9 @@ $Supple->SyntaxParser->addRule('emphasis_cross_paragraph', '/\/\/(.+)\n{2,}?/', 
  * ** ** -> <strong> </strong>
  * Note: The ordering here is very important. See reasoning for Emphasis. 
  */
-$Supple->SyntaxParser->addRule('strong', '/\*\*(.*?)\*\*/', '<strong>$1</strong>', 350);
-$Supple->SyntaxParser->addRule('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>', 351);
-$Supple->SyntaxParser->addRule('strong_cross_paragraph', '/\*\*(.+)\n{2,}?/', '<strong>$1</strong>'."\n\n", 355);
+$CI->syntaxparser->addRule('strong', '/\*\*(.*?)\*\*/', '<strong>$1</strong>', 350);
+$CI->syntaxparser->addRule('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>', 351);
+$CI->syntaxparser->addRule('strong_cross_paragraph', '/\*\*(.+)\n{2,}?/', '<strong>$1</strong>'."\n\n", 355);
 
 
 /**
@@ -441,6 +443,6 @@ $Supple->SyntaxParser->addRule('strong_cross_paragraph', '/\*\*(.+)\n{2,}?/', '<
  *  I'm not sure why we need '/\\\\\\\/' to match correctly when the correct
  *  way, I thought, was '/\\\\/'. Is this a bug?    
  */
-$Supple->SyntaxParser->addRule('linebreak', '/\\\\\\\/', "<br />\n", 400);   
+$CI->syntaxparser->addRule('linebreak', '/\\\\\\\/', "<br />\n", 400);   
 
 ?>
