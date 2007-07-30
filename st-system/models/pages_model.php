@@ -7,7 +7,7 @@ class Pages_model extends Model {
 	var $author = '';
 	var $body = '';
 	
-	var $page; //Contains all page information (array). Result from query.
+	var $page = array(); //Contains all page information (array). Result from query.
 	var $revisions_data;
 
 	
@@ -69,17 +69,17 @@ class Pages_model extends Model {
 			$this->page = $query->row_array();
 		}
 		
+		$query->free_result(); //Cut down on memory consumption
+		
 		//If the page id is still empty, then the page did not exist!
 		//We prompt user to create if no id is set. Otherwise, we error.
 		if(empty($this->page))
 		{
-			//Temporary hack
-			$this->page['body']='';
-			$this->page['time']='';
+			$this->page['body'] = '';
+			$this->page['time'] = '';
+			return false;
 		}	
-															
-		
-		$query->free_result(); //Cut down on memory consumption
+
 	}
 	
 	function copy_to_archives() {

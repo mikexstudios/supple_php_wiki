@@ -15,7 +15,14 @@ class Revisions extends Show {
 	function display($pagename) {
 		$this->_set_page_info($pagename);
 		
-		$this->load->view('revisions');
+		if(does_page_exist())
+		{
+			$this->load->view('revisions');
+		}
+		else
+		{
+			redirect($pagename);
+		}
 	}
 	
 

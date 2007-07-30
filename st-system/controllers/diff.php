@@ -45,10 +45,22 @@ class Diff extends Show {
 		$this->pages_model_diff->loadPage();
 		$this->data['a'] = $this->pages_model_diff->page;
 		
+		//Check for existance of this revision
+		if(empty($this->data['a']['time']))
+		{
+			show_error('The specified page id is invalid: '.$this->pid['a']);
+		}
+		
 		//Get data for b:
 		$this->pages_model_diff->id = $this->pid['b'];
 		$this->pages_model_diff->loadPage();
 		$this->data['b'] = $this->pages_model_diff->page;
+		
+		//Check for existance of this revision
+		if(empty($this->data['b']['time']))
+		{
+			show_error('The specified page id is invalid: '.$this->pid['b']);
+		}
 		
 		$this->compute_differences();
 		

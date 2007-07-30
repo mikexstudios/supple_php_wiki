@@ -144,6 +144,20 @@ function format_text($in_text) {
 	return $CI->syntaxparser->getText();
 }
 
+$CI->template->add_function('page_exists', 'does_page_exist');
+/**
+ * Assumes that this will be called from template so that page
+ * information has already been set
+ */  
+function does_page_exist() {
+	$temp_content = get('page_content');
+	if(!empty($temp_content))
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 $CI->template->add_function('execution_time', 'get_execution_time');
 function get_execution_time() {
