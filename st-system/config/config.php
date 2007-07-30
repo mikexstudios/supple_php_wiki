@@ -216,7 +216,7 @@ $config['cache_path'] = '';
 | enabled you MUST set an encryption key.  See the user guide for info.
 |
 */
-$config['encryption_key'] = "";
+$config['encryption_key'] = "suppleText"; //We shouldn't depend on this though.
 
 /*
 |--------------------------------------------------------------------------
@@ -229,11 +229,11 @@ $config['encryption_key'] = "";
 |  by default sessions last 7200 seconds (two hours).  Set to zero for no expiration.
 |
 */
-$config['sess_cookie_name']		= 'st_session';
-$config['sess_expiration']		= 7200;
-$config['sess_encrypt_cookie']	= FALSE;
-$config['sess_use_database']	= FALSE;
-$config['sess_table_name']		= 'st_sessions';
+$config['sess_cookie_name']		= 'session';
+$config['sess_expiration']		= 24*60*60*365; //Set session cookie to expire in a year. Hopefully, this won't retain DB records.
+$config['sess_encrypt_cookie']	= TRUE;
+$config['sess_use_database']	= TRUE;
+$config['sess_table_name']		= 'sessions';
 $config['sess_match_ip']		= FALSE;
 $config['sess_match_useragent']	= TRUE;
 

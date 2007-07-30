@@ -2,12 +2,16 @@
 
 $CI =& get_instance();
 
-//Set pages to output unicode
-$CI->output->set_header("Content-Type: text/html; charset=UTF-8");
-
 //For making database output unicode
 $CI->load->database(); //Helpers are called before libraries
 $CI->db->query("SET NAMES 'utf8'");  //We make SQL output unicode
+
+//Set sessions table and cookie with correct prefix
+//$CI->config->set_item('sess_cookie_name', $CI->db->dbprefix.$CI->config->item('sess_cookie_name'));
+//$CI->config->set_item('sess_table_name', $CI->db->dbprefix.$CI->config->item('sess_table_name'));
+
+//Set pages to output unicode
+$CI->output->set_header("Content-Type: text/html; charset=UTF-8");
 
 //For changing the views path. Good thing this class var wasn't
 //*really* made private :). But this has a potential to break

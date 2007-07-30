@@ -40,14 +40,24 @@ class Edit extends Show {
 		else
 		{
 			$this->load->helper('date');
-		
+			
+			//Set author
+			if($this->authorization->is_logged_in())
+			{
+				$author = $this->session->userdata('username');
+			}
+			else
+			{
+				$author = $this->input->ip_address();
+			}
+			
 			//The form is successful! This is where we make changes.
 			$this->pages_model->copy_to_archives();
 			$this->pages_model->delete();
 			//Now create new record
 			$this->pages_model->pagename = $pagename;
 			$this->pages_model->time = now(); //now() uses the date helper
-			$this->pages_model->author = 'Anonymous'; //For now
+			$this->pages_model->author = $author; //For now
 			$this->pages_model->note = $this->validation->note;
 			$this->pages_model->body = $this->validation->body;
 			$this->pages_model->insert();
