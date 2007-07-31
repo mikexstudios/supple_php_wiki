@@ -53,5 +53,18 @@ $db['suppletext']['db_debug'] = TRUE;
 $db['suppletext']['cache_on'] = FALSE;
 $db['suppletext']['cachedir'] = "";
 
+//MU Specific: Specifies the site-wide database (used for sessions, etc)
+$db['st_site']['hostname'] = "localhost";
+$db['st_site']['username'] = "test";
+$db['st_site']['password'] = "test";
+$db['st_site']['database'] = "suppletextcom_site";
+$db['st_site']['dbdriver'] = "mysql";
+$db['st_site']['dbprefix'] = "";
+$db['st_site']['active_r'] = TRUE;
+$db['st_site']['pconnect'] = FALSE; //We can only have one pconnection at any time!
+$db['st_site']['db_debug'] = TRUE;
+$db['st_site']['cache_on'] = FALSE;
+$db['st_site']['cachedir'] = "";
+
 
 ?>

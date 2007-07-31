@@ -1,7 +1,7 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 // ** Site URL ** //
-$config['base_url']	= "http://local.suppletext.org/suppleText_CI/"; //With trailing slash
+$config['base_url']	= "http://local.suppletext.org/suppleText_MU/"; //With trailing slash
 
 // ** MySQL settings ** //
 $db['suppletext']['hostname'] = "localhost"; // 99% chance you won't need to change this value
