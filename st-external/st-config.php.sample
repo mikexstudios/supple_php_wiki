@@ -1,18 +1,23 @@
-<?php
+<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
+
 // ** Site URL ** //
-define('SITE_URL', 'http://yoursite.com'); //No trailing slash
+$config['base_url']	= "http://yoursite.com/"; //With trailing slash
 
 // ** MySQL settings ** //
-define('DB_NAME', 'putyourdbnamehere');    // The name of the database
-define('DB_USER', 'usernamehere');     // Your MySQL username
-define('DB_PASSWORD', 'yourpasswordhere'); // ...and password
-define('DB_HOST', 'localhost');    // 99% chance you won't need to change this value
-define('DB_CHARSET', 'utf8');
-define('DB_COLLATE', '');
-
+$db['suppletext']['hostname'] = "localhost"; // 99% chance you won't need to change this value
+$db['suppletext']['username'] = "usernamehere"; // Your MySQL username
+$db['suppletext']['password'] = "yourpasswordhere"; // ...and password
+$db['suppletext']['database'] = "putyourdbnamehere"; // The name of the database
 // You can have multiple installations in one database if you give each a unique prefix
-$table_prefix  = 'st_';   // Only numbers, letters, and underscores please!
+$db['suppletext']['dbprefix'] = "st_"; // Only numbers, letters, and underscores please!
 
-/* That's all, stop editing! Happy writing. */
+// ** URI Settings ** //
+$config['index_page'] = ""; //If using URL Rewriting, set to empty. Otherwise, set to 'index.php'
+
+// ** Wiki Settings ** //
+$config['default_page'] = 'HomePage'; //Default wiki page.
+
+// ** Other Settings ** //
+$config['encryption_salt'] = 'st_'; // 99% chance you won't need to change this value
 
 ?>
