@@ -45,12 +45,8 @@ $db['default']['db_debug'] = TRUE;
 $db['default']['cache_on'] = FALSE;
 $db['default']['cachedir'] = "";
 
-$db['suppletext']['hostname'] = "localhost";
-$db['suppletext']['username'] = "test";
-$db['suppletext']['password'] = "test";
-$db['suppletext']['database'] = "suppletext_CI";
+require ABSPATH.'st-external/st-config.php'; //Offload the active DB into a separate config file.
 $db['suppletext']['dbdriver'] = "mysql";
-$db['suppletext']['dbprefix'] = "wikka_";
 $db['suppletext']['active_r'] = TRUE;
 $db['suppletext']['pconnect'] = TRUE;
 $db['suppletext']['db_debug'] = TRUE;

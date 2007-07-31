@@ -1,29 +1,9 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-/*
-|--------------------------------------------------------------------------
-| Base Site URL
-|--------------------------------------------------------------------------
-|
-| URL to your CodeIgniter root. Typically this will be your base URL,
-| WITH a trailing slash:
-|
-|	http://www.your-site.com/
-|
-*/
-$config['base_url']	= "http://local.suppletext.org/suppleText_CI/";
-
-/*
-|--------------------------------------------------------------------------
-| Index File
-|--------------------------------------------------------------------------
-|
-| Typically this will be your index.php file, unless you've renamed it to
-| something else. If you are using mod_rewrite to remove the page set this
-| variable so that it is blank.
-|
-*/
-$config['index_page'] = "";
+/**
+ * Base site URL and Index file config offloaded to external config file
+ */ 
+require ABSPATH.'st-external/st-config.php';
 
 /*
 |--------------------------------------------------------------------------
