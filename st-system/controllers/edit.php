@@ -18,13 +18,15 @@ class Edit extends Show {
 		
 		//Set validation rules
 		//Note we should also validate that the name does not already exist!
-		$rules['body'] = '';
+		$rules['body'] = ''; //We don't require this since the page can be empty.
 		$rules['note'] = 'trim|max_length[500]|xss_clean'; //We can't do alpha_dash since we allow spaces!
+		$fules['submit'] = 'required|trim|max_length[20]';
 		$this->validation->set_rules($rules);
 		
 		//Also repopulate the form
 		$fields['body'] = 'Page Content';
 		$fields['note'] = 'Edit Note'; //These names correspond to what is shown in error message.
+		$fields['submit'] = 'Submit/Preview Button'; //We need to set some name so that validation stores the value
 		$this->validation->set_fields($fields);
 	}
 	
@@ -39,30 +41,46 @@ class Edit extends Show {
 		}
 		else
 		{
-			$this->load->helper('date');
-			
-			//Set author
-			if($this->authorization->is_logged_in())
+			//Check for storage, otherwise, assume it is preview
+			if(strcmp($this->validation->submit, 'Store')===0) //Hm, hard-coding these forces templates to use these values?
 			{
-				$author = $this->session->userdata('username');
+				//Set author
+				if($this->authorization->is_logged_in())
+				{
+					$author = $this->session->userdata('username');
+				}
+				else
+				{
+					$author = $this->input->ip_address();
+				}
+				
+				//The form is successful! This is where we make changes.
+				$this->pages_model->copy_to_archives();
+				$this->pages_model->delete();
+				//Now create new record
+				$this->pages_model->pagename = $pagename;
+				$this->pages_model->time = now(); //now() uses the date helper
+				$this->pages_model->author = $author; //For now
+				//For some reason putting hsc_secure in form processing (above) doesn't work
+				//since the escaped characters are "unescaped" again!
+				$this->pages_model->note = $this->validation->hsc_secure($this->validation->note);
+				$this->pages_model->body = $this->validation->body;
+				$this->pages_model->insert();
+				
+				redirect($pagename);
+			}
+			else if(strcmp($this->validation->submit, 'Re-edit')===0)
+			{
+				//die('here');
+				$this->load->view('edit');
 			}
 			else
 			{
-				$author = $this->input->ip_address();
+				//Otherwise, we preview
+				$this->pages_model->page['body'] = format_text($this->validation->body);
+				$this->load->view('preview');
 			}
 			
-			//The form is successful! This is where we make changes.
-			$this->pages_model->copy_to_archives();
-			$this->pages_model->delete();
-			//Now create new record
-			$this->pages_model->pagename = $pagename;
-			$this->pages_model->time = now(); //now() uses the date helper
-			$this->pages_model->author = $author; //For now
-			$this->pages_model->note = $this->validation->note;
-			$this->pages_model->body = $this->validation->body;
-			$this->pages_model->insert();
-			
-			redirect($pagename);
 		}
 	}
 
