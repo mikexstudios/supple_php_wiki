@@ -18,6 +18,6 @@ $config['index_page'] = ""; //If using URL Rewriting, set to empty. Otherwise, s
 $config['default_page'] = 'HomePage'; //Default wiki page.
 
 // ** Other Settings ** //
-$config['encryption_salt'] = 'st_'; // 99% chance you won't need to change this value
+$config['encryption_salt'] = 'stsalt_'; // 99% chance you won't need to change this value
 
 ?>
