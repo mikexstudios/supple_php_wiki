@@ -9,7 +9,7 @@ $db['suppletext']['username'] = "test"; // Your MySQL username
 $db['suppletext']['password'] = "test"; // ...and password
 $db['suppletext']['database'] = "suppletext_CI"; // The name of the database
 // You can have multiple installations in one database if you give each a unique prefix
-$db['suppletext']['dbprefix'] = "wikka_"; // Only numbers, letters, and underscores please!
+$db['suppletext']['dbprefix'] = "st_"; // Only numbers, letters, and underscores please!
 
 // ** URI Settings ** //
 $config['index_page'] = ""; //If using URL Rewriting, set to empty. Otherwise, set to 'index.php'

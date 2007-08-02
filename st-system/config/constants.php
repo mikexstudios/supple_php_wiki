@@ -6,7 +6,6 @@ $config['dummy_key'] = 'dummy_value'; //Need this so that this config file will 
 define('ST_PAGES_TABLE', 'pages');
 define('ST_USERS_TABLE', 'users');
 define('ST_CONFIG_TABLE', 'config');
-define('ST_CACHE_TABLE', 'cache');
 define('ST_SESSIONS_TABLE', 'sessions');
 
 //FILE STRUCTURE
