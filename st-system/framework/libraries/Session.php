@@ -227,7 +227,7 @@ class CI_Session {
 			{
 				$this->CI->db->where('user_agent', $session['user_agent']);
 			}
-			
+
 			$query = $this->CI->db->get($this->session_table);
 
 			if ($query->num_rows() == 0)

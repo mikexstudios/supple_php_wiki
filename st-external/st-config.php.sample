@@ -19,5 +19,6 @@ $config['default_page'] = 'HomePage'; //Default wiki page.
 
 // ** Other Settings ** //
 $config['encryption_salt'] = 'stsalt_'; // 99% chance you won't need to change this value
+$config['sess_table_name'] = $db['suppletext']['dbprefix'].'sessions'; //For if your session table is different.
 
 ?>

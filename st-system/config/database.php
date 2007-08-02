@@ -45,7 +45,10 @@ $db['default']['db_debug'] = TRUE;
 $db['default']['cache_on'] = FALSE;
 $db['default']['cachedir'] = "";
 
-require ABSPATH.'st-external/st-config.php'; //Offload the active DB into a separate config file.
+$db['suppletext']['hostname'] = "localhost";
+$db['suppletext']['username'] = "root";
+$db['suppletext']['password'] = "";
+$db['suppletext']['database'] = "";
 $db['suppletext']['dbdriver'] = "mysql";
 $db['suppletext']['active_r'] = TRUE;
 $db['suppletext']['pconnect'] = TRUE;
@@ -53,5 +56,8 @@ $db['suppletext']['db_debug'] = TRUE;
 $db['suppletext']['cache_on'] = FALSE;
 $db['suppletext']['cachedir'] = "";
 
-
+//Offload the active DB into a separate config file.
+//We override settings here!
+require ABSPATH.'st-external/st-config.php';
+ 
 ?>
