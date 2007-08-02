@@ -55,8 +55,6 @@ class Edit extends Show {
 				}
 				
 				//The form is successful! This is where we make changes.
-				$this->pages_model->copy_to_archives();
-				$this->pages_model->delete();
 				//Now create new record
 				$this->pages_model->pagename = $pagename;
 				$this->pages_model->time = now(); //now() uses the date helper

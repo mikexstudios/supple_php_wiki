@@ -53,21 +53,10 @@ class Pages_model extends Model {
 		//We load the latest page first just so we can load information from the latest page.
 		$this->db->select('*');
 		$this->db->from(ST_PAGES_TABLE);
+		$this->db->orderby('id', 'desc');
 		$this->db->limit(1);
 		$query = $this->db->get();
 		$this->page = $query->row_array();
-		
-		
-		//If we don't find the page in the latest table, then we also check
-		//the archives table.
-		if(empty($this->page))
-		{
-			$this->_set_where_clauses(); //Must do this each time.
-			$this->db->select('*');
-			$this->db->from(ST_ARCHIVES_TABLE);
-			$query = $this->db->get();
-			$this->page = $query->row_array();
-		}
 		
 		$query->free_result(); //Cut down on memory consumption
 		
@@ -79,23 +68,6 @@ class Pages_model extends Model {
 			$this->page['time'] = '';
 			return false;
 		}	
-
-	}
-	
-	function copy_to_archives() {
-		//global $db;
-		
-		//Since we are not using Active Record, we don't use the
-		//set_where function.
-		if(empty($this->pagename))
-			{ return; }
-		
-		$sql = '
-			INSERT INTO '.$this->db->dbprefix.ST_ARCHIVES_TABLE.'
-			SELECT *  
-			FROM '.$this->db->dbprefix.ST_PAGES_TABLE.' 
-			WHERE tag = ?';
-		$this->db->query($sql, array($this->pagename));
 
 	}
 	
@@ -130,24 +102,9 @@ class Pages_model extends Model {
 		//We load the latest page first just so we can load information from the latest page.
 		$this->db->select('*');
 		$this->db->from(ST_PAGES_TABLE);
-		$this->db->limit(1);
-		$query = $this->db->get();
-		$this->revisions_data[] = $query->row_array();
-	
-		$this->_set_where_clauses(); //Must do this each time.
-		$this->db->select('*');
-		$this->db->from(ST_ARCHIVES_TABLE);
 		$this->db->orderby('id', 'desc');
 		$query = $this->db->get();
-		$results = $query->result_array();
-		
-		if(!empty($results))
-		{
-			foreach($results as $each_row)
-			{
-				array_push($this->revisions_data, $each_row);
-			}
-		}
+		$this->revisions_data = $query->result_array();
 		
 		return $this->revisions_data;
 	}	

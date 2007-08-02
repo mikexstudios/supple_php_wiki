@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Jul 29, 2007 at 09:12 AM
+-- Generation Time: Aug 01, 2007 at 08:57 PM
 -- Server version: 5.0.38
 -- PHP Version: 5.2.1
 
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `wikka_archives` (
   KEY `idx_tag` (`tag`),
   KEY `idx_time` (`time`),
   FULLTEXT KEY `body` (`body`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=181 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=190 ;
 
 -- 
 -- Dumping data for table `wikka_archives`
@@ -184,7 +184,14 @@ INSERT INTO `wikka_archives` (`id`, `tag`, `time`, `body`, `user`, `note`) VALUE
 (178, 'HomePage', 1185711493, '= Welcome to your new suppleText wiki! =\n\nYou will want to replace this text with whatever you want to put on your new home page. This is done by clicking the Edit link in the bottom right-hand corner. Any time you want to edit this or any content page, just click on the link!', '192.168.85.1', 'Header'),
 (170, 'NavigationLinks', 1185673045, 'HomePage | [[SandBox]] | [[http://www.suppletext.org/|suppleText]] | [[st-admin/users/login|Login]] | Put Other Links Here', 'Anonymous', 'Correct link syntax'),
 (176, 'SandBox', 1185695879, 'You might also want to visit SandBox2\n\nThe GNU General Public License is a free, copyleft license for software and other kinds of works.\n\nThe licenses for most software and other practical works are designed to take away your freedom to share and change the works. By contrast, the GNU General Public License is intended to guarantee your freedom to share and change all versions of a program--to make sure it remains free software for all its users. We, the Free Software Foundation, use the GNU General Public License for most of our software; it applies also to any other work released this way by its authors. You can apply it to your programs, too.\n\nWhen we speak of free software, we are referring to freedom, not price. Our General Public Licenses are designed to make sure that you have the freedom to distribute copies of free software (and charge for them if you wish), that you receive source code or can get it if you want it, that you can change the software or use pieces of it in new free programs, and that you know you can do these things.\n\n<<<wiki_path>>>\n\n[[<<<wiki_path>>>/st-admin/users/login|Login]]', 'test', 'deleted stuff'),
-(180, 'NavigationLinks', 1185712286, 'HomePage | [[http://www.suppletext.org/|suppleText]] | [[SandBox]] | //Put navigation links here//', '192.168.85.1', 'Changed nav links');
+(180, 'NavigationLinks', 1185712286, 'HomePage | [[http://www.suppletext.org/|suppleText]] | [[SandBox]] | //Put navigation links here//', '192.168.85.1', 'Changed nav links'),
+(181, 'SandBox', 1185712457, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!', '192.168.85.1', 'Official message'),
+(184, 'SandBox', 1185934256, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!\n\nWe are going to edit again...', '192.168.85.1', 'asdf'),
+(185, 'SandBox', 1185947220, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!\n\nWe are going to edit again...\n\n\nasdfasdfwdf', '192.168.85.1', 'asdfasdf "><a href="asdf">asdf</a>'),
+(186, 'SandBox', 1185947506, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!\n\nWe are going to edit again...\n\n\nasdfasdfwdf asdfasdf "><a href="asdf">asdf</a>', '192.168.85.1', 'asdfasdf "><a href="asdf">asdf</a>'),
+(187, 'SandBox', 1185947659, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!\n\nWe are going to edit again...\n\n\nasdfasdfwdf asdfasdf "><a href="asdf">asdf</a>\n\nTesting prep_for_form', '192.168.85.1', '"><a href="asdf">asdf</a>'),
+(188, 'SandBox', 1185948398, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!\n\nWe are going to edit again...\n\n\nasdfasdfwdf asdfasdf "><a href="asdf">asdf</a>\n\nTesting prep_for_form', '192.168.85.1', '"><a href="asdf">asdf</a>'),
+(189, 'SandBox', 1185948432, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!\n\nWe are going to edit again...\n\n\nasdfasdfwdf asdfasdf "><a href="asdf">asdf</a>\n\nTesting prep_for_form', '192.168.85.1', '&quot;&gt;&lt;a href=&quot;asdf&quot;&gt;asdf&lt;/a&gt;');
 
 -- --------------------------------------------------------
 
@@ -346,17 +353,17 @@ CREATE TABLE IF NOT EXISTS `wikka_pages` (
   KEY `idx_tag` (`tag`),
   KEY `idx_time` (`time`),
   FULLTEXT KEY `body` (`body`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=184 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=191 ;
 
 -- 
 -- Dumping data for table `wikka_pages`
 -- 
 
 INSERT INTO `wikka_pages` (`id`, `tag`, `time`, `body`, `user`, `note`) VALUES 
-(181, 'SandBox', 1185712457, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!', '192.168.85.1', 'Official message'),
 (182, 'Special:Navigation', 1185714400, 'HomePage | [[http://www.suppletext.org/|suppleText]] | [[SandBox]] | //Put navigation links here//', '192.168.85.1', 'Navigation Links'),
 (179, 'HomePage', 1185711506, '== Welcome to your new suppleText wiki! ==\n\nYou will want to replace this text with whatever you want to put on your new home page. This is done by clicking the Edit link in the bottom right-hand corner. Any time you want to edit this or any content page, just click on the link!', '192.168.85.1', 'Smaller header'),
 (183, 'NavigationLinks', 1185714441, '', '192.168.85.1', 'Removed'),
+(190, 'SandBox', 1185948743, '=== Welcome to the SandBox! ===\n\nThis page is for playing around with wiki syntax. Feel free to mess around!\n\nWe are going to edit again...\n\n\nasdfasdfwdf asdfasdf "><a href="asdf">asdf</a>\n\nTesting prep_for_form', '192.168.85.1', 'changed note'),
 (84, 'Login', 2007, '<<< login >>>', '', ''),
 (90, 'Logout', 2007, '<<< logout >>>', 'test', ''),
 (138, 'FormattingRules', 2007, '== suppleText Formatting Guide ==\n\nNote: Anything between {{{ {{{ }}} and {{{  ~}}} }}} is not formatted.\n \n\nOnce you have read through this, test your formatting skills in the SandBox.\n== 1. Text Formatting ==\n\n{{{**I''m bold**}}}\n**I''m bold**\n\n{{{//I''m italic text!//}}}\n//I''m italic text!//\n\n{{{ {{{monospace text ~}}} }}}\n{{{monospace text}}}\n\n== 2. Headers ==\n\nUse between five = (for the biggest header) and two = (for the smallest header) on both sides of a text to render it as a header.\n\n{{{= Really big header =}}}\n= Really big header =\n\n{{{== Rather big header ==}}}\n== Rather big header ==\n\n{{{=== Medium header ===}}}\n=== Medium header ===\n\n{{{==== Not-so-big header ====}}}\n==== Not-so-big header ====\n\n{{{===== Smallish header =====}}}\n===== Smallish header =====\n\n{{{====== Smallest header ======}}}\n====== Smallest header ======\n\n== 3. Horizontal separator ==\n{{{----}}}\n----\n\n== 4. Forced line break ==\nThis is the first line,{{{\\\\}}}and this is the second.\n\nThis is the first line,\\\\and this is the second.\n\n== 5. Lists and indents ==\n\nCurrently, no indent functionality.\n\nTo create bulleted/ordered lists, use the following markup (you can always use 4 spaces instead of a ~):\n\n=== Bulleted lists ===\n{{{\n* Line one\n* Line two\n}}}\n\n* Line one\n* Line two\n\n=== Numbered lists ===\n{{{\n# Line one\n# Line two\n}}}\n\n# Line one\n# Line two\n\n== 7. Images ==\n\n{{{ {{http://www.suppletext.org/logo-medium.gif|suppleText Logo}} }}}\n\n{{http://www.suppletext.org/logo-medium.gif|suppleText Logo}} \n\n== 8. Links ==\n\nTo create a link to a wiki page you can use any of the following options:\n\n   1. type a WikiName:\n\n	  {{{FormattingRules}}}\n	  FormattingRules\n\n   2. add a forced link surrounding the page name by {{{[[}}} and {{{]]}}} (everything after the | will be shown as description):\n\n	  {{{[[SandBox|Test your formatting skills]]}}}\n	  [[SandBox|Test your formatting skills]]\n\n	  {{{[[SandBox|沙箱]]}}}\n	  [[SandBox|沙箱]]\n\n   3. add an image with a link (see instructions above).\n\n\nTo link to external pages, you can do any of the following:\n\n   1. type a URL inside the page:\n\n	  {{{http://www.example.com}}}\n	  http://www.example.com\n\n   2. add a forced link surrounding the URL by {{{[[}}} and {{{]]}}} (everything after the | will be shown as description):\n\n	  {{{[[http://example.com/jenna/|Jenna''s Home Page]]}}}\n	  [[http://example.com/jenna/|Jenna''s Home Page]]\n\n	  {{{[[mailto:mail@example.com|Write me!]]}}}\n	  [[mailto:mail@example.com|Write me!]]\n\n   3. add an image with a link (see instructions above);\n\n== 9. Tables ==\n\nAll cells are separated by single pipes. Leading spaces are permitted before the first cell of a row and trailing spaces are permitted at the end of a line. The ending pipe is optional. You can embed links, bold, italics, line breaks, and nowiki in table cells. Equal sign directly following pipe defines a header. Headers can be arranged horizontally or vertically.\n\nExample:\n{{{\n|=Heading Col 1 |=Heading Col 2         |\n|Cell 1.1       |Two lines\\\\in Cell 1.2 |\n|Cell 2.1       |Cell 2.2               |\n}}}\n\n|=Heading Col 1 |=Heading Col 2         |\n|Cell 1.1       |Two lines\\\\in Cell 1.2 |\n|Cell 2.1       |Cell 2.2               |', 'Anonymous', ''),
@@ -421,8 +428,12 @@ CREATE TABLE IF NOT EXISTS `wikka_sessions` (
 -- 
 
 INSERT INTO `wikka_sessions` (`session_id`, `ip_address`, `user_agent`, `last_activity`) VALUES 
-('afa83c882da686c32dca4a4c31cc356a', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1185714376),
-('0049bac2533165f623a3d8c8c58aef08', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1185695680);
+('afa83c882da686c32dca4a4c31cc356a', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1185906364),
+('0049bac2533165f623a3d8c8c58aef08', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1185695680),
+('9cd09974887fdb94a436aa63ee36ae96', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1185907214),
+('2d9f0a9a3f7f0d95bf6a5bd1c6415048', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1185914440),
+('d4dcb038d68df2ebb36b6bdec2f532af', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1185966547),
+('da56c7ef1fc7f2726bce4c9a1e4b1101', '192.168.85.1', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv', 1186016005);
 
 -- --------------------------------------------------------
 
