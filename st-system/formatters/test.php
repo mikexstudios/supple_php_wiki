@@ -71,42 +71,29 @@ function horizontalrule_callback(&$matches) {
 //beginning or end of the long string so we should insert \n at the beginning and end of the string.
 $CI->syntaxparser->add_block_definition('unordered_lists', '/\n(?:\*.+?\n)+/s', 'unordered_lists_callback', 235, true);
 $CI->syntaxparser->add_block_definition('ordered_lists', '/\n(?:\#.+?\n)+/s', 'ordered_lists_callback', 236, true);
+$sp_list_type = ''; //A global
 function unordered_lists_callback(&$matches) {
-	//die($matches[0]);
-	return lists($matches[0], 'unordered');	
-
+	global $sp_list_type;
+	
+	$sp_list_type = 'unordered';
+	return lists($matches[0]);	
 } 
 function ordered_lists_callback(&$matches) {
-
-	//return 'asdf';
-	return lists($matches[0], 'ordered');	
-
+	global $sp_list_type;
+	
+	$sp_list_type = 'ordered';
+	return lists($matches[0]);	
 } 
-function lists($in_text, $type) {
-	global $CI;
-	
-	$inner_list = ''; //Make empty
-	
-	/*
-	//If we match ** by itself without surrounding *, then we know that it
-	//is the 'strong' modifier. Therefore, we return without doing anything.
-	if(preg_match('/\n\*\*.+$/', $in_text))
-	{
-		return 'here'.$in_text; //We should more rigorously do the newline stuff. Right now, it's a lot of guesswork.
-	}
-	*/
-	
-	//We should do something similar for ##.
-	
-	//This function is recursive! If we don't stop it, it will run infinitely!
+function lists($in_text) {
+	global $CI, $sp_list_type;
 	
 	//Split by each line
-	if(strcmp($type, 'unordered')==0)
+	if(strcmp($sp_list_type, 'unordered')==0)
 	{
 		$tag = 'ul';
 		$identifier = '\*';
 	}
-	else if(strcmp($type, 'ordered')==0)
+	else if(strcmp($sp_list_type, 'ordered')==0)
 	{
 		$tag = 'ol';
 		$identifier = '\#';
@@ -117,50 +104,45 @@ function lists($in_text, $type) {
 	}
 
 	$in_text = preg_replace_callback('/\n\s*('.$identifier.'+)\s+(.*)/', 'lists_callback', $in_text);
-	while(preg_match('|</li></ul><ul><li><ul>|', $in_text)) //Note that we have a <ul> on the end of this. We match multilevel list
+	while(preg_match('|</li></'.$tag.'><'.$tag.'><li><'.$tag.'>|', $in_text)) //Note that we have a <ul> on the end of this. We match multilevel list
 	{
-		$in_text = preg_replace('|</li></ul><ul><li>|', '', $in_text);
+		$in_text = preg_replace('|</li></'.$tag.'><'.$tag.'><li>|', '', $in_text);
 	}
 	
 	//This is for lists with a single level. We assume that if the list is multi-
 	//level, the </ul><ul>'s are already removed.
-	$in_text = preg_replace('|</ul><ul>|', '', $in_text);
+	$in_text = preg_replace('|</'.$tag.'><'.$tag.'>|', '', $in_text);
 	
 	//Returned HTML is ugly. Maybe HTML Tidy it sometime.
+	$sp_list_type = '';
 	return "\n".$CI->syntaxparser->hash($in_text);
 }
 function lists_callback(&$matches) {
-	global $CI;
+	global $CI, $sp_list_type;
+	
+	if(strcmp($sp_list_type, 'unordered')==0)
+		{ $tag = 'ul'; }
+	else if(strcmp($sp_list_type, 'ordered')==0)
+		{ $tag = 'ol'; }
+	else
+		{ return ''; }
 	
 	$level = strlen($matches[1]);
 	$text = trim($matches[2]); //Maybe only trim by one space to allow for users to force space.
 	$text = $CI->syntaxparser->applyAllInlineDefs($text);
-	/*
-	if($level == 1)
-	{
-		return '<li>'.$text.'</li>';
-	}
-	*/
-	
+
 	$pre = '';
 	$post = '';
 	$list_html = '';
 	for($i=0; $i<$level; $i++)
 	{
-			$pre .= '<ul><li>';
-			$post .= '</li></ul>';
+			$pre .= '<'.$tag.'><li>';
+			$post .= '</li></'.$tag.'>';
 	}
 	
 	$list_html = $pre.$text.$post;
-	//echo($list_html); 
-	//<ul><li>one</li></ul><ul><li>two</li></ul><ul><li>three</li></ul>
-	//<ul><li>1</li></ul><ul><li><ul><li>2</li></ul></li></ul><ul><li><ul><li><ul><li>3</li></ul></li></ul></li></ul><ul><li><ul><li><ul><li><ul><li>4</li></ul></li></ul></li></ul></li></ul><ul><li><ul><li><ul><li><ul><li><ul><li>5</li></ul></li></ul></li></ul></li></ul></li></ul>
 	return $list_html;
 }
-
-//Ugly hack to connect the lists (inner lists). Later on, we should indent lists inside of lists.
-//$CI->syntaxparser->addRule('unordered_lists_postprocess', '/<\/li>\n<li>\n(<ul>.+?<\/ul>)\n/s', "\n".'$1', 237);
-//$CI->syntaxparser->addRule('ordered_lists_postprocess', '/<\/li>\n<li>\n(<ol>.+?<\/ol>)\n/s', "\n".'$1', 238);
 
 
 /**
