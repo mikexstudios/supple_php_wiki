@@ -13,8 +13,9 @@
 class SyntaxParser {
 	var $CI;
 	var $text;
-	var $rules;
-	var $delimiter = "\xFF";
+	var $blockdefs = array();
+	var $inlinedefs = array();
+	var $delimiter = "\xFF"; //Maybe something else might work better to allow for non UTF-8
 	var $token_pattern;
 	var $hashed_text = array();
 	var $syntax_path, $syntax_path_loaded;
@@ -22,7 +23,7 @@ class SyntaxParser {
 	function SyntaxParser() {
 		$this->CI =& get_instance();
 		
-		$this->token_pattern = $this->delimiter.'([a-z0-9]+)'.$this->delimiter;
+		$this->token_pattern = $this->delimiter.'(?:[a-z0-9]+)'.$this->delimiter;
 		log_message('debug', "SyntaxParser Class Initialized");
 	}	
 	
@@ -42,7 +43,8 @@ class SyntaxParser {
 			return;
 		}
 		
-		load_files_in_directory($in_path);
+		//load_files_in_directory($in_path);
+		include_once $this->syntax_path.'/test.php';
 		$this->syntax_path_loaded[md5($in_path)] = true; //Set so we know it has already been loaded
 	}
 	
@@ -54,38 +56,76 @@ class SyntaxParser {
 		return $this->text;
 	}
 	
-	function addRule($in_tag, $in_pattern, $in_replacement, $in_priority, $is_callback=false) {
+	/**
+	 * Defines with regex what constitutes a block
+	 */	 	
+	function add_block_definition($in_tag, $in_pattern, $in_callback, $in_priority) {
 		//It might be a good idea to cast to specific data formats here.
 		//Also add check for adding a tag that already exists.
-	    $this->rules[$in_tag] = array('pattern' => $in_pattern, 
+	    $this->blockdefs[$in_tag] = array('pattern' => $in_pattern, 
+														 'replacement' => $in_callback, 
+														 'priority' => $in_priority);
+	}
+	
+	/**
+	 * Rules get applied inside blocks
+	 */	 	
+	function add_inline_definition($in_tag, $in_pattern, $in_replacement, $in_priority, $is_callback=false) {
+		//It might be a good idea to cast to specific data formats here.
+		//Also add check for adding a tag that already exists.
+	    $this->inlinedefs[$in_tag] = array('pattern' => $in_pattern, 
 														 'replacement' => $in_replacement, 
 														 'priority' => $in_priority,
 														 'is_callback' => $is_callback);
 	}
 	
+	//--------------------------------
+
+	function applyBlockDef($in_tag, $in_text) {
+
+		//Maybe we can add a doesfunctionexist check here.
+		return preg_replace_callback($this->blockdefs[$in_tag]['pattern'], $this->blockdefs[$in_tag]['replacement'] , $in_text);
+
+	}
+
 	//We choose this design decision for speed. The other method would be to manually
-	function applyRule($in_tag) {
+	function applyInlineDef($in_tag, $in_text) {
 		//Check for callback
-		if($this->rules[$in_tag]['is_callback']==true)
+		if($this->inlinedefs[$in_tag]['is_callback']==true)
 		{
 			//Maybe we can add a doesfunctionexist check here.
-			$this->text = preg_replace_callback($this->rules[$in_tag]['pattern'], $this->rules[$in_tag]['replacement'] , $this->text);
+			return preg_replace_callback($this->inlinedefs[$in_tag]['pattern'], $this->inlinedefs[$in_tag]['replacement'] , $in_text);
 		}
 		else if($this->rules[$in_tag]['is_callback']==false) //We could have just done an else too.
 		{
-			$this->text = preg_replace($this->rules[$in_tag]['pattern'], $this->rules[$in_tag]['replacement'] , $this->text);
+			return preg_replace($this->inlinedefs[$in_tag]['pattern'], $this->inlinedefs[$in_tag]['replacement'] , $in_text);
 		}
+	}
+	
+	/**
+	 * This and sortRules can be abstracted in the future
+	 */	 	
+	function sortBlockDefs() {
+		uasort($this->blockdefs, array(&$this, '_priority_sort_callback'));	
 	}
 	
 	/**
 	 * @access private
 	 */	 	
-	function sortRules() { //Currently only ascending
+	function sortInlineDefs() { //Currently only ascending
 		//Because we have a multi-dimensional array, we can use array_multisort or
 		//uasort. uasort is more elegant since we don't have to create "columns" for 
 		//array_multisort. We use uasort instead of usort in order to keep the "keys"
 		//associated to the arrays instead of having them replaced by number indicies.
-		uasort($this->rules, array(&$this, '_sortRules_callback'));	
+		uasort($this->inlinedefs, array(&$this, '_priority_sort_callback'));	
+	}
+	
+	function sort_by_priority(&$in) { //Currently only ascending
+		//Because we have a multi-dimensional array, we can use array_multisort or
+		//uasort. uasort is more elegant since we don't have to create "columns" for 
+		//array_multisort. We use uasort instead of usort in order to keep the "keys"
+		//associated to the arrays instead of having them replaced by number indicies.
+		uasort($in, array(&$this, '_priority_sort_callback'));	
 	}
 	
 	/**
@@ -93,7 +133,7 @@ class SyntaxParser {
 	 *	 	
 	 * @access private
 	 */	 	
-	function _sortRules_callback($a, $b) {
+	function _priority_sort_callback($a, $b) {
 		if($a['priority'] == $b['priority'])
 			{ return 0; }
 		else if($a['priority'] < $b['priority'])
@@ -102,17 +142,36 @@ class SyntaxParser {
 			{ return 1; }			
 	}
 	
-	//Sort by priority. Then apply each.
 	function applyAll() {
-		$this->sortRules(); //Sort by priority first.
+		$this->text = $this->applyAllBlockDefs($this->text);
+		$this->text = $this->unhash_contents($this->text);
+	}
+	
+	function applyAllBlockDefs($in_text) {
+		//Sort blocks by priority
+		$this->sort_by_priority($this->blockdefs);
+		
+		foreach(array_keys($this->blockdefs) as $tag)
+		{			
+			$in_text = $this->applyBlockDef($tag, $in_text);
+		}
+		
+		return $in_text;
+	}
+	
+	//Sort by priority. Then apply each.
+	function applyAllInlineDefs($in_text) {
+		$this->sort_by_priority($this->inlinedefs); //Sort by priority first.
 
 		//According to comments in php manual:
 		//http://us2.php.net/manual/en/control-structures.foreach.php#54311
 		//This is faster than a foreach(... as $key => $value).
-		foreach(array_keys($this->rules) as $tag)
+		foreach(array_keys($this->inlinedefs) as $tag)
 		{			
-			$this->applyRule($tag);
+			$in_text = $this->applyInlineDef($tag, $in_text);
 		}
+		
+		return $in_text;
 	}
 
 	/**
@@ -143,7 +202,7 @@ class SyntaxParser {
 	}
 	
 	function unhash_contents($text) {
-		return preg_replace_callback('/'.$this->token_pattern.'/', array(&$this, '_unhash_contents_callback'), $text);
+		return preg_replace_callback('/('.$this->token_pattern.')/', array(&$this, '_unhash_contents_callback'), $text);
 		
 		//The below code isn't very good because it doesn't get rid of the \n\n's
 		//around the hash key.
@@ -155,6 +214,7 @@ class SyntaxParser {
 	 * @access private
 	 */	 	
 	function _unhash_contents_callback(&$matches) {
+		$matches[1] = trim($matches[1], $this->delimiter);
 		return $this->unhash($matches[1]);
 	}
 	
