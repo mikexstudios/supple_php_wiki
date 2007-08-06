@@ -23,6 +23,8 @@ class SyntaxParser {
 	function SyntaxParser() {
 		$this->CI =& get_instance();
 		
+		$this->CI->load->helper('syntax');
+		
 		$this->token_pattern = $this->delimiter.'(?:[a-z0-9]+)'.$this->delimiter;
 		log_message('debug', "SyntaxParser Class Initialized");
 	}	
@@ -59,12 +61,13 @@ class SyntaxParser {
 	/**
 	 * Defines with regex what constitutes a block
 	 */	 	
-	function add_block_definition($in_tag, $in_pattern, $in_callback, $in_priority) {
+	function add_block_definition($in_tag, $in_pattern, $in_callback, $in_priority, $is_callback=true) {
 		//It might be a good idea to cast to specific data formats here.
 		//Also add check for adding a tag that already exists.
 	    $this->blockdefs[$in_tag] = array('pattern' => $in_pattern, 
 														 'replacement' => $in_callback, 
-														 'priority' => $in_priority);
+														 'priority' => $in_priority, 
+														 'is_callback' => $is_callback);
 	}
 	
 	/**
@@ -82,10 +85,16 @@ class SyntaxParser {
 	//--------------------------------
 
 	function applyBlockDef($in_tag, $in_text) {
-
-		//Maybe we can add a doesfunctionexist check here.
-		return preg_replace_callback($this->blockdefs[$in_tag]['pattern'], $this->blockdefs[$in_tag]['replacement'] , $in_text);
-
+		//Check for callback
+		if($this->blockdefs[$in_tag]['is_callback']==true)
+		{
+			//Maybe we can add a doesfunctionexist check here.
+			return preg_replace_callback($this->blockdefs[$in_tag]['pattern'], $this->blockdefs[$in_tag]['replacement'] , $in_text);
+		}
+		else if($this->blockdefs[$in_tag]['is_callback']==false) //We could have just done an else too.
+		{
+			return preg_replace($this->blockdefs[$in_tag]['pattern'], $this->blockdefs[$in_tag]['replacement'] , $in_text);
+		}
 	}
 
 	//We choose this design decision for speed. The other method would be to manually
@@ -96,7 +105,7 @@ class SyntaxParser {
 			//Maybe we can add a doesfunctionexist check here.
 			return preg_replace_callback($this->inlinedefs[$in_tag]['pattern'], $this->inlinedefs[$in_tag]['replacement'] , $in_text);
 		}
-		else if($this->rules[$in_tag]['is_callback']==false) //We could have just done an else too.
+		else if($this->inlinedefs[$in_tag]['is_callback']==false) //We could have just done an else too.
 		{
 			return preg_replace($this->inlinedefs[$in_tag]['pattern'], $this->inlinedefs[$in_tag]['replacement'] , $in_text);
 		}

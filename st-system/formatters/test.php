@@ -11,9 +11,43 @@
 
 $CI =& get_instance();
 
+/** 
+ * Prefilter things 
+ * (well, these things should be moved out of this creole class)
+ */ 
+ 
+//str_replace in this case is faster, but oh well, we sacrifice some.
+//Also, I've seen this done with (\r|\r\n), but this is slower since two
+//checks are done at each step.
+$CI->syntaxparser->add_block_definition('to_unix_lineendings', '/\r\n?/', "\n", 10, false);
+
+//Replace 4 consecutive spaces at the beginning of a line with tab character.
+//Since the text is all one long string, we find the start of lines by the \n
+//and then we count four consecutive spaces.
+//$CI->syntaxparser->add_block_definition('spaces_to_tab', '/\n[ ]{4}/', "\n\t", 20, false); 
+
+/**
+ * Trim
+ * Remove whitespace from the beginning and end of a string
+ * Actually trim is pretty important since future regex depend on
+ * lines ending cleanly with \n.  
+ * (But below implementation could be a little slow)
+ * NOTE: Trim conflicts with spaces_to_tab! 
+ */ 
+$CI->syntaxparser->add_block_definition('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30);
+function trim_spaces_callback(&$matches) {
+	return trim($matches[1]);
+} 
+
+//Insert a newline at the beginning and end of the text. This will help
+//in regex later since we can assume lines start and end with \n
+$CI->syntaxparser->add_block_definition('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40, false);
+
+
+
 //We want to specify blocks first.
 
-$CI->syntaxparser->add_block_definition('preformatted', '/\n{{{\n(.*)\n}}}\n/Us', 'preformatted_callback', 100, true);
+$CI->syntaxparser->add_block_definition('preformatted', '/\n{{{\n(.*)\n}}}\n/Us', 'preformatted_callback', 70, true);
 function preformatted_callback(&$matches) {
 	global $CI;
 
@@ -38,6 +72,54 @@ function preformatted_callback(&$matches) {
 	
 	return "\n".$CI->syntaxparser->hash("<pre>\n".$matches[1]."\n</pre>")."\n";
 }  
+
+/**
+ * Snippets
+ * well, they are the Wikka/Wakka "actions", but we don't have a better 
+ * name for them yet.
+ */
+$CI->syntaxparser->add_block_definition('snippets', '/<<(.+?)>>/', 'snippets_callback', 75); 
+function snippets_callback(&$matches) {
+	global $CI;
+	
+	$action = trim($matches[1]);
+
+	// search for parameters separated by spaces or newlines - Wikka #371
+	if (preg_match('/\s/', $action))
+	{
+		// parse input for action name and parameters
+		preg_match('/^([A-Za-z0-9]*)\s+(.*)$/s', $action, $matches);
+		// extract $action and $vars_temp ("raw" attributes)
+		list(, $action, $args) = $matches;
+		
+		//Call action, pass the args to it
+		return $CI->syntaxparser->doAction($action, $args);
+		
+	}
+	if (!preg_match('/^[a-zA-Z0-9_]+$/', $action))
+	{
+		return 'Unknown action; the action name must not contain special characters.';
+	}
+
+	return $CI->syntaxparser->doAction($action);
+}
+
+//When non-paragraph items are separated by more than one newline, then we
+//assume that the user is intentionally inserting a newline:
+//See #10: http://dev.suppletext.org/ticket/10
+$CI->syntaxparser->add_block_definition('intentional_newline', '/\n(\n+)\n/', 'intentional_newline_callback', 80, true);
+function intentional_newline_callback(&$matches) {
+	global $CI;
+	
+	$num_of_br = strlen($matches[1]);
+	$br_html = '';
+	for($i=0;$i<$num_of_br;$i++)
+	{
+		$br_html .= "<br />\n";
+	}
+	
+	return "\n\n".$CI->syntaxparser->hash($br_html)."\n";
+}
 
 $CI->syntaxparser->add_block_definition('headings', '/^(={1,6}) *(.*?) *=*$/m', 'headings_callback', 100);
 function headings_callback(&$matches) {
@@ -218,6 +300,8 @@ function lists_callback(&$matches) {
  */
 $CI->syntaxparser->add_block_definition('tables', '/\n(?:\|.+?\n)+/s', 'tables_callback', 250, true);
 function tables_callback(&$matches) {
+	global $CI;
+	
 	$table_html = "\n".'<table class="wiki_syntax_table">'."\n";
 	
 	//$syntax_rows = preg_split('/\n/', trim($matches[0])); //We trim to remove the beginning and end \n that we match
@@ -233,10 +317,12 @@ function tables_callback(&$matches) {
 			//Check for table headers
 			if(preg_match('/^=(.+)/', $each_cell, $cell_matches))
 			{
+				$cell_matches[1] = $CI->syntaxparser->applyAllInlineDefs($cell_matches[1]);
 				$table_html .= "<th>".$cell_matches[1]."</th>\n";	
 			}
 			else
 			{
+				$each_cell = $CI->syntaxparser->applyAllInlineDefs($each_cell);
 				$table_html .= "<td>".$each_cell."</td>\n";
 			} 
 		}
@@ -311,7 +397,6 @@ function paragraph_callback(&$matches) {
 }
 
 
-
 //Specify inline elements
 
 //Escape character here. We parse the escape character only if it is at the start
@@ -331,7 +416,7 @@ function escape_callback(&$matches) {
 	}
 	
 	return $matches[1].$CI->syntaxparser->hash($matches[2]);
-} 
+}
 
 //Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
 //NOTE: This should be checked VERY carefully against the Creole specification.
@@ -343,6 +428,18 @@ function tt_callback(&$matches) {
 	
 	return $CI->syntaxparser->hash('<tt>'.$matches[1].'</tt>');
 }
+
+/**
+ * Escaping HTML
+ */
+$CI->syntaxparser->add_inline_definition('escape_html_1', '/</', '&lt;', 102);
+$CI->syntaxparser->add_inline_definition('escape_html_2', '/>/', '&gt;', 103);
+
+/**
+ * Newlines
+ * Convert all \n in to <br />. 
+ */  
+$CI->syntaxparser->add_inline_definition('newline', '/\n/', "<br />\n", 110);
 
 /**
  * Image (inline)
@@ -429,20 +526,25 @@ function links_callback(&$matches) {
 	}
 	
 	//Match WikiLinks (The regex for these should be better...and safer)
-	if(preg_match('/(\S+)\|(.+)/', $matches[1], $link_matches))
+	if(preg_match('/(.+)\|(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
 		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES);
+		//Translate text into a linkable wikiword
+		$link_matches[1] = wiki_url_title($link_matches[1]);
+
 		$link_matches[2] = $CI->input->xss_clean($link_matches[2]);
 		$link_matches[2] = htmlentities($link_matches[2], ENT_QUOTES);
 		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>'));
 	}	
 	
-	if(preg_match('/(\S+)/', $matches[1], $link_matches))
+	//Dangerous regex?
+	if(preg_match('/(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
 		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES);
-		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[1].'</a>'));
+
+		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url(wiki_url_title($link_matches[1])).'">'.$link_matches[1].'</a>'));
 	}	
 	
 	//For everything else that doesn't seem to match.
@@ -528,7 +630,38 @@ function raw_url_callback(&$matches) {
 	return $CI->syntaxparser->hash('<a href="'.$url.'">'.$url.'</a>');
 }
 
+/**
+ * Emphasis/Italics
+ * // // -> <em> </em>
+ * (Double check regex)
+ * Note: The ordering here is very important. We need to take care of emphasis
+ *       over lines and paragraphs after we do the normal inline stuff.  
+ * Italics *MUST* be loaded before Bold according to Creole specifications. 
+ */
+$CI->syntaxparser->add_inline_definition('emphasis_inline', '/\/\/(.+?)\/\//', '<em>$1</em>', 339); //Maybe we need to make this ungreedy
+$CI->syntaxparser->add_inline_definition('emphasis_cross_lines', '/\/\/(.+\n.*)\/\//', '<em>$1</em>', 340);
+$CI->syntaxparser->add_inline_definition('emphasis_noclose', '/\/\/(.+\n?.*)/', '<em>$1</em>', 345); //Takes care of cases where // to end of line -> italics.
 
+
+/**
+ * Strong/Bold
+ * ** ** -> <strong> </strong>
+ * Note: The ordering here is very important. See reasoning for Emphasis. 
+ */
+$CI->syntaxparser->add_inline_definition('strong', '/\*\*(.*?)\*\*/', '<strong>$1</strong>', 350);
+$CI->syntaxparser->add_inline_definition('strong_cross_lines', '/\*\*(.+\n.*)\*\*/', '<strong>$1</strong>', 351);
+$CI->syntaxparser->add_inline_definition('strong_noclose', '/\*\*(.+\n?.*)/', '<strong>$1</strong>', 355);
+
+/**
+ * Line Breaks
+ * \\ to <br />\n
+ * (The problem with this current implementation is that if we have \\\
+ *  that will translate to \n\ (where \\n might be preferred). We have to
+ *  consult Creole more carefully.)
+ *  I'm not sure why we need '/\\\\\\\/' to match correctly when the correct
+ *  way, I thought, was '/\\\\/'. Is this a bug?    
+ */
+$CI->syntaxparser->add_inline_definition('linebreak', '/\\\\\\\/', "<br />\n", 400);   
 
 //Inline Postfilters
 

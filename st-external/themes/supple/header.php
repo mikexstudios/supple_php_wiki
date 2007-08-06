@@ -12,6 +12,6 @@
 	<h1><?php out('page_tag'); ?> : <a href="<?php out('page_url', get('root_page')); ?>"><?php out('site_name'); ?></a></h1>
 	
 	<div class="pagenavigation">
-		<?php out('format', '<<<include Special:Navigation>>>'); ?> 	
+		<?php out('format', '<<include Special:Navigation>>'); ?> 	
 	</div>
 </div>
