@@ -45,8 +45,8 @@ class SyntaxParser {
 			return;
 		}
 		
-		//load_files_in_directory($in_path);
-		include_once $this->syntax_path.'/test.php';
+		load_files_in_directory($in_path);
+		//include_once $this->syntax_path.'/test.php';
 		$this->syntax_path_loaded[md5($in_path)] = true; //Set so we know it has already been loaded
 	}
 	
