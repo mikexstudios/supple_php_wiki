@@ -69,12 +69,12 @@ function horizontalrule_callback(&$matches) {
  */
 //Watch out for the \n at the beginning and the \n at the end of the regex. The list could be at the
 //beginning or end of the long string so we should insert \n at the beginning and end of the string.
-$CI->syntaxparser->add_block_definition('unordered_lists', '/\n(?:\*.+?\n)+/s', 'unordered_lists_callback', 235, true);
+$CI->syntaxparser->add_block_definition('unordered_lists', '/\n(?:\*(?:.+?\n)+)+/', 'unordered_lists_callback', 235, true);
 $CI->syntaxparser->add_block_definition('ordered_lists', '/\n(?:\#.+?\n)+/s', 'ordered_lists_callback', 236, true);
 $sp_list_type = ''; //A global
 function unordered_lists_callback(&$matches) {
 	global $sp_list_type;
-	
+	//die($matches[0]);
 	$sp_list_type = 'unordered';
 	return lists($matches[0]);	
 } 
@@ -86,6 +86,13 @@ function ordered_lists_callback(&$matches) {
 } 
 function lists($in_text) {
 	global $CI, $sp_list_type;
+	
+	//If we match ** by itself without surrounding *, then we know that it
+	//is the 'strong' modifier. Therefore, we return without doing anything.
+	if(preg_match('/^\*\*.+$/', $in_text))
+	{
+		return $in_text;
+	}
 	
 	//Split by each line
 	if(strcmp($sp_list_type, 'unordered')==0)
@@ -103,7 +110,68 @@ function lists($in_text) {
 		return '';
 	}
 
-	$in_text = preg_replace_callback('/\n\s*('.$identifier.'+)\s+(.*)/', 'lists_callback', $in_text);
+	/**
+	 * This ugly bit groups multiline list items into
+	 * one array key.
+	 */	 	 	 	
+	$in_text = trim($in_text);
+	$split_text = explode("\n", $in_text);
+	//print_r($split_text);
+	$new_split_text = array();
+	$new_split_text_count = 0;
+	for($i=0; $i<count($split_text); $i++)
+	{
+		if(isset($split_text[$i+1]) && !preg_match('/\s*'.$identifier.'+\s+.*/', $split_text[$i+1]))
+		{
+			//echo 'here'. $split_text[$i].'|'.$split_text[$i+1]."\n";
+			if(isset($new_split_text[$new_split_text_count]))
+			{
+				$new_split_text[$new_split_text_count] .= "\n".$split_text[$i];
+			}
+			else
+			{
+				$new_split_text[$new_split_text_count] = $split_text[$i];
+			}
+			/*
+			if(isset($new_split_text[$new_split_text_count]))
+			{
+				$new_split_text[$new_split_text_count] .= "\n".$split_text[$i+1];
+			}
+			else
+			{
+				$new_split_text[$new_split_text_count] = $split_text[$i]."\n".$split_text[$i+1];
+			}
+			*/
+		}
+		else
+		{
+			if(isset($new_split_text[$new_split_text_count]))
+			{
+				$new_split_text[$new_split_text_count] .= "\n".$split_text[$i];
+				//$new_split_text[$new_split_text_count] .= "\n".$split_text[$i+1];
+			}
+			else
+			{
+				$new_split_text[$new_split_text_count] = $split_text[$i];
+			}
+			//$new_split_text[$new_split_text_count] = $split_text[$i];
+			$new_split_text_count++;
+		}
+	}
+	//print_r($new_split_text);
+	
+	$in_text = '';
+	foreach($new_split_text as $each_line)
+	{
+		$in_text .= preg_replace_callback('/\s*('.$identifier.'+)\s+(.*)/s', 'lists_callback', $each_line);
+	}
+	//echo $in_text;
+	//die();
+	
+	//$in_text = preg_replace_callback('/\n\s*('.$identifier.'+)\s+((?:.*\n)+?)/', 'lists_callback', $in_text);
+	//die('<pre>'.htmlspecialchars($in_text).'</pre>');
+	
+	//$in_text = preg_replace_callback('/\n\s*('.$identifier.'+)\s+(.*)/', 'lists_callback', $in_text);
 	while(preg_match('|</li></'.$tag.'><'.$tag.'><li><'.$tag.'>|', $in_text)) //Note that we have a <ul> on the end of this. We match multilevel list
 	{
 		$in_text = preg_replace('|</li></'.$tag.'><'.$tag.'><li>|', '', $in_text);
@@ -119,7 +187,7 @@ function lists($in_text) {
 }
 function lists_callback(&$matches) {
 	global $CI, $sp_list_type;
-	
+	//echo($matches[2]);
 	if(strcmp($sp_list_type, 'unordered')==0)
 		{ $tag = 'ul'; }
 	else if(strcmp($sp_list_type, 'ordered')==0)
