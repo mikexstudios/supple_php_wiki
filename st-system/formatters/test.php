@@ -83,22 +83,27 @@ function snippets_callback(&$matches) {
 	global $CI;
 	
 	$action = trim($matches[1]);
+	
+	if (!preg_match('/^[ a-zA-Z0-9_:]+$/', $action))
+	{
+		//return 'Unknown action; the action name must not contain special characters.';
+		return '<<'.$action.'>>';
+	}
+	
+	$action = htmlentities($action);
 
 	// search for parameters separated by spaces or newlines - Wikka #371
 	if (preg_match('/\s/', $action))
 	{
 		// parse input for action name and parameters
-		preg_match('/^([A-Za-z0-9]*)\s+(.*)$/s', $action, $matches);
-		// extract $action and $vars_temp ("raw" attributes)
-		list(, $action, $args) = $matches;
-		
-		//Call action, pass the args to it
-		return $CI->syntaxparser->doAction($action, $args);
-		
-	}
-	if (!preg_match('/^[a-zA-Z0-9_]+$/', $action))
-	{
-		return 'Unknown action; the action name must not contain special characters.';
+		if(preg_match('/^([A-Za-z0-9]*)\s+(.*)$/s', $action, $matches))
+		{
+			// extract $action and $vars_temp ("raw" attributes)
+			list(, $action, $args) = $matches;
+			
+			//Call action, pass the args to it
+			return $CI->syntaxparser->doAction($action, $args);
+		}
 	}
 
 	return $CI->syntaxparser->doAction($action);
@@ -181,11 +186,13 @@ function lists($in_text) {
 	{
 		$tag = 'ul';
 		$identifier = '\*';
+		$anti_identifiers = '\#'; //If we see this in the beg of a line, we break out of this mode. String together with |
 	}
 	else if(strcmp($sp_list_type, 'ordered')==0)
 	{
 		$tag = 'ol';
 		$identifier = '\#';
+		$anti_identifiers = '\*';
 	}
 	else
 	{
@@ -214,16 +221,6 @@ function lists($in_text) {
 			{
 				$new_split_text[$new_split_text_count] = $split_text[$i];
 			}
-			/*
-			if(isset($new_split_text[$new_split_text_count]))
-			{
-				$new_split_text[$new_split_text_count] .= "\n".$split_text[$i+1];
-			}
-			else
-			{
-				$new_split_text[$new_split_text_count] = $split_text[$i]."\n".$split_text[$i+1];
-			}
-			*/
 		}
 		else
 		{
