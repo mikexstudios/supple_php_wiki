@@ -156,23 +156,13 @@ function horizontalrule_callback(&$matches) {
  */
 //Watch out for the \n at the beginning and the \n at the end of the regex. The list could be at the
 //beginning or end of the long string so we should insert \n at the beginning and end of the string.
-$CI->syntaxparser->add_block_definition('unordered_lists', '/\n(?:\*(?:.+?\n)+)+/', 'unordered_lists_callback', 235, true);
-$CI->syntaxparser->add_block_definition('ordered_lists', '/\n(?:\#.+?\n)+/s', 'ordered_lists_callback', 236, true);
-$sp_list_type = ''; //A global
-function unordered_lists_callback(&$matches) {
-	global $sp_list_type;
-	//die($matches[0]);
-	$sp_list_type = 'unordered';
-	return lists($matches[0]);	
-} 
-function ordered_lists_callback(&$matches) {
-	global $sp_list_type;
-	
-	$sp_list_type = 'ordered';
-	return lists($matches[0]);	
-} 
-function lists($in_text) {
+$CI->syntaxparser->add_block_definition('lists', '/\n(?:(?:\*|\#)(?:.+?\n)+)+/', 'lists', 235, true);
+
+function lists(&$matches) {
 	global $CI, $sp_list_type;
+	
+	$in_text = $matches[0];
+	//die($matches[0]);
 	
 	//If we match ** by itself without surrounding *, then we know that it
 	//is the 'strong' modifier. Therefore, we return without doing anything.
@@ -181,23 +171,26 @@ function lists($in_text) {
 		return $in_text;
 	}
 	
-	//Split by each line
-	if(strcmp($sp_list_type, 'unordered')==0)
+	//Define a few things:
+	$tags_def['ul']['identifier'] = '\*';
+	$tags_def['ol']['identifier'] = '\#';
+	
+	//Construct identifiers regex
+	$identifiers = '';
+	foreach($tags_def as $each_tag)
 	{
-		$tag = 'ul';
-		$identifier = '\*';
-		$anti_identifiers = '\#'; //If we see this in the beg of a line, we break out of this mode. String together with |
+		$identifiers .= $each_tag['identifier'].'|';
 	}
-	else if(strcmp($sp_list_type, 'ordered')==0)
+	$identifiers = trim($identifiers, '|');
+	
+	//Construct tags regex
+	$tags = '';
+	foreach(array_keys($tags_def) as $each_tag_key)
 	{
-		$tag = 'ol';
-		$identifier = '\#';
-		$anti_identifiers = '\*';
+		$tags .= $each_tag_key.'|';
 	}
-	else
-	{
-		return '';
-	}
+	$tags = trim($tags, '|');
+	//die($tags);
 
 	/**
 	 * This ugly bit groups multiline list items into
@@ -206,11 +199,13 @@ function lists($in_text) {
 	$in_text = trim($in_text);
 	$split_text = explode("\n", $in_text);
 	//print_r($split_text);
+	//die();
 	$new_split_text = array();
 	$new_split_text_count = 0;
 	for($i=0; $i<count($split_text); $i++)
 	{
-		if(isset($split_text[$i+1]) && !preg_match('/\s*'.$identifier.'+\s+.*/', $split_text[$i+1]))
+		//if(isset($split_text[$i+1]) && !preg_match('/\s*(?:'.$identifier.'|'.$anti_identifiers.')+\s+.*/', $split_text[$i+1]))
+		if(isset($split_text[$i+1]) && !preg_match('/\s*(?:'.$identifiers.')+\s+.*/', $split_text[$i+1]))
 		{
 			//echo 'here'. $split_text[$i].'|'.$split_text[$i+1]."\n";
 			if(isset($new_split_text[$new_split_text_count]))
@@ -238,11 +233,12 @@ function lists($in_text) {
 		}
 	}
 	//print_r($new_split_text);
+	//die();
 	
 	$in_text = '';
 	foreach($new_split_text as $each_line)
 	{
-		$in_text .= preg_replace_callback('/\s*('.$identifier.'+)\s+(.*)/s', 'lists_callback', $each_line);
+		$in_text .= preg_replace_callback('/\s*((?:'.$identifiers.')+)\s+(.*)/s', 'lists_callback', $each_line);
 	}
 	//echo $in_text;
 	//die();
@@ -251,25 +247,28 @@ function lists($in_text) {
 	//die('<pre>'.htmlspecialchars($in_text).'</pre>');
 	
 	//$in_text = preg_replace_callback('/\n\s*('.$identifier.'+)\s+(.*)/', 'lists_callback', $in_text);
-	while(preg_match('|</li></'.$tag.'><'.$tag.'><li><'.$tag.'>|', $in_text)) //Note that we have a <ul> on the end of this. We match multilevel list
+	$link_lists_regex = '%</li></(?:'.$tags.')><(?:'.$tags.')><li><(?:'.$tags.')>%';
+	while(preg_match('%</li></(?:'.$tags.')><(?:'.$tags.')><li><(?:'.$tags.')>%', $in_text)) //Note that we have a <ul> on the end of this. We match multilevel list
 	{
-		$in_text = preg_replace('|</li></'.$tag.'><'.$tag.'><li>|', '', $in_text);
+		$in_text = preg_replace('%</li></(?:'.$tags.')><(?:'.$tags.')><li><('.$tags.')>%', '<$1>', $in_text); //The tag on the end is necessary to distinguish multi-level lists
 	}
-	
+	//die('<pre>'.htmlspecialchars($in_text).'</pre>');
 	//This is for lists with a single level. We assume that if the list is multi-
-	//level, the </ul><ul>'s are already removed.
-	$in_text = preg_replace('|</'.$tag.'><'.$tag.'>|', '', $in_text);
+	//level, the </ul><ul>'s or </ol><ol>'s or mixture of them are already removed.
+	//$in_text = preg_replace('%</('.$tags.')><\1>%', '', $in_text);
+	$in_text = preg_replace('%</(?:'.$tags.')><(?:'.$tags.')>%', '', $in_text);
+	//die('<pre>'.htmlspecialchars($in_text).'</pre>');
 	
 	//Returned HTML is ugly. Maybe HTML Tidy it sometime.
 	$sp_list_type = '';
-	return "\n".$CI->syntaxparser->hash($in_text);
+	return "\n".$CI->syntaxparser->hash($in_text)."\n";
 }
 function lists_callback(&$matches) {
 	global $CI, $sp_list_type;
 	//echo($matches[2]);
-	if(strcmp($sp_list_type, 'unordered')==0)
+	if(strpos($matches[1], '*')!==FALSE)
 		{ $tag = 'ul'; }
-	else if(strcmp($sp_list_type, 'ordered')==0)
+	else if(strpos($matches[1], '#')!==FALSE)
 		{ $tag = 'ol'; }
 	else
 		{ return ''; }
@@ -436,7 +435,7 @@ $CI->syntaxparser->add_inline_definition('escape_html_2', '/>/', '&gt;', 103);
  * Newlines
  * Convert all \n in to <br />. 
  */  
-$CI->syntaxparser->add_inline_definition('newline', '/\n/', "<br />\n", 110);
+$CI->syntaxparser->add_inline_definition('newline', '/\n/', " <br />\n", 110); //Note the space before the <br />
 
 /**
  * Image (inline)
@@ -560,7 +559,7 @@ $upper = "A-Z";
 $lower = "a-z0-9";
 $either = "A-Za-z0-9";
 $wikiword_regex =      
-						"/(\s)(!?" .            // START WikiPage pattern (1) //Hmm need to check for a space or newline?
+						"/(^|\s)(!?" .      // START WikiPage pattern (1) //Hmm need to check for a space or beginning of line
             "[$upper]" .       // 1 upper
             "[$either]*" .     // 0+ alpha or digit
             "[$lower]+" .      // 1+ lower or digit
