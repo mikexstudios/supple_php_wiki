@@ -156,9 +156,9 @@ function horizontalrule_callback(&$matches) {
  */
 //Watch out for the \n at the beginning and the \n at the end of the regex. The list could be at the
 //beginning or end of the long string so we should insert \n at the beginning and end of the string.
-$CI->syntaxparser->add_block_definition('lists', '/\n(?:(?:\*|\#)(?:.+?\n)+)+/', 'lists', 235, true);
+$CI->syntaxparser->add_block_definition('lists', '/\n(?:(?:\*|\#)(?:.+?\n)+)+/', 'lists_callback', 235, true);
 
-function lists(&$matches) {
+function lists_callback(&$matches) {
 	global $CI, $sp_list_type;
 	
 	$in_text = $matches[0];
@@ -235,61 +235,209 @@ function lists(&$matches) {
 	//print_r($new_split_text);
 	//die();
 	
-	$in_text = '';
-	foreach($new_split_text as $each_line)
-	{
-		$in_text .= preg_replace_callback('/\s*((?:'.$identifiers.')+)\s+(.*)/s', 'lists_callback', $each_line);
-	}
-	//echo $in_text;
-	//die();
-	
-	//$in_text = preg_replace_callback('/\n\s*('.$identifier.'+)\s+((?:.*\n)+?)/', 'lists_callback', $in_text);
-	//die('<pre>'.htmlspecialchars($in_text).'</pre>');
-	
-	//$in_text = preg_replace_callback('/\n\s*('.$identifier.'+)\s+(.*)/', 'lists_callback', $in_text);
-	$link_lists_regex = '%</li></(?:'.$tags.')><(?:'.$tags.')><li><(?:'.$tags.')>%';
-	while(preg_match('%</li></(?:'.$tags.')><(?:'.$tags.')><li><(?:'.$tags.')>%', $in_text)) //Note that we have a <ul> on the end of this. We match multilevel list
-	{
-		$in_text = preg_replace('%</li></(?:'.$tags.')><(?:'.$tags.')><li><('.$tags.')>%', '<$1>', $in_text); //The tag on the end is necessary to distinguish multi-level lists
-	}
-	//die('<pre>'.htmlspecialchars($in_text).'</pre>');
-	//This is for lists with a single level. We assume that if the list is multi-
-	//level, the </ul><ul>'s or </ol><ol>'s or mixture of them are already removed.
-	//$in_text = preg_replace('%</('.$tags.')><\1>%', '', $in_text);
-	$in_text = preg_replace('%</(?:'.$tags.')><(?:'.$tags.')>%', '', $in_text);
-	//die('<pre>'.htmlspecialchars($in_text).'</pre>');
-	
-	//Returned HTML is ugly. Maybe HTML Tidy it sometime.
-	$sp_list_type = '';
+	$in_text = lists($new_split_text);
+	//die($in_text);
+
 	return "\n".$CI->syntaxparser->hash($in_text)."\n";
 }
-function lists_callback(&$matches) {
-	global $CI, $sp_list_type;
-	//echo($matches[2]);
-	if(strpos($matches[1], '*')!==FALSE)
-		{ $tag = 'ul'; }
-	else if(strpos($matches[1], '#')!==FALSE)
-		{ $tag = 'ol'; }
-	else
-		{ return ''; }
-	
-	$level = strlen($matches[1]);
-	$text = trim($matches[2]); //Maybe only trim by one space to allow for users to force space.
-	$text = $CI->syntaxparser->applyAllInlineDefs($text);
+function lists($in_list_array, $ol_index=1) {
+	global $CI;
 
-	$pre = '';
-	$post = '';
-	$list_html = '';
-	for($i=0; $i<$level; $i++)
+	//Define some variables
+	$tags_def['ul']['identifier'] = '*';
+	$tags_def['ol']['identifier'] = '#';
+	
+	//Construct identifiers regex
+	$identifiers = '';
+	foreach($tags_def as $each_tag)
 	{
-			$pre .= '<'.$tag.'><li>';
-			$post .= '</li></'.$tag.'>';
+		$identifiers .= '\\'.$each_tag['identifier'].'|';
+	}
+	$identifiers = trim($identifiers, '|');
+	//Construct tags regex
+	$tags = '';
+	foreach(array_keys($tags_def) as $each_tag_key)
+	{
+		$tags .= $each_tag_key.'|';
+	}
+	$tags = trim($tags, '|');	
+	
+	//-------------------------------
+	
+	$first_entry = get_list_entry_info($in_list_array[0]);
+	$list_type = $first_entry['type'];
+	$list_level = $first_entry['level'];
+	
+	//die($list_type.' '.$list_level);
+	
+	/*
+	if($list_level != 1)
+	{
+		$type_tabs =  str_repeat("\t", $list_level);
+		$tabs = $type_tabs."\t";
+	}
+	else
+	{
+		$type_tabs =  str_repeat("\t", $list_level-1);
+		$tabs = $type_tabs."\t";
+	}
+	*/
+	
+	$type_tabs = str_repeat("\t", ($list_level-1)*2); //Calculate indents correctly
+	$tabs = $type_tabs."\t";
+	
+	$inner_list = array();
+	$end_type_tag = true; //Do we print the end type tag?
+	//$ol_index = 1; //If a ul cuts into an ol, we can resume the index from this.
+	if($list_type == 'ol' && $ol_index > 1)
+	{
+		$list_html = $type_tabs.'<'.$list_type.' start="'.$ol_index.'">'."\n";
+	}
+	else
+	{
+		$list_html = $type_tabs.'<'.$list_type.'>'."\n";
+	}
+	foreach($in_list_array as $key => $each_line)
+	{
+		$entry_info = get_list_entry_info($each_line);
+		//Check level first
+		if($entry_info['level'] == $list_level)
+		{
+			if($entry_info['type'] == $list_type)
+			{
+				$list_html .= $tabs.'<li>'.$entry_info['content'];
+				if(isset($in_list_array[$key+1]))
+				{
+					$next_entry_info = get_list_entry_info($in_list_array[$key+1]);
+					if($next_entry_info['level'] == $list_level && $next_entry_info['type'] == $list_type)
+					{
+						$list_html .= '</li>'."\n";
+					}
+					else
+					{
+						//Nothing
+						$list_html .= "\n";
+					}
+				}
+				else
+				{
+					$list_html .= '</li>'."\n";
+				}
+			}
+			else
+			{
+				//Same level, different type => new list
+				$inner_list[] = $each_line;
+				
+				//Check next line
+				if(isset($in_list_array[$key+1]))
+				{
+					$next_entry_info = get_list_entry_info($in_list_array[$key+1]);
+					if($next_entry_info['type'] != $entry_info['type']) //$next_entry_info['level'] != $list_level && 
+					{
+						$list_html .= $type_tabs.'</'.$list_type.'>'."\n";
+						$list_html .= lists($inner_list)."\n";//.$tabs.'</li>'."\n";
+						//$list_html .= $type_tabs.'<'.$list_type.'>'."\n";
+						$inner_list = array();
+						$end_type_tag = false;
+						
+						//Put the rest of the array through lists
+						$list_html .= lists(array_slice($in_list_array, $key+1), $ol_index+1)."\n";
+						return $list_html;
+					}
+				}
+				else
+				{
+					$list_html .= $type_tabs.'</'.$list_type.'>'."\n";
+					$list_html .= lists($inner_list);//.$tabs.'</li>'."\n";
+					//$list_html .= $type_tabs.'<'.$list_type.'>'."\n";
+					$inner_list = array();
+					$end_type_tag = false;
+				}
+			}
+		}
+		else
+		{
+			//Diff level
+			$inner_list[] = $each_line;
+			
+			//Check next line
+			if(isset($in_list_array[$key+1]))
+			{
+				$next_entry_info = get_list_entry_info($in_list_array[$key+1]);
+				if($next_entry_info['level'] == $list_level)
+				{
+					$list_html .= lists($inner_list)."\n".$tabs.'</li>'."\n";
+					$inner_list = array();
+				}
+			}
+			else
+			{
+				$list_html .= lists($inner_list)."\n".$tabs.'</li>'."\n";
+				$inner_list = array();
+			}
+		}
+		
+	}
+	if($end_type_tag)
+	{
+		$list_html .= $type_tabs.'</'.$list_type.'>';
+		$end_type_tag = false;
 	}
 	
-	$list_html = $pre.$text.$post;
 	return $list_html;
 }
+function get_list_entry_info($in_entry) {
+	//Define some variables
+	$tags_def['ul']['identifier'] = '*';
+	$tags_def['ol']['identifier'] = '#';
+	
+	//Construct identifiers regex
+	$identifiers = '';
+	foreach($tags_def as $each_tag)
+	{
+		$identifiers .= '\\'.$each_tag['identifier'].'|';
+	}
+	$identifiers = trim($identifiers, '|');
+	//Construct tags regex
+	$tags = '';
+	foreach(array_keys($tags_def) as $each_tag_key)
+	{
+		$tags .= $each_tag_key.'|';
+	}
+	$tags = trim($tags, '|');	
+	
+	if(preg_match('/\s*((?:'.$identifiers.')+)\s+(.*)/s', $in_entry, $matches))
+	{
+		$list_type_symbol = substr($matches[1], 0, 1); //Get first character
+		switch($list_type_symbol)
+		{
+			case $tags_def['ul']['identifier']:
+				$list_type = 'ul';
+				break;
+			case $tags_def['ol']['identifier']:
+				$list_type = 'ol';
+				break;
+			default:
+				$list_type = 'ul'; //Let's just assume this
+		}
+		$list_level = strlen($matches[1]);
+		$list_content = $matches[2];
+	}
+	else
+	{
+		//Something is wrong.
+		return 'Invalid list';
+	}
+	
+	//Return as array
+	$return_info['type'] = $list_type;
+	$return_info['level'] = $list_level;
+	$return_info['content'] = $list_content;
+	
+	return $return_info;
 
+}
 
 /**
  * Tables
