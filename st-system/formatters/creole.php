@@ -19,12 +19,7 @@ $CI =& get_instance();
 //str_replace in this case is faster, but oh well, we sacrifice some.
 //Also, I've seen this done with (\r|\r\n), but this is slower since two
 //checks are done at each step.
-$CI->syntaxparser->add_block_definition('to_unix_lineendings', '/\r\n?/', "\n", 10, false);
-
-//Replace 4 consecutive spaces at the beginning of a line with tab character.
-//Since the text is all one long string, we find the start of lines by the \n
-//and then we count four consecutive spaces.
-//$CI->syntaxparser->add_block_definition('spaces_to_tab', '/\n[ ]{4}/', "\n\t", 20, false); 
+$CI->syntaxparser->add_block_definition('to_unix_lineendings', '/\r\n?/', "\n", 10, false); 
 
 /**
  * Trim
@@ -43,24 +38,24 @@ function trim_spaces_callback(&$matches) {
 //in regex later since we can assume lines start and end with \n
 $CI->syntaxparser->add_block_definition('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40, false);
 
-
-/**
- * Metadata
- * Undisplayed items associated with a page. Think of these as "page settings"
- */
-$CI->syntaxparser->add_block_definition('metadata', '/^@@([a-zA-Z0-9_-]+)\s*=\s*(.+)@@\s*$/m', 'metadata_callback', 50, true);
-function metadata_callback(&$matches) {
+//Escape character here. We parse the escape character only if it is at the start
+//of some word (so we have a whitespace char in front).
+$CI->syntaxparser->add_block_definition('escape', '/(\s|^)~(.)/', 'escape_callback', 45, true);
+function escape_callback(&$matches) {
 	global $CI;
 	
-	$matches[1] = $CI->input->xss_clean($matches[1]);
-	$matches[1] = htmlentities($matches[1], ENT_QUOTES);
-	$matches[2] = $CI->input->xss_clean($matches[2]);
-	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
+	//Protect against some XSS (When user tries to escape every character in XSS
+	//in hopes that after unhashing the malicious code is assembled again).
+	$matches[1] = htmlentities($matches[1]);
 	
-	$CI->template->add_value($matches[1], $matches[2]);
+	//If \s is a space, we remove it
+	if(strcmp($matches[1], ' ')==0)
+	{
+		return $CI->syntaxparser->hash($matches[2]);
+	}
 	
-	//Do not return anything
-}  
+	return $matches[1].$CI->syntaxparser->hash($matches[2]);
+}
 
 //We want to specify blocks first.
 
@@ -68,10 +63,11 @@ $CI->syntaxparser->add_block_definition('preformatted', '/\n{{{\n(.*)\n}}}\n/Us'
 function preformatted_callback(&$matches) {
 	global $CI;
 
+	
+
 	//Currently taken from Preformatted.php from Creole of Pear::Text_wiki
 	//@author Tomaiuolo Michele <tomamic@yahoo.it>
 	
-	global $preformatted_storage, $preformatted_storage_count, $preformatted_token;
 	// any sequence of closing curly braces separated
 	// by some spaces, will have one space removed
 	$find = "/} ( *)(?=})/";
@@ -153,7 +149,7 @@ function headings_callback(&$matches) {
   //The header can't accept any other block level elements inside so just inline:
   $text = $CI->syntaxparser->applyAllInlineDefs($text);
   
-  return $CI->syntaxparser->hash('<h'.$level.'>'.$text.'</h'.$level.'>'); //Maybe we don't need the newlines
+  return $CI->syntaxparser->hash('<h'.$level.'>'.$text.'</h'.$level.'>')."\n"; //Maybe we don't need the newlines
 }
 
 /**
@@ -224,7 +220,7 @@ function lists_callback(&$matches) {
 	for($i=0; $i<count($split_text); $i++)
 	{
 		//if(isset($split_text[$i+1]) && !preg_match('/\s*(?:'.$identifier.'|'.$anti_identifiers.')+\s+.*/', $split_text[$i+1]))
-		if(isset($split_text[$i+1]) && !preg_match('/\s*(?:'.$identifiers.')+\s+.*/', $split_text[$i+1]))
+		if(isset($split_text[$i+1]) && !preg_match('/\s*(?:'.$identifiers.')+\s*.*/', $split_text[$i+1]))
 		{
 			//echo 'here'. $split_text[$i].'|'.$split_text[$i+1]."\n";
 			if(isset($new_split_text[$new_split_text_count]))
@@ -448,7 +444,7 @@ function get_list_entry_info($in_entry) {
 	}
 	$tags = trim($tags, '|');	
 	
-	if(preg_match('/\s*((?:'.$identifiers.')+)\s+(.*)/s', $in_entry, $matches))
+	if(preg_match('/\s*((?:'.$identifiers.')+)\s*(.*)/s', $in_entry, $matches))
 	{
 		$list_type_symbol = substr($matches[1], 0, 1); //Get first character
 		switch($list_type_symbol)
@@ -535,6 +531,9 @@ function paragraph_callback(&$matches) {
 	
 	if(preg_match('/'.$CI->syntaxparser->token_pattern.'/', $matches[1]))
 	{
+		//Replace escape hashes with contents of the escape.
+		$matches[1] = preg_replace_callback('/\s*('.$CI->syntaxparser->token_pattern.')\s*/', 'paragraph_callback_escape', $matches[1]);
+	
 		//This takes care of cases where one block is right under another with no
 		//line break inbetween. Essentially, we are checking for the existance of
 		//hashed blocks and then ignoring the hashed blocks (and working only on
@@ -542,16 +541,66 @@ function paragraph_callback(&$matches) {
 		//= Header =
 		//Paragraph right underneath header without a newline inbetween.
 		$split_by_token = preg_split('/(\s*'.$CI->syntaxparser->token_pattern.'\s*)/', $matches[1], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+		
+		//NOTE: Tokens (hashes) are stored in $split_by_token each as their own entry.
+		
+		//echo $matches[1]."\n\n";
+		//print_r($split_by_token);
+		//die();
+		
 		/*
-		echo $matches[1]."\n\n";
-		print_r($split_by_token);
-		die();
+		//Check for the escape character hash and connect paragraphs if needed.
+		$new_split_by_token = array();
+		for($i=0;$i<count($split_by_token);$i++)
+		{
+			if(preg_match('/'.$CI->syntaxparser->token_pattern.'/', $split_by_token[$i]))
+			{
+				//We check if the hash is from an escape character.
+				$temp_unhash = $CI->syntaxparser->unhash(trim($split_by_token[$i]));
+				if(preg_match('/^.$/', $temp_unhash)) //one character
+				{
+					if(isset($split_by_token[$i+1]))
+					{
+						//If the next element is a hash, we don't connect it.
+						if(preg_match('/'.$CI->syntaxparser->token_pattern.'/', $split_by_token[$i+1]))
+						{
+							$new_split_by_token[] = array_pop($new_split_by_token).$temp_unhash;
+						}
+						else
+						{
+							$new_split_by_token[] = array_pop($new_split_by_token).$temp_unhash.$split_by_token[$i+1];
+							$i++; //Skip next element
+						}
+					}
+					else
+					{
+						$new_split_by_token[] = array_pop($new_split_by_token).$temp_unhash;
+					}
+				}
+				else
+				{
+					$new_split_by_token[] = $split_by_token[$i];
+				}
+			}
+			else
+			{
+				$new_split_by_token[] = $split_by_token[$i];
+			}
+		}
 		*/
+		
+		//print_r($new_split_by_token);
+		//die();
+		
 		$output = '';
 		foreach($split_by_token as $each_split)
 		{
+			//echo $each_split."\n";
 			if(!preg_match('/'.$CI->syntaxparser->token_pattern.'/', $each_split))
 			{
+				//Re-escape the un-hashed elements. Crude, but ok for now.
+				$each_split = $CI->syntaxparser->applyBlockDef('escape', $each_split);
+				
 				$each_split = $CI->syntaxparser->applyAllInlineDefs($each_split);
 				$output .= '<p>'.$each_split.'</p>';
 			}
@@ -580,28 +629,20 @@ function paragraph_callback(&$matches) {
 	
 	return $matches[1].$matches[2]; //Why don't we need to prepend \n ?
 }
+function paragraph_callback_escape(&$matches) {
+	global $CI;
+	
+	$temp_unhash = $CI->syntaxparser->unhash(trim($matches[1]));
+	if(preg_match('/^.$/', $temp_unhash)) //one character
+	{
+		return '~'.$temp_unhash;
+	}
+	
+	return $matches[1];
+}
 
 
 //Specify inline elements
-
-//Escape character here. We parse the escape character only if it is at the start
-//of some word (so we have a whitespace char in front).
-$CI->syntaxparser->add_inline_definition('escape', '/(\s|^)~(.)/', 'escape_callback', 50, true);
-function escape_callback(&$matches) {
-	global $CI;
-	
-	//Protect against some XSS (When user tries to escape every character in XSS
-	//in hopes that after unhashing the malicious code is assembled again).
-	$matches[1] = htmlentities($matches[1]);
-	
-	//If \s is a space, we remove it
-	if(strcmp($matches[1], ' ')==0)
-	{
-		return $CI->syntaxparser->hash($matches[2]);
-	}
-	
-	return $matches[1].$CI->syntaxparser->hash($matches[2]);
-}
 
 //Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
 //NOTE: This should be checked VERY carefully against the Creole specification.

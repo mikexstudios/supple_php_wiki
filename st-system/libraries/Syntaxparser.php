@@ -200,7 +200,8 @@ class SyntaxParser {
 	}
 
 	function unhash($key) {
-	
+		$key = trim($key, $this->delimiter);
+		
 		if(!empty($this->hashed_text[$key]))
 		{
 			return $this->hashed_text[$key];			
@@ -223,7 +224,7 @@ class SyntaxParser {
 	 * @access private
 	 */	 	
 	function _unhash_contents_callback(&$matches) {
-		$matches[1] = trim($matches[1], $this->delimiter);
+		//$matches[1] = trim($matches[1], $this->delimiter);
 		return $this->unhash($matches[1]);
 	}
 	
