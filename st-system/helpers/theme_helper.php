@@ -144,12 +144,12 @@ function format_text($in_text) {
 	return $CI->syntaxparser->getText();
 }
 
-$CI->template->add_function('page_exists', 'does_page_exist');
+$CI->template->add_function('page_exists', 'does_current_page_exist');
 /**
  * Assumes that this will be called from template so that page
  * information has already been set
  */  
-function does_page_exist() {
+function does_current_page_exist() {
 	$temp_content = get('page_content');
 	if(!empty($temp_content))
 	{
@@ -164,6 +164,13 @@ function get_execution_time() {
 	global $CI;
 	
 	return $CI->benchmark->elapsed_time();
+}
+
+$CI->template->add_function('database_queries', 'get_num_database_queries');
+function get_num_database_queries() {
+	global $CI;
+	
+	return $CI->db->total_queries();
 }
 
 $CI->template->add_function('form_value', 'get_form_value');

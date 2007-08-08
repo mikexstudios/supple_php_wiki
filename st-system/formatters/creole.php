@@ -166,20 +166,22 @@ function lists_callback(&$matches) {
 	
 	//If we match ** by itself without surrounding *, then we know that it
 	//is the 'strong' modifier. Therefore, we return without doing anything.
-	if(preg_match('/^\*\*.+$/', $in_text))
+	/*
+	if(preg_match('/^\*\*.+$/s', $in_text))
 	{
-		return $in_text;
+		return "\n".$in_text;
 	}
+	*/
 	
 	//Define a few things:
-	$tags_def['ul']['identifier'] = '\*';
-	$tags_def['ol']['identifier'] = '\#';
+	$tags_def['ul']['identifier'] = '*';
+	$tags_def['ol']['identifier'] = '#';
 	
 	//Construct identifiers regex
 	$identifiers = '';
 	foreach($tags_def as $each_tag)
 	{
-		$identifiers .= $each_tag['identifier'].'|';
+		$identifiers .= '\\'.$each_tag['identifier'].'|';
 	}
 	$identifiers = trim($identifiers, '|');
 	
@@ -235,6 +237,28 @@ function lists_callback(&$matches) {
 	//print_r($new_split_text);
 	//die();
 	
+	//Check to see if we actually have a bold entry instead of a list
+	if(count($new_split_text) == 1 && preg_match('/^\*\*.+$/s', $new_split_text[0]))
+	{
+		return "\n".$new_split_text[0]."\n";
+	}
+	
+	//If the list starts out with a level greater than 1, then we pad the beginning
+	//of the array with the previous levels.
+	$new_split_first_entry = get_list_entry_info($new_split_text[0]);
+	if($new_split_first_entry['level'] > 1)
+	{
+		//die($new_split_first_entry['level']);
+		//die($new_split_first_entry['content'].print_r($new_split_first_entry));
+		$temp_identifier = $tags_def[$new_split_first_entry['type']]['identifier'];
+		for($i=1; $i<$new_split_first_entry['level']; $i++)
+		{	
+			//die($i.'asdf');
+			array_unshift($new_split_text, str_repeat($temp_identifier, $i).' '); 
+		}
+	}
+	
+	//Recursively process lists
 	$in_text = lists($new_split_text);
 	//die($in_text);
 
@@ -305,7 +329,7 @@ function lists($in_list_array, $ol_index=1) {
 		{
 			if($entry_info['type'] == $list_type)
 			{
-				$list_html .= $tabs.'<li>'.$entry_info['content'];
+				$list_html .= $tabs.'<li>'.$CI->syntaxparser->applyAllInlineDefs($entry_info['content']);
 				if(isset($in_list_array[$key+1]))
 				{
 					$next_entry_info = get_list_entry_info($in_list_array[$key+1]);
@@ -343,7 +367,7 @@ function lists($in_list_array, $ol_index=1) {
 						
 						//Put the rest of the array through lists
 						$list_html .= lists(array_slice($in_list_array, $key+1), $ol_index+1)."\n";
-						return $list_html;
+						return $list_html; //This ends execution of this function
 					}
 				}
 				else
@@ -545,7 +569,7 @@ function paragraph_callback(&$matches) {
 
 //Escape character here. We parse the escape character only if it is at the start
 //of some word (so we have a whitespace char in front).
-$CI->syntaxparser->add_inline_definition('escape', '/(\s)~(.)/', 'escape_callback', 50, true);
+$CI->syntaxparser->add_inline_definition('escape', '/(\s|^)~(.)/', 'escape_callback', 50, true);
 function escape_callback(&$matches) {
 	global $CI;
 	
@@ -641,7 +665,7 @@ function links_callback(&$matches) {
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
 		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES);
-		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>');
+		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
 	
 	//Match just external url.
@@ -649,7 +673,7 @@ function links_callback(&$matches) {
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
-		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>');
+		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
 	}
 	
 	//Match mailto: type links. NOTE: This could be dangerous if we don't check well.
@@ -660,13 +684,13 @@ function links_callback(&$matches) {
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
 		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES);
-		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'">'.$url_matches[2].'</a>');
+		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
 		if(preg_match('/([a-z]+:\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
-		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.$url_matches[1].'">'.$url_matches[1].'</a>'));
+		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
 	}
 	
 	//Match WikiLinks (The regex for these should be better...and safer)
@@ -679,16 +703,37 @@ function links_callback(&$matches) {
 
 		$link_matches[2] = $CI->input->xss_clean($link_matches[2]);
 		$link_matches[2] = htmlentities($link_matches[2], ENT_QUOTES);
-		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>'));
+		
+		//Check for wiki-page existance
+		if(does_page_exist($link_matches[1]))
+		{
+			$return_url = '<a href="'.construct_page_url($link_matches[1]).'">'.$link_matches[2].'</a>';
+		}
+		else
+		{
+			$return_url = '<a href="'.construct_page_url($link_matches[1]).'" class="missingpage" title="Create this page">'.$link_matches[2].'</a>';
+		}
+		
+		return $CI->syntaxparser->hash($return_url);
 	}	
 	
-	//Dangerous regex?
+	//Dangerous regex? Limit characters
 	if(preg_match('/(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
 		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES);
-
-		return $CI->syntaxparser->hash($CI->input->xss_clean('<a href="'.construct_page_url(wiki_url_title($link_matches[1])).'">'.$link_matches[1].'</a>'));
+		
+		//Check for wiki-page existance
+		if(does_page_exist($link_matches[1]))
+		{
+			$return_url = '<a href="'.construct_page_url(wiki_url_title($link_matches[1])).'">'.$link_matches[1].'</a>';
+		}
+		else
+		{
+			$return_url = '<a href="'.construct_page_url(wiki_url_title($link_matches[1])).'" class="missingpage" title="Create this page">'.$link_matches[1].'</a>';
+		}
+		
+		return $CI->syntaxparser->hash($return_url);
 	}	
 	
 	//For everything else that doesn't seem to match.
@@ -721,7 +766,18 @@ function wikiwordlink_callback(&$matches) {
 	//$matches[1] includes the whitespace characters.
 	$matches[2] = $CI->input->xss_clean($matches[2]);
 	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
-	return $matches[1].$CI->syntaxparser->hash('<a href="'.construct_page_url($matches[2]).'">'.$matches[2].'</a>');
+	
+	//Check for wiki-page existance
+	if(does_page_exist($matches[2]))
+	{
+		$return_url = '<a href="'.construct_page_url($matches[2]).'">'.$matches[2].'</a>';
+	}
+	else
+	{
+		$return_url = '<a href="'.construct_page_url($matches[2]).'" class="missingpage" title="Create this page">'.$matches[2].'</a>';
+	}
+	
+	return $matches[1].$CI->syntaxparser->hash($return_url);
 }
 
 /**
@@ -761,17 +817,17 @@ function raw_url_callback(&$matches) {
 		{
 			$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
 			$url = htmlentities($url, ENT_QUOTES);
-			return $CI->syntaxparser->hash('<a href="'.$url.'">'.$url.'</a>');
+			return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 		}
 
 		$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1]);
 		$url = htmlentities($url, ENT_QUOTES);
-		return $CI->syntaxparser->hash('<a href="'.$url.'">'.$url.'</a>').$raw_url_matches[2]; //We keep the punctuation on the end.
+		return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>').$raw_url_matches[2]; //We keep the punctuation on the end.
 	}
 	
 	$url = $CI->input->xss_clean($matches[2].$matches[3]);
 	$url = htmlentities($url, ENT_QUOTES);
-	return $CI->syntaxparser->hash('<a href="'.$url.'">'.$url.'</a>');
+	return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 }
 
 /**

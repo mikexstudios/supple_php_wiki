@@ -6,7 +6,7 @@ body {
 	margin: 0 auto;
 	padding: 0;
 	font-family: "Lucida Grande", verdana, arial, helvetica, sans-serif;
-		font-size: small; line-height: 1.3em;
+		font-size: small; line-height: 1.5em;
 	color: #000;
   background: #fff;
   width: 700px;
@@ -70,7 +70,37 @@ code, pre	{
 	padding-left: 5px;
 }
 
+.missingpage {
+	text-decoration: none;
+	border-bottom-width: 1px;
+	border-bottom-color: #063;
+	border-bottom-style: dashed;
+}
 
+/* text formatting */
+h1 {
+	font-size: 18pt;
+}
+
+h2 {
+	font-size: 16pt;
+}
+
+h3 {
+	font-size: 14pt;
+}
+
+h4 {
+	font-size: 12pt;
+}
+
+h5 {
+	font-size: 10pt;
+}
+
+h6 {
+	font-size: 8pt;
+}
 
 /*-------------------------------------------------
 STRUCTURE

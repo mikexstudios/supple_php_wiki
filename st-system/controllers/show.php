@@ -49,7 +49,7 @@ class Show extends Controller {
 		$this->_set_page_info($pagename);
 		
 		//Syntax formatting. 
-		if(does_page_exist())
+		if(does_current_page_exist())
 		{
 			$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
 		}

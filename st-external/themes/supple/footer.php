@@ -10,7 +10,7 @@
 		<a class="ext" href="http://validator.w3.org/check/referer">Valid XHTML 1.0 Transitional</a> |
 		<a class="ext" href="http://jigsaw.w3.org/css-validator/check/referer">Valid CSS</a> |
 		Powered by <a class="ext" href="http://www.suppletext.org/">suppleText</a><br />
-		Page was generated in <?php out('execution_time'); ?> seconds
+		Page was generated in <?php out('execution_time'); ?> seconds with <?php out('database_queries'); ?> queries.
 	</div>
 </div>
 
