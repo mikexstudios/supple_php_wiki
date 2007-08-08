@@ -29,7 +29,7 @@ $CI->syntaxparser->add_block_definition('to_unix_lineendings', '/\r\n?/', "\n", 
  * (But below implementation could be a little slow)
  * NOTE: Trim conflicts with spaces_to_tab! 
  */ 
-$CI->syntaxparser->add_block_definition('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30);
+//$CI->syntaxparser->add_block_definition('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30);
 function trim_spaces_callback(&$matches) {
 	return trim($matches[1]);
 } 
