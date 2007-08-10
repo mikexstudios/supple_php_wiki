@@ -46,7 +46,7 @@ function escape_callback(&$matches) {
 	
 	//Protect against some XSS (When user tries to escape every character in XSS
 	//in hopes that after unhashing the malicious code is assembled again).
-	$matches[1] = htmlentities($matches[1]);
+	$matches[1] = htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
 	
 	//If \s is a space, we remove it
 	if(strcmp($matches[1], ' ')==0)
@@ -531,7 +531,7 @@ function paragraph_callback(&$matches) {
 	{
 		//Replace escape hashes with contents of the escape.
 		$matches[1] = preg_replace_callback('/\s*('.$CI->syntaxparser->token_pattern.')\s*/', 'paragraph_callback_escape', $matches[1]);
-	
+		//die($matches[1]);
 		//This takes care of cases where one block is right under another with no
 		//line break inbetween. Essentially, we are checking for the existance of
 		//hashed blocks and then ignoring the hashed blocks (and working only on
@@ -633,7 +633,7 @@ function paragraph_callback_escape(&$matches) {
 	$temp_unhash = $CI->syntaxparser->unhash(trim($matches[1]));
 	if(preg_match('/^.$/', $temp_unhash)) //one character
 	{
-		return '~'.$temp_unhash;
+		return ' ~'.$temp_unhash;
 	}
 	
 	return $matches[1];
@@ -642,14 +642,33 @@ function paragraph_callback_escape(&$matches) {
 
 //Specify inline elements
 
+//Escape character here. We parse the escape character only if it is at the start
+//of some word (so we have a whitespace char in front).
+$CI->syntaxparser->add_inline_definition('escape', '/(^|\s)~(.)/', 'inline_escape_callback', 50, true);
+function inline_escape_callback(&$matches) {
+	global $CI;
+
+	//Protect against some XSS (When user tries to escape every character in XSS
+	//in hopes that after unhashing the malicious code is assembled again).
+	$matches[1] = htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
+	
+	//If \s is a space, we remove it
+	if(strcmp($matches[1], ' ')==0)
+	{
+		return $CI->syntaxparser->hash($matches[2]);
+	}
+	
+	return $matches[1].$CI->syntaxparser->hash($matches[2]);
+}
+
 //Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
 //NOTE: This should be checked VERY carefully against the Creole specification.
 //      I have a feeling that this is currently wrong.
 //Creole 1.0 says that this doesn't HAVE to be monospace.
-$CI->syntaxparser->add_inline_definition('tt', '/{{{({*?.*?}*)}}}/', 'tt_callback', 100, true);
+$CI->syntaxparser->add_inline_definition('tt', '/{{{(.*?)}}}/', 'tt_callback', 100, true);
 function tt_callback(&$matches) {
 	global $CI;
-	
+	//die($matches[1]);
 	return $CI->syntaxparser->hash('<tt>'.$matches[1].'</tt>');
 }
 
@@ -683,9 +702,9 @@ function inlineimage_callback(&$matches) {
 	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
-		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
+		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
-		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES);
+		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />');
 	}
 	
@@ -693,7 +712,7 @@ function inlineimage_callback(&$matches) {
 	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
-		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
+		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<img src="'.$url_matches[1].'" />');
 		
 	}
@@ -718,9 +737,9 @@ function links_callback(&$matches) {
 	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
-		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
+		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
-		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES);
+		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
 	
@@ -728,7 +747,7 @@ function links_callback(&$matches) {
 	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
-		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
+		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
 	}
 	
@@ -737,15 +756,15 @@ function links_callback(&$matches) {
 	if(preg_match('/([a-z]+:\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
-		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
+		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
-		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES);
+		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
 		if(preg_match('/([a-z]+:\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
-		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES);
+		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
 	}
 	
@@ -753,12 +772,12 @@ function links_callback(&$matches) {
 	if(preg_match('/(.+)\|(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
-		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES);
+		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES, 'UTF-8');
 		//Translate text into a linkable wikiword
 		$link_matches[1] = wiki_url_title($link_matches[1]);
 
 		$link_matches[2] = $CI->input->xss_clean($link_matches[2]);
-		$link_matches[2] = htmlentities($link_matches[2], ENT_QUOTES);
+		$link_matches[2] = htmlentities($link_matches[2], ENT_QUOTES, 'UTF-8');
 		
 		//Check for wiki-page existance
 		if(does_page_exist($link_matches[1]))
@@ -777,7 +796,7 @@ function links_callback(&$matches) {
 	if(preg_match('/(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
-		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES);
+		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES, 'UTF-8');
 		
 		//Check for wiki-page existance
 		if(does_page_exist($link_matches[1]))
@@ -821,7 +840,7 @@ function wikiwordlink_callback(&$matches) {
 	
 	//$matches[1] includes the whitespace characters.
 	$matches[2] = $CI->input->xss_clean($matches[2]);
-	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
+	$matches[2] = htmlentities($matches[2], ENT_QUOTES, 'UTF-8');
 	
 	//Check for wiki-page existance
 	if(does_page_exist($matches[2]))
@@ -872,17 +891,17 @@ function raw_url_callback(&$matches) {
 		if(!empty($raw_url_matches[3])) 
 		{
 			$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
-			$url = htmlentities($url, ENT_QUOTES);
+			$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
 			return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 		}
 
 		$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1]);
-		$url = htmlentities($url, ENT_QUOTES);
+		$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>').$raw_url_matches[2]; //We keep the punctuation on the end.
 	}
 	
 	$url = $CI->input->xss_clean($matches[2].$matches[3]);
-	$url = htmlentities($url, ENT_QUOTES);
+	$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
 	return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 }
 
