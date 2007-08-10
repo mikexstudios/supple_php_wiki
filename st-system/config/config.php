@@ -43,7 +43,7 @@ $config['index_page'] = "";
 | 'ORIG_PATH_INFO'	Uses the ORIG_PATH_INFO
 |
 */
-$config['uri_protocol']	= "PATH_INFO"; //For win32
+$config['uri_protocol']	= "AUTO";
 
 /*
 |--------------------------------------------------------------------------
