@@ -151,7 +151,8 @@ $CI->template->add_function('page_exists', 'does_current_page_exist');
  */  
 function does_current_page_exist() {
 	$temp_content = get('page_content');
-	if(!empty($temp_content))
+	$temp_time = get('page_time');
+	if(!empty($temp_content) && !empty($temp_time))
 	{
 		return true;
 	}

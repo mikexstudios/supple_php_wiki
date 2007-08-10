@@ -883,7 +883,7 @@ function raw_url_callback(&$matches) {
 	}
 	
 	//We won't consider single punctuation characters at the end of the URL
-	if(preg_match('/(\S+)([,\.\?!:;"\']+)(\S+)?/', $matches[3], $raw_url_matches)) 
+	if(preg_match('/(\S+)([,\.\?!:;"\'\)\(]+)(\S+)?/', $matches[3], $raw_url_matches)) 
 	{
 		//This is kind of crude, but works. Perhaps a recursive approach would be
 		//more elegant.
