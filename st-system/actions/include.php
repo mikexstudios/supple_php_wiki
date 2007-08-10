@@ -10,20 +10,29 @@ $page = strtolower($page);
 
 if ($page != get_current_pagename()) 
 {
-	//Create another instance of the pages_model
-	$CI->load->model('Pages_model', 'pages_model_include');
-	$CI->pages_model_include->pagename = $page;
-	//die($page);
-	$CI->pages_model_include->loadPage();
+	//Check if page exists
+	if(does_page_exist($page))
+	{
+		//Create another instance of the pages_model
+		$CI->load->model('Pages_model', 'pages_model_include');
+		$CI->pages_model_include->pagename = $page;
+		//die($page);
+		$CI->pages_model_include->loadPage();
+			
+		//Syntax formatting. 
+		//$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
 		
-	//Syntax formatting. 
-	//$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
-	
-	echo $CI->pages_model_include->page['body'];
-	
-	//NOTE: Since CI does its own thing with loading files,
-	//we can't unset the model using unset().
-	//unset($CI->pages_model_include);
+		echo $CI->pages_model_include->page['body'];
+		
+		//NOTE: Since CI does its own thing with loading files,
+		//we can't unset the model using unset().
+		//unset($CI->pages_model_include);
+	}
+	else
+	{
+		//echo 'Unknown page: '.$page;
+		echo '';
+	}
 } 
 else print '<em class="error">Circular reference.</em>';
 

@@ -240,7 +240,14 @@ class SyntaxParser {
 		$action = $in_action;
 		$args = $in_args;
 		
-		return include_buffered(base_path('st-system/actions/'.$action.'.php'));
+		//Check if action file exists
+		$action_path = base_path('st-system/actions/'.$action.'.php');
+		if(file_exists($action_path))
+		{
+			return include_buffered(base_path('st-system/actions/'.$action.'.php'));
+		}
+		
+		return false;
 	}
 
 }

@@ -86,42 +86,6 @@ function preformatted_callback(&$matches) {
 	return "\n".$CI->syntaxparser->hash("<pre>\n".$matches[1]."\n</pre>")."\n";
 }  
 
-/**
- * Snippets
- * well, they are the Wikka/Wakka "actions", but we don't have a better 
- * name for them yet.
- */
-$CI->syntaxparser->add_block_definition('snippets', '/<<(.+?)>>/', 'snippets_callback', 75); 
-function snippets_callback(&$matches) {
-	global $CI;
-	
-	$action = trim($matches[1]);
-	
-	if (!preg_match('/^[ a-zA-Z0-9_:]+$/', $action))
-	{
-		//return 'Unknown action; the action name must not contain special characters.';
-		return '<<'.$action.'>>';
-	}
-	
-	$action = htmlentities($action, ENT_QUOTES);
-
-	// search for parameters separated by spaces or newlines - Wikka #371
-	if (preg_match('/\s/', $action))
-	{
-		// parse input for action name and parameters
-		if(preg_match('/^([A-Za-z0-9]*)\s+(.*)$/s', $action, $matches))
-		{
-			// extract $action and $vars_temp ("raw" attributes)
-			list(, $action, $args) = $matches;
-			
-			//Call action, pass the args to it
-			return $CI->syntaxparser->doAction($action, $args);
-		}
-	}
-
-	return $CI->syntaxparser->doAction($action);
-}
-
 //When non-paragraph items are separated by more than one newline, then we
 //assume that the user is intentionally inserting a newline:
 //See #10: http://dev.suppletext.org/ticket/10
@@ -219,32 +183,33 @@ function lists_callback(&$matches) {
 	$new_split_text_count = 0;
 	for($i=0; $i<count($split_text); $i++)
 	{
+		if(isset($new_split_text[$new_split_text_count]))
+		{
+			$new_split_text[$new_split_text_count] .= "\n".$split_text[$i];
+		}
+		else
+		{
+			$new_split_text[$new_split_text_count] = $split_text[$i];
+		}
 		//if(isset($split_text[$i+1]) && !preg_match('/\s*(?:'.$identifier.'|'.$anti_identifiers.')+\s+.*/', $split_text[$i+1]))
 		if(isset($split_text[$i+1]) && !preg_match('/\s*(?:'.$identifiers.')+\s*.*/', $split_text[$i+1]))
 		{
 			//echo 'here'. $split_text[$i].'|'.$split_text[$i+1]."\n";
-			if(isset($new_split_text[$new_split_text_count]))
-			{
-				$new_split_text[$new_split_text_count] .= "\n".$split_text[$i];
-			}
-			else
-			{
-				$new_split_text[$new_split_text_count] = $split_text[$i];
-			}
+			//Do nothing. Since we don't increment the $new_split_text_count, we can
+			//keep concatinating.
 		}
 		else
 		{
-			if(isset($new_split_text[$new_split_text_count]))
+			//Fix for detecting if a line is actually bold. If that's the case, we
+			//just merge is with the previous line.
+			if(isset($split_text[$i+1]) && lists_determine_if_bold($split_text[$i+1]))
 			{
-				$new_split_text[$new_split_text_count] .= "\n".$split_text[$i];
-				//$new_split_text[$new_split_text_count] .= "\n".$split_text[$i+1];
 			}
 			else
 			{
-				$new_split_text[$new_split_text_count] = $split_text[$i];
+				//$new_split_text[$new_split_text_count] = $split_text[$i];
+				$new_split_text_count++;
 			}
-			//$new_split_text[$new_split_text_count] = $split_text[$i];
-			$new_split_text_count++;
 		}
 	}
 	//print_r($new_split_text);
@@ -255,6 +220,15 @@ function lists_callback(&$matches) {
 	{
 		return "\n".$new_split_text[0]."\n";
 	}
+	
+	//If the count is more than one, we have to check each entry and see if
+	//the user actually meant bold.
+	//print_r($new_split_text);
+	//$new_split_text = array_filter($new_split_text, 'lists_determine_if_bold');
+	//print_r($new_split_text);
+	//die();
+	
+	
 	
 	//If the list starts out with a level greater than 1, then we pad the beginning
 	//of the array with the previous levels.
@@ -276,6 +250,30 @@ function lists_callback(&$matches) {
 	//die($in_text);
 
 	return "\n".$CI->syntaxparser->hash($in_text)."\n";
+}
+function lists_determine_if_bold($in_entry) {
+	//$split_entry = preg_split('/(\*\*)/', $in_entry, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+	//print_r($split_entry);
+	
+	if(preg_match('/^\*\*[^\*]/', $in_entry) && preg_match_all('/(\*\*)/', $in_entry, $matches))
+	{
+		//print_r($matches);
+		//echo $in_entry;
+		//die();
+		$num_of_delimiters = count($matches[1]); //[1] contains matches (as subarray)
+		if($num_of_delimiters & 1) //bitwise check for oddness
+		{
+			//Odd. This means that we are in a list
+			return false;
+		}
+		else
+		{
+			//Even
+			return true;
+		}
+	}
+	
+	return false;
 }
 function lists($in_list_array, $ol_index=1) {
 	global $CI;
