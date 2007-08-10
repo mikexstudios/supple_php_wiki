@@ -30,6 +30,8 @@ class Diff extends Show {
 		$this->pid['a'] = $this->input->get('a');
 		$this->pid['b'] = $this->input->get('b');
 		
+		//die($this->pid['a']);
+		
 		//Secure input
 		if(!$this->validation->numeric($this->pid['a']) || !$this->validation->numeric($this->pid['b'])) 
 		{

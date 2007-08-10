@@ -207,7 +207,7 @@ class CI_Input {
 	 * @return	string
 	 */
 	function get($index = '', $xss_clean = FALSE)
-	{		
+	{	
 		if ( ! isset($_GET[$index]))
 		{
 			return FALSE;
