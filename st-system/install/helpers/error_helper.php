@@ -5,6 +5,25 @@
 
 $CI =& get_instance();
 
+function error_already_installed() {
+	global $CI;
+	
+	$data['error_title'] = 'Already Installed!';
+	$data['error_content'] = '
+		<p>
+		 suppleText has already been installed. Therefore, this entire install script has
+     been disabled. If you wish to reinstall suppleText, please delete st-config.php from
+     /st-external.
+		</p>
+     <p> 
+     If you need help you can always visit the 
+     <a href="http://www.suppletext.org/forum">suppleText Support Forums</a>.
+     </p>			
+	';
+	
+	$CI->load->view('error', $data);
+}
+
 function error_directory_writable() {
 	global $CI;
 	
@@ -82,7 +101,7 @@ function error_sample_config_file() {
 	$CI->load->view('error', $data);
 }
 
-function error_no_step1() {
+function error_no_config_temp() {
 	global $CI;
 	
 	$data['error_title'] = 'Step 1 not Completed!';
@@ -90,6 +109,26 @@ function error_no_step1() {
 		<p>
      suppleText could not find /st-external/config.temp.php which was generated
      during Step 1 of the installation.
+		</p>
+		<p> 
+		 Please try <a href="index.php">running the installation script again from 
+		 the beginning</a>. If you still need help you can always visit the 
+     <a href="http://www.suppletext.org/forum">suppleText Support Forums</a>.
+     </p>
+	';
+	
+	$CI->load->view('error', $data);
+}
+
+function error_no_step($num) {
+	global $CI;
+	
+	$data['error_title'] = 'Step '.$num.' not Completed!';
+	$data['error_content'] = '
+		<p>
+     You did not seem to have completed Step '.$num.' of the installation! You should
+     really follow the steps in the right order so that the installation can be
+     completed successfully.
 		</p>
 		<p> 
 		 Please try <a href="index.php">running the installation script again from 
@@ -147,5 +186,50 @@ function error_import_schema() {
 	$CI->load->view('error', $data);
 }
 
+function error_creating_user() {
+	global $CI;
+	
+	$data['error_title'] = 'Unable to create new user!';
+	$data['error_content'] = '
+		 <p>
+     suppleText was not able to create a new user with the database connection 
+     information you provided in step 1. One possible reason for this error 
+     is that the user that you provided to access the database does not have 
+     write capabilities (such as using the commands CREATE TABLE and INSERT). 
+     Make sure the user has correct permissions. Or it could be that you are
+     trying to install the script again and the user already exists.
+     </p>
+     <p>
+     If you are unsure of what to do, you should probably contact your host. 
+     If you still need help you can always visit the 
+     <a href="http://www.suppletext.org/forum">suppleText Support Forums</a>.
+     </p>
+	';
+	
+	$CI->load->view('error', $data);
+}
+
+function error_renaming_config() {
+	global $CI;
+	
+	$data['error_title'] = 'Unable to rename st-config.temp.php!';
+	$data['error_content'] = '
+		 <p>
+     suppleText was not able to rename st-config.temp.php to st-config.php
+     in /st-external. This is the final step in the installation. You can 
+     try to correct the directory permissions of /st-external, click back in
+     your browser, and try to complete step 3 again. Otherwise, you can
+     just rename st-config.temp.php to st-config.php. Once that occurs, you have
+     installed suppleText successfully and there is no need to come back to
+     this installer.
+     </p>
+     <p>
+     If you still need help you can always visit the 
+     <a href="http://www.suppletext.org/forum">suppleText Support Forums</a>.
+     </p>
+	';
+	
+	$CI->load->view('error', $data);
+}
 
 ?>

@@ -10,14 +10,15 @@ class Step1 extends Controller {
 	}
 	
 	function _initialize() {
+		//Unfortunately, we can't put the below code in the constructor since
+		//$this isn't fully initialized yet in the constructor (for some reason).
+		$this->load->helper('checkpoint');
+	
 		//We check if st-config.php file exists
-		if (file_exists(ABSPATH.'st-external/st-config.php')) 
-		{
-			show_error('The file \'st-external/st-config.php\' already exists. suppleText is probably already installed. Now <a href="../../">go use the script</a>!');
-		}	
+		check_installed();
 		
 		//Check if config file directory is writable
-		$this->check_config_writable();
+		check_config_writable();
 	}
 	
 	//We don't need to remap here since we are using traditional
@@ -93,6 +94,10 @@ class Step1 extends Controller {
 			
 			//Write a preliminary config file
 			$this->_generate_preliminary_config_file($db_config);
+			
+			//Set step1 completed
+			$this->load->library('session');
+			$this->session->set_userdata('step1_completed', true);
 			
 			//Everything is good, so we move on to step 2:
 			header('Location: index.php?step2'); //We have to use this method of redirecting.

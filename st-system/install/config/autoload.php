@@ -50,7 +50,7 @@ $autoload['libraries'] = array();
 |	$autoload['helper'] = array('url', 'file');
 */
 
-$autoload['helper'] = array('error');
+$autoload['helper'] = array('hacks', 'error');
 
 
 /*

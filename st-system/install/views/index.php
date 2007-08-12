@@ -20,6 +20,10 @@
      you have completed the following tasks:
      </p>
      <ol>
+     			<li>
+     			<strong>Make sure cookies are enabled in your browser</strong>! Otherwise,
+     			you will get error messages saying that steps were not completed.
+     			</li>
           <li>
           Make sure that this script has the permissions to write to the
           directory <code>/st-external</code>. If you 

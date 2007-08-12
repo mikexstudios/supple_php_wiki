@@ -12,19 +12,11 @@ class Install extends Controller {
 	
 	function index() {
 		//We check if st-config.php file exists
-		if (!file_exists(ABSPATH.'st-external/st-config.php')) 
-		{
-			//Display install page
-			$this->load->view('index');	
-		}
-		else
-		{
-			$data['error_title'] = 'Already Installed!';
-			$data['error_content'] = '<p>The file \'st-external/st-config.php\' already exists. suppleText is probably already installed. Now <a href="../../">go use the script</a>!</p>';
-			
-			$this->load->view('error', $data);
-			//show_error('The file \'st-external/st-config.php\' already exists. suppleText is probably already installed. Now <a href="../../">go use the script</a>!');
-		}
+		$this->load->helper('checkpoint');
+		check_installed();
+		
+		//Display install page
+		$this->load->view('index');	
 	}
 }
 ?>

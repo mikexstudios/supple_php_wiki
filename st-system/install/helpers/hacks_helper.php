@@ -5,4 +5,7 @@ $CI =& get_instance();
 //Set pages to output unicode
 $CI->output->set_header("Content-Type: text/html; charset=UTF-8");
 
+//Load constants (includes database tables)
+include_once ABSPATH.'st-system/config/constants.php';
+
 ?>
