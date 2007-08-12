@@ -35,8 +35,6 @@ CREATE TABLE IF NOT EXISTS `st_config` (
 INSERT INTO `st_config` (`order`, `option`, `value`, `vartype`, `displaycode`, `name`, `description`) VALUES 
 (4, 'is_rewrite', 'true', 'boolean', 'yesno', 'Enable Pretty URLs', 'Set to yes if proper .htaccess file is created with the necessary mod_rewrite code'),
 (1, 'root_page', 'HomePage', 'string', 'string', 'Default Page', 'The page that is displayed when no page is specified.'),
-(0, 'site_name', 'My suppleText wiki', 'string', 'text', 'Wiki Site Name', 'A title for your wiki'),
-(5, 'site_url', '/suppleText', 'string', 'text', 'Site URL', 'Absolute or relative path to script location. No trailing slash.'),
 (6, 'use_cache', 'false', 'boolean', 'yesno', 'Use Page Caching', 'If set to true, stores syntax parsed pages in database and loads the cached version to users.'),
 (2, 'use_theme', 'supple', 'string', 'text', 'Use Theme', 'The theme used to display pages');
 

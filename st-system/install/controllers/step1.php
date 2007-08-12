@@ -5,26 +5,30 @@ class Step1 extends Controller {
 	function Step1()
 	{
 		parent::Controller();	
+
 		$this->load->library('validation');
+	}
+	
+	function _initialize() {
+		//We check if st-config.php file exists
+		if (file_exists(ABSPATH.'st-external/st-config.php')) 
+		{
+			show_error('The file \'st-external/st-config.php\' already exists. suppleText is probably already installed. Now <a href="../../">go use the script</a>!');
+		}	
+		
+		//Check if config file directory is writable
+		$this->check_config_writable();
 	}
 	
 	//We don't need to remap here since we are using traditional
 	//URI format.
 	
-	function index() {		
-		//We check if st-config.php file exists
-		if (!file_exists(ABSPATH.'st-external/st-config.php')) 
-		{
-			//Check if config file directory is writable
-			$this->check_config_writable();
-			
-			//Display install page
-			$this->load->view('step1');	
-		}
-		else
-		{
-			show_error('The file \'st-external/st-config.php\' already exists. suppleText is probably already installed. Now <a href="../../">go use the script</a>!');
-		}
+	function index() {
+		$this->_initialize();
+					
+		//Display install page
+		$this->_prep_form();
+		$this->load->view('step1');	
 	}
 	
 	function check_config_writable() {
@@ -60,6 +64,7 @@ class Step1 extends Controller {
 	}
 	
 	function check() {
+		$this->_initialize();
 		$this->_prep_form();
 		
 		if ($this->validation->run() == FALSE)
@@ -87,36 +92,36 @@ class Step1 extends Controller {
 			}
 			
 			//Write a preliminary config file
-			$this->generate_preliminary_config_file($db_config);
+			$this->_generate_preliminary_config_file($db_config);
 			
 			//Everything is good, so we move on to step 2:
-			$this->load->helper('url');
-			redirect('step2'); //, 'refresh'
+			header('Location: index.php?step2'); //We have to use this method of redirecting.
+			
 		}
 	}
 	
-function generate_preliminary_config_file($db_config) {
-    
-		$config_sample_file = @file_get_contents(ABSPATH.'st-external/st-config.php.sample');
-		if($config_sample_file === FALSE)
-		{
-			error_sample_config_file();
-		}
-		
-		//Set search and replaces
-		$search[] = 'st_'; $replace[] = $db_config['dbprefix']; //Do this before the others since this has the most potential to conflict.
-		$search[] = 'localhost'; $replace[] = $db_config['hostname'];
-		$search[] = 'putyourdbnamehere'; $replace[] = $db_config['database'];
-		$search[] = 'usernamehere'; $replace[] = $db_config['username'];
-		$search[] = 'yourpasswordhere'; $replace[] = $db_config['password'];
-
-		$config_sample_file = str_replace($search, $replace, $config_sample_file);
-		
-		if(!file_put_contents(ABSPATH.'st-external/st-config.temp.php', $config_sample_file))
-		{
-			error_directory_writable();
-		}
-}
+	function _generate_preliminary_config_file($db_config) {
+	    
+			$config_sample_file = @file_get_contents(ABSPATH.'st-external/st-config.php.sample');
+			if($config_sample_file === FALSE)
+			{
+				error_sample_config_file();
+			}
+			
+			//Set search and replaces
+			$search[] = 'st_'; $replace[] = $db_config['dbprefix']; //Do this before the others since this has the most potential to conflict.
+			$search[] = 'localhost'; $replace[] = $db_config['hostname'];
+			$search[] = 'putyourdbnamehere'; $replace[] = $db_config['database'];
+			$search[] = 'usernamehere'; $replace[] = $db_config['username'];
+			$search[] = 'yourpasswordhere'; $replace[] = $db_config['password'];
+	
+			$config_sample_file = str_replace($search, $replace, $config_sample_file);
+			
+			if(!file_put_contents(ABSPATH.'st-external/st-config.temp.php', $config_sample_file))
+			{
+				error_directory_writable();
+			}
+	}
 
 }
 

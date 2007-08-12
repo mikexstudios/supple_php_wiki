@@ -50,6 +50,7 @@ $db['suppletext']['username'] = "root";
 $db['suppletext']['password'] = "";
 $db['suppletext']['database'] = "";
 $db['suppletext']['dbdriver'] = "mysql";
+$db['suppletext']['dbprefix'] = "";
 $db['suppletext']['active_r'] = TRUE;
 $db['suppletext']['pconnect'] = TRUE;
 $db['suppletext']['db_debug'] = TRUE;

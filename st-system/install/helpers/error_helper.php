@@ -82,5 +82,70 @@ function error_sample_config_file() {
 	$CI->load->view('error', $data);
 }
 
+function error_no_step1() {
+	global $CI;
+	
+	$data['error_title'] = 'Step 1 not Completed!';
+	$data['error_content'] = '
+		<p>
+     suppleText could not find /st-external/config.temp.php which was generated
+     during Step 1 of the installation.
+		</p>
+		<p> 
+		 Please try <a href="index.php">running the installation script again from 
+		 the beginning</a>. If you still need help you can always visit the 
+     <a href="http://www.suppletext.org/forum">suppleText Support Forums</a>.
+     </p>
+	';
+	
+	$CI->load->view('error', $data);
+}
+
+function error_no_dbschema($filename) {
+	global $CI;
+	
+	$data['error_title'] = 'Missing Database Schema!';
+	$data['error_content'] = '
+		<p>
+     suppleText could not find the database schema file:
+		 <em>/st-system/install/sql/'.$filename.'</em> which is needed to create the database.
+		</p>
+		<p> 
+		 Please check that <em>/st-system/install/sql/'.$filename.'</em>
+     exists. If it does not exist, re-download suppleText and try installing 
+		 it again. If you still need help you can always visit the 
+     <a href="http://www.suppletext.org/forum">suppleText Support Forums</a>.
+     </p>
+	';
+	
+	$CI->load->view('error', $data);
+}
+
+function error_import_schema() {
+	global $CI;
+	
+	$data['error_title'] = 'Error importing SQL Schema!';
+	$data['error_content'] = '
+		 <p>
+     suppleText was not able to create tables and insert data necessary for the upgrade.
+     Please check the following:
+     </p>
+     <ul>
+          <li>One possible reason for this error is that the user that you 
+          provided to access the database does not have write capabilities
+          (such as using the commands CREATE TABLE, ALTER TABLE, and INSERT). Make sure the
+          user has correct permissions.</li>
+     </ul>
+     <p>
+     If you think everything is correct, click back and try to continue with the
+     script installation. If you still need help you can always visit the 
+     <a href="http://www.suppletext.org/forum">suppleText Support Forums</a>.
+     Who knows? This could be a bug in the script!
+     </p>
+	';
+	
+	$CI->load->view('error', $data);
+}
+
 
 ?>
