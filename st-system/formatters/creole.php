@@ -734,7 +734,7 @@ function links_callback(&$matches) {
 
 	//Match external url with link text. This should come before the 
 	//'just external url case' since \S+ also matches the | character.
-	if(preg_match('/([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+	if(preg_match('/^([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
@@ -744,7 +744,7 @@ function links_callback(&$matches) {
 	}
 	
 	//Match just external url.
-	if(preg_match('/([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
+	if(preg_match('/^([a-z]+:\/\/\S+)/', $matches[1], $url_matches))
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
@@ -753,7 +753,7 @@ function links_callback(&$matches) {
 	
 	//Match mailto: type links. NOTE: This could be dangerous if we don't check well.
 	//javascript injection possible! This is crude!
-	if(preg_match('/([a-z]+:\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+	if(preg_match('/^([a-z]+:\S+@\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
@@ -761,7 +761,7 @@ function links_callback(&$matches) {
 		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
-		if(preg_match('/([a-z]+:\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
+		if(preg_match('/^([a-z]+:\S+@\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
@@ -769,7 +769,7 @@ function links_callback(&$matches) {
 	}
 	
 	//Match WikiLinks (The regex for these should be better...and safer)
-	if(preg_match('/(.+)\|(.+)/', $matches[1], $link_matches))
+	if(preg_match('/^(.+)\|(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
 		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES, 'UTF-8');
@@ -793,7 +793,7 @@ function links_callback(&$matches) {
 	}	
 	
 	//Dangerous regex? Limit characters
-	if(preg_match('/(.+)/', $matches[1], $link_matches))
+	if(preg_match('/^(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
 		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES, 'UTF-8');
