@@ -313,6 +313,19 @@ $config['rewrite_short_tags'] = FALSE;
 /**
  * Overwrite config settings with external file
  */ 
-require ABSPATH.'st-external/st-config.php';
+$install_check = @include ABSPATH.'st-external/st-config.php';
+if($install_check === FALSE)
+{
+	$pre_path = '';
+	if(!empty($_SERVER['PHP_SELF']))
+	{
+		if(preg_match('%^(/.*)index.php.*$%', $_SERVER['PHP_SELF'], $matches))
+		{
+			$pre_path = trim($matches[1]);
+		}	
+		unset($matches);
+	}
+	die('It does not seem like suppleText is installed since /st-external/st-config.php cannot be found. <a href="'.$pre_path.'st-system/install/index.php">Click here to install suppleText</a>! (If the link does not work, manually visit st-system/install/)');
+}
 
 ?>
