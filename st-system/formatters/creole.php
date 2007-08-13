@@ -103,15 +103,16 @@ function intentional_newline_callback(&$matches) {
 	return "\n\n".$CI->syntaxparser->hash($br_html)."\n";
 }
 
-$CI->syntaxparser->add_block_definition('headings', '/^(={1,6}) *(.*?) *=*$/m', 'headings_callback', 100);
+$CI->syntaxparser->add_block_definition('headings', '/^(={1,6}) *(.*)$/m', 'headings_callback', 100);
 function headings_callback(&$matches) {
 	global $CI;
-	
+	//print_r($matches);die();
 	$level = strlen($matches[1]);
-  $text = trim($matches[2]);
+  $text = trim($matches[2], ' =');
   
   //The header can't accept any other block level elements inside so just inline:
   $text = $CI->syntaxparser->applyAllInlineDefs($text);
+  
   
   return $CI->syntaxparser->hash('<h'.$level.'>'.$text.'</h'.$level.'>')."\n"; //Maybe we don't need the newlines
 }
