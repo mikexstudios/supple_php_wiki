@@ -188,4 +188,6 @@ function get_form_value($in_name, $escape=true) {
 	return $CI->validation->$in_name;
 }
 
+$CI->template->add_value('st_version', $CI->settings->get('version'));
+
 ?>

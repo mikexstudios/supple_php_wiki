@@ -17,7 +17,7 @@
 	$top_menu = get('top_menu'); 
 	foreach($top_menu as $menu_entry):
 ?>
-	<li><a href="<?php out('admin_url', $menu_entry['link_to']); ?>"><?php echo $menu_entry['name']; ?></a></li>
+	<li><a href="<?php out('admin_url', $menu_entry['link_to']); ?>" <?php if($menu_entry['link_to']==get('this_admin_page')) {echo 'class="current"';} ?>><?php echo $menu_entry['name']; ?></a></li>
 <?php
 	endforeach;
 ?>
@@ -26,18 +26,25 @@
 
 <?php
 	$top_menu = get('sub_menu', get('this_admin_page'));
+	$subpage_name = get('this_admin_subpage'); 
 	if(!empty($top_menu)): 
+		if(empty($subpage_name)) 
+			{ $subpage_name = element('link_to', reset($top_menu)); } //reset() gets first element of array non-destructively
+		else
+			{ $subpage_name = get('this_admin_page').'/'.get('this_admin_subpage'); }
 ?>
 <ul id="submenu">
 <?php foreach($top_menu as $menu_entry): ?>
-	<li><a href="<?php out('admin_url', $menu_entry['link_to']); ?>"><?php echo $menu_entry['name']; ?></a></li>
+	<li><a href="<?php out('admin_url', $menu_entry['link_to']); ?>" <?php if($menu_entry['link_to']==$subpage_name) {echo 'class="current"';} ?>><?php echo $menu_entry['name']; ?></a></li>
 <?php endforeach; ?>
 </ul>
 <?php endif; ?>
 
+<!--
 <div id='moderated' class='updated fade'>
-<p>1 comment marked as spam<br/>
-</p></div>
+<p>1 comment marked as spam</p>
+</div>
+-->
 
 <div class="wrap">
 
@@ -47,11 +54,11 @@
 
 
 <div id="footer">
-<p class="logo"><a href="http://wordpress.org/" id="wordpress-logo"><img src="images/wordpress-logo.png" alt="WordPress" /></a></p>
-<p class="docs"><a href="http://codex.wordpress.org/">Documentation</a> &#8212; <a href="http://wordpress.org/support/">Support Forums</a><br />
+<!-- <p class="logo"><a href="http://www.suppletext.org/" id="suppletext-logo"><img src="http://www.suppletext.org/images/logo-medium.gif" alt="suppleText" /></a></p> -->
+<p class="docs"><a href="http://www.suppletext.org/">suppleText</a> &#8212; <a href="http://www.suppletext.org/Documentation">Documentation</a> &#8212; <a href="http://www.suppletext.org/forums/">Support Forums</a><br />
 
-2.2 &#8212; 1.22 seconds</p>
+<?php out('st_version'); ?> &#8212; <?php out('database_queries'); ?> queries &#8212; <?php out('execution_time'); ?> seconds</p>
 </div>
-<script type="text/javascript">if(typeof wpOnload=='function')wpOnload();</script>
+
 </body>
 </html>

@@ -26,6 +26,20 @@ function get_current_admin_pagename() {
 	return 'dashboard'; //Default admin page
 }
 
+$CI->template->add_function('this_admin_subpage', 'get_current_admin_subpagename');
+function get_current_admin_subpagename() {
+	global $CI;
+	
+	//NOTE: URI automatically initialized by the system.
+	$subpagename = $CI->uri->segment(3);
+	if(!empty($subpagename))
+	{
+		return $CI->uri->segment(3);
+	}
+	
+	return '';
+}
+
 $CI->template->add_function('admin_url', 'construct_admin_url');
 function construct_admin_url($page, $handler='', $args='') {
 	return construct_page_url('st-admin/'.$page, $handler, $args);
