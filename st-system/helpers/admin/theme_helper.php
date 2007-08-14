@@ -59,4 +59,8 @@ function get_sub_menu($in_associated_page='') {
 	return $CI->adminmenu->get_sub_level($in_associated_page);
 }
 
+function admin_theme_include($file) {
+	theme_include('admin/'.$file);
+}
+
 ?>

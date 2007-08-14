@@ -1,3 +1,4 @@
+<?php  if (!defined('BASEPATH')) exit('No direct script access allowed'); ?>
 <div id="footer">
 	<?php if(get('page_exists')): ?>
 		<a href="<?php out('page_url', get('page_tag')); ?>/edit">Edit this page</a> | 
