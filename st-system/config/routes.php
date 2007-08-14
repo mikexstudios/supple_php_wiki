@@ -44,7 +44,7 @@ $route['default_controller'] = "show";
 $route['scaffolding_trigger'] = "";
 
 //For admin stuff
-$route['st-admin'] = 'st-admin/welcome'; 
+$route['st-admin'] = 'st-admin/dashboard'; 
 $route['st-admin/(.+)'] = "st-admin/$1";
 
 //Our custom routing solution. We want:

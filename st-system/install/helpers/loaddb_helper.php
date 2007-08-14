@@ -14,7 +14,7 @@ function load_db() {
 	{
 		error_no_step1();
 	}
-	
+
 	//Augment imported db info
 	$db['suppletext']['pconnect'] = FALSE;
 	$db['suppletext']['db_debug'] = FALSE; //FALSE - We use our own custom error messages

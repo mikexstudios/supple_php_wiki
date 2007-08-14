@@ -11,14 +11,18 @@ class Users extends Controller {
 	//We don't need to remap here since we are using traditional
 	//URI format.
 	
-	function index()
-	{
+	function _initialize() {
 		$this->load->library('authorization');
 		if(!$this->authorization->is_logged_in())
 		{
 			//Not logged in, redirect to login page.
-			redirect('st-admin/users/login');
+			redirect('/st-admin/users/login');
 		}
+	}
+	
+	function index()
+	{
+		$this->_initialize();
 		
 		//Otherwise, bring to profile
 		show_error('You are already logged in!');
@@ -51,13 +55,16 @@ class Users extends Controller {
 		{
 			//User submitted the form
 			$this->load->library('authorization');
+			//die($this->validation->user_login.' '.$this->validation->user_password);
 			if($this->authorization->validate($this->validation->user_login, $this->validation->user_password))
 			{
 				//User was authenticated
 				$this->authorization->set_logged_in($this->validation->user_login);
 				
 				//Redirect to page where we came from
-				redirect($this->validation->redirect_to);
+				$redirect_to = $this->session->userdata('login_redirect_to');
+				$this->session->set_userdata('login_redirect_to', ''); //Clear the redirect to.
+				redirect($redirect_to);
 			}
 			
 			//User was not authenticated! Hack to get custom error message:
@@ -67,18 +74,5 @@ class Users extends Controller {
 		}
 	}
 	
-	//This is just for testing
-	function display($pagename) {
-		
-		//Test users_model
-		$this->users_model->username = 'test';
-		$x = $this->users_model->get_value('uid');
-		echo $x;
-		$this->users_model->set_value('uid', $x+1);
-	}
-	
-
-	
-
 }
 ?>

@@ -79,7 +79,7 @@ function theme_include($file) {
 }
 
 $CI->template->add_function('current_url', 'get_current_url');
-function get_current_url($prefix='http://', $postfix='') {
+function get_current_url() {
 	global $CI;
 	
   return site_url($CI->uri->uri_string());
@@ -124,6 +124,7 @@ function base_path($in_file='') {
 	return ABSPATH.$in_file;
 }
 
+$CI->template->add_function('this_page', 'get_current_pagename');
 function get_current_pagename() {
 	global $CI;
 	
