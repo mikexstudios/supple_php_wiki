@@ -56,14 +56,23 @@ function get_theme_system_path($file='') {
 
 //Registering as Action eliminates the need for separate out_* functions.
 $CI->template->add_function('theme_url', 'get_theme_url_path');
-function get_theme_url_path($file='') {
+function get_theme_url_path($file='', $use_theme='') {
 	global $CI;
 	
-	if(empty($file))
+	//If no theme is specified, we use the current theme
+	if(empty($use_theme))
 	{
-		return site_url(THEMES_DIR.$CI->settings->get('use_theme'));
+		$use_theme = $CI->settings->get('use_theme');
 	}
-	return get_theme_url_path().'/'.$file;
+	
+	$return_url = site_url(THEMES_DIR.$use_theme);
+	
+	if(!empty($file))
+	{
+		return $return_url.'/'.$file;
+	}
+	
+	return $return_url;
 }
 
 /**
@@ -189,5 +198,22 @@ function get_form_value($in_name, $escape=true) {
 }
 
 $CI->template->add_value('st_version', $CI->settings->get('version'));
+
+/**
+ * This should be used sparingly
+ */ 
+$CI->template->add_function('setting', 'get_setting');
+function get_setting($in_key) {
+	global $CI;
+	
+	return $CI->settings->get($in_key);
+}
+
+$CI->template->add_function('this_uri_fragment', 'get_this_uri_fragment');
+function get_this_uri_fragment() {
+	global $CI;
+	
+	return $CI->uri->uri_string();
+}
 
 ?>

@@ -2,44 +2,43 @@
 
 <?php admin_theme_include('header'); ?>
 
-<?php if(!empty($this->validation->error_string)): ?>
-		<?php echo $this->validation->error_string; ?>
-<?php endif; ?>
+<?php out('message'); ?>
 
 <!--starting page content-->
 <div class="wrap">
 
-<h2>General Options</h2>
-<form method="post" action="<?php out('admin_url', 'options/general'); ?>"> 
-<p class="submit"><input type="submit" name="Submit" value="Update Options &raquo;" /></p>
+<h2>Current Theme</h2>
+<div id="currenttheme">
+	<img src="<?php out('theme_url', 'screenshot.png'); ?>" alt="Current theme preview" />
+	<?php $theme_data = get('theme_data', get('setting', 'use_theme')); ?>
+	<h3><a href="<?php echo $theme_data['url'] ?>"><?php echo $theme_data['name'] ?> <?php echo $theme_data['version'] ?></a> by <a href="<?php echo $theme_data['author_url'] ?>" title="Visit author homepage"><?php echo $theme_data['author'] ?></a></h3>
+	
+	<p><?php echo $theme_data['description'] ?></p>
+	<p>All of this theme&#8217;s files are located in <code>st-external/themes/<?php out('setting', 'use_theme') ?></code>.</p>
+</div>
 
-<table class="optiontable"> 
+<h2>Available Themes</h2>
+<?php 
+	$avaliable_themes = get('avaliable_themes'); 
+	foreach($avaliable_themes as $each_theme): //themes.php?action=activate&amp;template=classic&amp;stylesheet=classic&#038;_wpnonce=23364fbf1f
+		$each_theme_data = get('theme_data', $each_theme);
+?>
+<div class="available-theme">
+<h3><a href="<?php out('admin_url', 'presentation/themes/activate/'.$each_theme); ?>"><?php echo $each_theme_data['name'] ?> <?php echo $each_theme_data['version'] ?></a></h3>
 
-<tr valign="top"> 
-<th scope="row">Wiki title:</th> 
-<td><input name="site_name" type="text" id="site_name" value="<?php if(empty($this->validation->site_name)) { out('setting', 'site_name'); } else { echo $this->validation->site_name; } ?>" size="40" /></td> 
-</tr> 
+<a href="<?php out('admin_url', 'presentation/themes/activate/'.$each_theme); ?>" class="screenshot">
+<img src="<?php out('theme_url', 'screenshot.png', $each_theme); ?>" alt="<?php echo $each_theme_data['name'] ?> Theme" />
+</a>
 
-<tr valign="top"> 
-<th scope="row">Your wiki address (URL):</th> 
-<td>
-	<p class="config_static_value"><?php echo $this->config->item('base_url'); ?></p><br />
-	Note: To change your wiki address (URL), you must edit the <code>/st-external/st-config.php</code> file.   
-</td>
-</tr> 
+<p><?php echo $theme_data['description'] ?></p>
+</div>
+<?php 
+	endforeach;
+?>
 
-<tr valign="top"> 
-<th scope="row">Default wiki page:</th> 
-<td>
-	<input name="root_page" type="text" id="root_page" value="<?php if(empty($this->validation->root_page)) { out('setting', 'root_page'); } else { echo $this->validation->root_page; } ?>" size="40" /><br />
-	This is the page that is displayed when your root URL is visited (when no page is selected).
-</td> 
-</tr> 
 
-</table> 
-
-<p class="submit"><input type="submit" name="Submit" value="Update Options &raquo;" /></p>
-</form>
+<h2>Get More Themes</h2>
+<p>You can find additional themes for your site in the <a href="http://www.suppletext.org/Themes">suppleText theme directory</a>. To install a theme you generally just need to upload the theme folder into your <code>st-external/themes</code> directory. Once a theme is uploaded, you should see it on this page.</p>
 
 </div>
 <!--closing page content-->

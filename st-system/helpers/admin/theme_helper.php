@@ -5,8 +5,48 @@
 
 $CI =& get_instance();
 
+$CI->template->add_function('theme_data', 'get_theme_data');
 function get_theme_data($in_theme_name) {
 	return @include_once ABSPATH.THEMES_DIR.$in_theme_name.'/theme-info.php';
+}
+
+$CI->template->add_function('theme_directories', 'get_theme_directories');
+function get_theme_directories() {
+	global $CI;
+	$CI->load->helper('directory');
+	
+	$map = directory_map(ABSPATH.THEMES_DIR, TRUE); //TRUE = only top level dir
+	//print_r($map);
+	
+	return $map;
+}
+
+$CI->template->add_function('avaliable_themes', 'get_avaliable_themes');
+function get_avaliable_themes() {
+	global $CI;
+	
+	//Check if directories also exclude current theme
+	$theme_directories_temp = get_theme_directories();
+	$current_theme = $CI->settings->get('use_theme');
+	$theme_directories = array();
+	foreach($theme_directories_temp as $each_theme_directory)
+	{
+		if(is_dir(ABSPATH.THEMES_DIR.$each_theme_directory) && $each_theme_directory != $current_theme)
+		{
+			$theme_directories[] = $each_theme_directory;
+		}
+	}
+	
+	return $theme_directories;
+}
+
+function does_theme_exist($in_theme_name) {
+	if(file_exists(ABSPATH.THEMES_DIR.$in_theme_name))
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 
@@ -68,11 +108,20 @@ function admin_theme_include($file) {
 	theme_include('admin/'.$file);
 }
 
+/* //Moved to the regular theme_helper
 $CI->template->add_function('setting', 'get_setting');
 function get_setting($in_key) {
 	global $CI;
 	
 	return $CI->settings->get($in_key);
+}
+*/
+
+$CI->template->add_function('message', 'get_message');
+function get_message() {
+	global $CI;
+	
+	return $CI->message->get();
 }
 
 ?>

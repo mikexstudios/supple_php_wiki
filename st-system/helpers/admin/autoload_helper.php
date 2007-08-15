@@ -4,7 +4,8 @@ $CI =& get_instance();
 
 //A makeshift autoload for admin
 
-$CI->load->helper(array('admin/theme', 'admin/menu'));
+$CI->load->helper(array('admin/theme', 'admin/menu', 'admin/security'));
+$CI->load->library('message');
 
 
 ?>

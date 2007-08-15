@@ -37,7 +37,29 @@ class Presentation extends Controller {
 		$this->_initialize();
 		$this->template->add_value('admin_page_title', 'Presentation &rsaquo; Themes'); //So header can display the correct title
 		
-		
+		//Check for user input
+		$action = $this->uri->segment(4);
+		$selected_theme = $this->uri->segment(5);
+		if($action == 'activate' && is_refer_from_this_page())
+		{
+			//Validate data, make changes
+			$selected_theme = trim($selected_theme);
+			if(preg_match('/[A-Za-z0-9-_\.\[\]\(\) ]/', $selected_theme) && does_theme_exist($selected_theme)) //Some characters we check here will never be reached because of URL disallowed characters
+			{
+				$this->settings->set('use_theme', $selected_theme);
+				
+				$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
+				$this->message->set_text('New theme activated. <a href="'.base_url().'">View site &raquo;</a>');
+			}
+			else
+			{
+				//Set our custom message:
+				$this->message->set_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+				$this->message->set_text('Invalid theme selected!');
+			}
+		}
+
+		//No matter if we have input or not, we always show the page
 		$this->load->view('admin/presentation-themes');
 	}
 	
