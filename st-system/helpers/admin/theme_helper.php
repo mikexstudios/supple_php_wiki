@@ -5,6 +5,11 @@
 
 $CI =& get_instance();
 
+function get_theme_data($in_theme_name) {
+	return @include_once ABSPATH.THEMES_DIR.$in_theme_name.'/theme-info.php';
+}
+
+
 $CI->template->add_function('logged_in_username', 'get_logged_in_username');
 function get_logged_in_username() {
 	global $CI;

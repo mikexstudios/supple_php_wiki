@@ -24,24 +24,24 @@ class Users_model extends Model {
 	}
 	
 	function set_value($in_key, $in_value, $in_attribute='') {	
+		
+		//check if the key exists. We want this to come before the other
+		//AR SQL statements. Otherwise, we run into conflicts.
+		$temp_value = $this->get_value($in_key);
+		
 		//In both UPDATE and INSERT, we have to set the value and attr.
 		$this->db->set('value', $in_value);
 		$this->db->set('attribute', $in_attribute);
+		$this->db->where('username', $this->username);
+		$this->db->where('`key`', $in_key);
+		$this->db->limit(1);
 		
-		//check if the key exists
-		$temp_value = $this->get_value($in_key);
 		if(!empty($temp_value)) //empty() can only be used on a variable
 		{
-			$this->db->where('username', $this->username);
-			$this->db->where('`key`', $in_key);
-			$this->db->limit(1);
 			$this->db->update(ST_USERS_TABLE);
 		}
 		else
 		{
-			$this->db->set('username', $this->username);
-			$this->db->set('`key`', $in_key);
-			$this->db->limit(1);
 			$this->db->insert(ST_USERS_TABLE);
 		}
 	}

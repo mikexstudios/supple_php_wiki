@@ -25,7 +25,7 @@ class Show extends Controller {
 	
 	function index()
 	{
-		$this->display($this->config->item('default_page'));
+		$this->display($this->settings->get('root_page'));
 	}
 	
 	function _set_page_info($pagename) {

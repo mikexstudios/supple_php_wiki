@@ -6,9 +6,11 @@ class Settings {
 
 	function Settings() {
 		$this->CI =& get_instance();
-	
+		
+		$this->CI->load->helper('array'); //Settings is called before autoload
+		
 		//Grab settings from database
-		$this->get_config_info();
+		//$this->get_config_info();
 		
 		log_message('debug', "Template Class Initialized");
 	}
@@ -17,7 +19,7 @@ class Settings {
 	{
 		$this->CI->db->select('*');
 		$this->CI->db->from(ST_CONFIG_TABLE);
-		$this->CI->db->orderby('`order`', 'ASC'); //Need order to be in ` `
+		$this->CI->db->orderby('`id`', 'ASC'); //Need order to be in ` `
 	
 		$query = $this->CI->db->get();
 		$result = $query->result_array();
@@ -73,9 +75,15 @@ class Settings {
 		return $this->configInfo[$inKey]['option'];
 	}
 	
-	function get($inKey)
+	function get($in_key)
 	{
-		return $this->configInfo[$inKey]['value']; //Returns blank if nothing
+		$this->CI->db->select('value');
+		$this->CI->db->from(ST_CONFIG_TABLE);
+		$this->CI->db->where('`key`', $in_key); //key is a MySQL reserved word. We need to quote it.
+		$this->CI->db->limit(1);
+		$query = $this->CI->db->get();
+		
+		return element('value', $query->row_array()); //We want a single result
 	}
 	
 	function get_name($inKey)
@@ -93,74 +101,23 @@ class Settings {
 		return $this->configInfo;	
 	}
 	
-	//Leave the SQL not working for now.
-	function add_new_setting($inKey, $inValue, $inVarType, $inDisplayCode, $inName, $inDescription)
+	function set($in_key, $in_value)
 	{
-		global $message;
+		//check if the key exists. Needs to come before other AR SQL statements.
+		$temp_value = $this->get($in_key);
 		
-		$order = $this->Db->get_var("SELECT MAX(`order`)+1 FROM ".ST_CONFIG_TABLE);
-
-		$sql = '
-		    INSERT INTO '.ST_CONFIG_TABLE." (`order`, `option`, `value`, `vartype`, `displaycode`, `name`, `description`)
-			VALUES ('$order', '$inKey', '$inValue', '$inVarType', '$inDisplayCode', '$inName', '$inDescription')";
-		$result = $this->Db->query($sql);
-		if ($result == 0) {
-			#$message->error("Could not add new setting!");
-			die('Could not add new setting!');
-		}	
-	}
-	
-	function change_setting_value($inKey, $inValue)
-	{
-		global $message;
-
-        switch ($this->getVarType($inKey))
-        {
-            case 'number':
-                $inValue = (int)$inValue;
-                break;
-            case 'boolean':
-                $inValue = (int)(bool)$inValue;
-                break;
-            default:
-                break;
-        }
-
-		$sql = '
-		    UPDATE '.ST_CONFIG_TABLE."
-			SET `value` = '$inValue'
-			WHERE `option` = '$inKey'"; //OPTION is a sql reserved word
-		$result = $this->Db->query($sql);
-		if ($result==0) {
-			#$message->error('Could not change value for setting! SQL: '.$sql);
-			die('Could not change value for setting! SQL: '.$sql);
+		$this->CI->db->set('value', $in_value);
+		$this->CI->db->where('`key`', $in_key);
+		$this->CI->db->limit(1);
+		
+		if(!empty($temp_value)) //empty() can only be used on a variable
+		{
+			return $this->CI->db->update(ST_CONFIG_TABLE);
 		}
-	}
-	
-	function change_setting_description($inKey, $inDescription)
-	{
-		global $message;
-		
-		$sql = '
-		    UPDATE '.ST_CONFIG_TABLE."
-			SET `description` = '$inDescription'
-			WHERE `option` = '$inKey'";
-		$result = $this->Db->query($sql);
-		if ($result==0) {
-			#$message->error("Could not change description for setting!");
-			die('Could not change description for setting!');
+		else
+		{
+			return $this->CI->db->insert(ST_CONFIG_TABLE);
 		}
-	}
-	
-	function does_setting_exist($inKey)
-	{
-		if (array_key_exists($inKey, $this->configInfo) && !empty($this->configInfo[$inKey]['option'])) {
-			//Option exists
-			return true;
-		}	
-		
-		//Option does not exist
-		return false;
 	}
 	
 }
