@@ -1339,3 +1339,11 @@ a.view-link {
 	margin-right: 220px;
 	text-decoration:underline;
 }
+
+.config_static_value {
+	margin: 0;
+	padding: 0;
+	margin-bottom: -10px;
+	font-size: 12pt;
+	font-weight: bold;
+}

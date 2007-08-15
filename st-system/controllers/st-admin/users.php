@@ -74,5 +74,11 @@ class Users extends Controller {
 		}
 	}
 	
+	function logout() {
+		$this->load->library('authorization');
+		$this->authorization->logout();
+		redirect('/st-admin/users');
+	}
+	
 }
 ?>

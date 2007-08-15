@@ -63,4 +63,11 @@ function admin_theme_include($file) {
 	theme_include('admin/'.$file);
 }
 
+$CI->template->add_function('setting', 'get_setting');
+function get_setting($in_key) {
+	global $CI;
+	
+	return $CI->settings->get($in_key);
+}
+
 ?>
