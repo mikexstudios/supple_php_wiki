@@ -12,9 +12,14 @@ class Users extends Controller {
 	//URI format.
 	
 	function _initialize() {
+		$this->load->helper('admin/autoload');
+		
 		$this->load->library('authorization');
 		if(!$this->authorization->is_logged_in())
 		{
+			//Set where to redirect to after login
+			//$this->session->set_userdata('login_redirect_to', $this->uri->uri_string());
+			
 			//Not logged in, redirect to login page.
 			redirect('/st-admin/users/login');
 		}
@@ -24,8 +29,16 @@ class Users extends Controller {
 	{
 		$this->_initialize();
 		
-		//Otherwise, bring to profile
-		show_error('You are already logged in!');
+		//Otherwise, bring to user management
+		$this->management();
+	}
+	
+	function management() {
+		$this->_initialize();
+		$this->template->add_value('admin_page_title', 'Users &rsaquo; Management');
+		
+		$this->load->view('admin/users-management');
+	
 	}
 	
 	function login() {
