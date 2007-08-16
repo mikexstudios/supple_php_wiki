@@ -8,67 +8,53 @@
 <div class="wrap">
 
 <h2>User List by Role</h2>
-	
-<form action="" method="get" name="search" id="search">
-	<p><input type="text" name="usersearch" id="usersearch" value="" /> <input type="submit" value="Search Users &raquo;" class="button" /></p>
-</form>
-	
-<h3>1 shown below</h3>
 
 <form action="" method="post" name="updateusers" id="updateusers">
-<input type="hidden" name="_wpnonce" value="176098e012" /><input type="hidden" name="_wp_http_referer" value="/wordpress_trunk/wp-admin/users.php" /><table class="widefat">
+<table class="widefat">
+
 <tbody>
-<tr>
-	<th colspan="7"><h3>Administrator</h3></th>
-</tr>
 <tr class="thead">
 	<th>ID</th>
 	<th>Username</th>
-	<th>Name</th>
-
 	<th>E-mail</th>
-	<th>Website</th>
-	<th colspan="2" style="text-align: center">Actions</th>
+	<th>Actions</th>
 </tr>
 </tbody>
-<tbody id="role-administrator">
-	<tr id='user-1' class="alternate">
-		<td><input type='checkbox' name='users[]' id='user_1' value='1' /> <label for='user_1'>1</label></td>
 
-		<td><label for='user_1'><strong>admin</strong></label></td>
-		<td><label for='user_1'> </label></td>
-		<td><a href='mailto:mike.huynh@gmail.com' title='e-mail: mike.huynh@gmail.com'>mike.huynh@gmail.com</a></td>
-		<td><a href='http://' title='website: http://'></a></td>
-		<td align='center'><a href='edit.php?author=1' title='View posts by this author' class='edit'>View 1 post</a></td>
-		<td><a href='user-edit.php?user_id=1&wp_http_referer=%2Fwordpress_trunk%2Fwp-admin%2Fusers.php' class='edit'>Edit</a></td>
-
+<tbody>
+<?php 
+	$all_users_info = get('all_users_info'); 
+	//print_r($all_users_info);
+	foreach($all_users_info as $each_username => $each_user_info): 
+?>
+	<tr id='user-<?php echo $each_user_info['uid']; ?>' <?php echo alternator('class="alternate"', ''); ?>>
+		<td><input type='checkbox' name='users[]' id='user_<?php echo $each_user_info['uid']; ?>' value='<?php echo $each_user_info['uid']; ?>' /> <label for='user_<?php echo $each_user_info['uid']; ?>'><?php echo $each_user_info['uid']; ?></label></td>
+		<td><label for='user_<?php echo $each_user_info['uid']; ?>'><strong><?php echo $each_username; ?></strong></label></td>
+		<td><a href='mailto:<?php echo $each_user_info['email']; ?>' title='e-mail: <?php echo $each_user_info['email']; ?>'><?php echo $each_user_info['email']; ?></a></td>
+		<td><a href='<?php out('admin_url', 'users/profile/'.$each_username); ?>' class='edit'>Edit</a></td>
 	</tr>
+<?php
+	endforeach;	
+?>
 </tbody>
 </table>
 
-
-	<h3>Update Selected</h3>
-	<ul style="list-style:none;">
-		<li><input type="radio" name="action" id="action0" value="delete" /> <label for="action0">Delete checked users.</label></li>
-		<li>
-
-			<input type="radio" name="action" id="action1" value="promote" /> <label for="action1">Set the Role of checked users to:</label>
-			<select name="new_role" onchange="getElementById('action1').checked = 'true'">
-	<option value='administrator'>Administrator</option>
-	<option value='editor'>Editor</option>
-	<option value='author'>Author</option>
-	<option value='contributor'>Contributor</option>
-
-	<option value='subscriber'>Subscriber</option></select>
-		</li>
-	</ul>
-	<p class="submit"><input type="submit" value="Bulk Update &raquo;" /></p>
+<h3>Update Selected</h3>
+<ul style="list-style:none;">
+	<li><input type="radio" name="action" id="action0" value="delete" /> <label for="action0">Delete checked users.</label></li>
+	<li>
+		<input type="radio" name="action" id="action1" value="promote" /> <label for="action1">Set the Role of checked users to:</label>
+		<select name="new_role" onchange="getElementById('action1').checked = 'true'">
+			<option value='registered'>Registered</option>
+			<option value='editor'>Editor</option>
+			<option value='administrator'>Administrator</option>
+		</select>
+	</li>
+</ul>
+<p class="submit"><input type="submit" value="Bulk Update &raquo;" /></p>
 </form>
 
-
 <h2 id="add-new-user">Add New User</h2>
-
-<div id="ajax-response"></div>
 
 <div class="narrow">
 

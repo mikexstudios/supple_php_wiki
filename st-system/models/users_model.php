@@ -7,8 +7,23 @@ class Users_model extends Model {
 	//var $value = '';
 	//var $attribute = '';
 	
+	var $all_users = array(); //Holds all user info
+	
 	function Users_model() {
 		parent::Model();	
+	}
+	
+	function get_all() {
+		$this->db->select('*');
+		$this->db->from(ST_USERS_TABLE);
+		$query = $this->db->get();
+		
+		foreach($query->result() as $row)
+		{
+			$this->all_users[$row->username][$row->key] = $row->value;
+		}
+		
+		return $this->all_users;
 	}
 	
 	function get_value($in_key) {

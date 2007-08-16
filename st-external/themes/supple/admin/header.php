@@ -11,7 +11,7 @@
 <h1><a href="<?php out('page_url', get('root_page')); ?>"><?php out('site_name'); ?></a></h1>
 </div>
 
-<div id="user_info"><p>Hello, <strong><?php out('logged_in_username'); ?></strong>. [<a href="<?php out('admin_url', 'users/logout'); ?>" title="Log out of this account">Sign Out</a>, <a href="<?php out('admin_url', 'users/myprofile'); ?>">My Profile</a>] </p></div>
+<div id="user_info"><p>Hello, <strong><?php out('logged_in_username'); ?></strong>. [<a href="<?php out('admin_url', 'users/logout'); ?>" title="Log out of this account">Sign Out</a>, <a href="<?php out('admin_url', 'users/profile'); ?>">My Profile</a>] </p></div>
 
 <ul id="adminmenu">
 <?php //Remember to add class="current" to the select page!

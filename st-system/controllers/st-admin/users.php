@@ -37,6 +37,7 @@ class Users extends Controller {
 		$this->_initialize();
 		$this->template->add_value('admin_page_title', 'Users &rsaquo; Management');
 		
+		$this->load->helper('string');
 		$this->load->view('admin/users-management');
 	
 	}

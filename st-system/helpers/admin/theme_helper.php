@@ -124,4 +124,12 @@ function get_message() {
 	return $CI->message->get();
 }
 
+$CI->template->add_function('all_users_info', 'get_all_users_info');
+function get_all_users_info() {
+	global $CI;
+	
+	$CI->load->model('users_model');
+	return $CI->users_model->get_all();
+}
+
 ?>
