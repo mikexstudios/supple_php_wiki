@@ -45,14 +45,16 @@ class Users extends Controller {
 		//In the future, we can loop through the number of users and set rules for
 		//each one.
 		$rules['users'] = 'required|callback__user_ids_check'; //We don't require this since the page can be empty.
-		$rules['action'] = 'trim|required|alphanum|max_length[200]'; //Add page name check here
-		$rules['new_role'] = 'trim|alphanum|max_length[100]';
+		$rules['action'] = 'required|trim|alpha_dash|max_length[200]'; //Add page name check here
+		$rules['new_role'] = 'trim|alpha_dash|max_length[100]';
+		$rules['bulkupdate'] = 'required'; //Submit button
 		$this->validation->set_rules($rules);
 		
 		//Also repopulate the form
 		$fields['users'] = 'User ID Selection';
 		$fields['action'] = 'Update Selected';
 		$fields['new_role'] = 'User Role';
+		$fields['bulkupdate'] = 'Bulk Update';
 		$this->validation->set_fields($fields);
 		
 		if($this->validation->run() === TRUE)
@@ -151,26 +153,62 @@ class Users extends Controller {
 		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
 		
 		//Set validation rules
-		$rules['user_login'] = 'required|callback__user_ids_check'; //We don't require this since the page can be empty.
-		$rules['email'] = 'trim|required|alphanum|max_length[200]'; //Add page name check here
-		$rules['pass1'] = 'trim|alphanum|max_length[100]';
-		$rules['pass2'] = '';
-		$rules['role'] = '';
+		$rules['user_login'] = 'required|trim|max_length[100]|alpha_dash|callback__user_exist_check'; //We don't require this since the page can be empty.
+		$rules['email'] = 'required|trim|max_length[300]|valid_email'; //Add page name check here
+		$rules['pass1'] = 'required|trim|max_length[250]';
+		$rules['pass2'] = 'required|trim|max_length[250]|matches[pass1]';
+		$rules['role'] = 'required|trim|max_length[100]|alpha_dash';
+		$rules['adduser'] = 'required'; //The submit button
 		$this->validation->set_rules($rules);
 		
 		//Also repopulate the form
-		$fields['user_login'] = 'User ID Selection';
-		$fields['email'] = 'Update Selected';
-		$fields['pass1'] = 'User Role';
-		$fields['pass1'] = '';
-		$fields['role'] = '';
+		$fields['user_login'] = 'Username';
+		$fields['email'] = 'E-mail';
+		$fields['pass1'] = 'Password';
+		$fields['pass2'] = 'Password Again';
+		$fields['role'] = 'Role';
+		$fields['adduser'] = 'Add User Submit';
 		$this->validation->set_fields($fields);
 		
 		if($this->validation->run() === TRUE)
 		{
+			//Now we add the user
+			$this->users_model->username = $this->validation->user_login;
+			$this->users_model->set_value('uid', $this->users_model->get_next_uid());
+				$this->load->library('encrypt');
+				$hashed_password = $this->encrypt->sha1($this->config->item('encryption_salt').$this->validation->pass1);			
+			$this->users_model->set_value('password', $hashed_password);
+			$this->users_model->set_value('email', $this->validation->email);
+			$this->users_model->set_value('role', $this->validation->role);
+			
+			//Now display sucess message
+			$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
+			$this->message->set_text('New user created: '.$this->validation->user_login);
+			
+			//Now we empty some of the form fields
+			$this->validation->user_login = '';
+			$this->validation->email = '';
 		}
 		
-		$this->load->view('admin/users-management');
+		$this->load->view('admin/users-addnew');
+	}
+	
+	function _user_exist_check($in_username) {
+		$this->users_model->username = $in_username;
+		$uid_temp = $this->users_model->get_value('uid');
+
+		if(!empty($uid_temp))
+		{
+			//Set error
+			$this->validation->set_message('_user_exist_check', 'The user you are trying to add already exists.');
+			return false; //User exists!
+		}
+		
+		return true;
+	}
+	
+	function profile() {
+	
 	}
 	
 	function login() {

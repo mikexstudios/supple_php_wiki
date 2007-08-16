@@ -16,6 +16,7 @@ class Users_model extends Model {
 	function get_all() {
 		$this->db->select('*');
 		$this->db->from(ST_USERS_TABLE);
+		$this->db->orderby('id', 'asc');
 		$query = $this->db->get();
 		
 		foreach($query->result() as $row)
@@ -24,6 +25,18 @@ class Users_model extends Model {
 		}
 		
 		return $this->all_users;
+	}
+	
+	function get_next_uid() {
+		$this->db->select('value');
+		$this->db->from(ST_USERS_TABLE);
+		$this->db->where('`key`', 'uid');
+		$this->db->orderby('value', 'desc');
+		$this->db->limit(1);
+		$query = $this->db->get();
+		$largest_uid = intval(element('value', $query->row_array())); //We want a single result
+		
+		return $largest_uid+1;
 	}
 	
 	function get_username($in_uid) {
@@ -57,16 +70,18 @@ class Users_model extends Model {
 		//In both UPDATE and INSERT, we have to set the value and attr.
 		$this->db->set('value', $in_value);
 		$this->db->set('attribute', $in_attribute);
-		$this->db->where('username', $this->username);
-		$this->db->where('`key`', $in_key);
 		$this->db->limit(1);
 		
 		if(!empty($temp_value)) //empty() can only be used on a variable
 		{
+			$this->db->where('username', $this->username);
+			$this->db->where('`key`', $in_key);
 			return $this->db->update(ST_USERS_TABLE);
 		}
 		else
 		{
+			$this->db->set('username', $this->username); //Notice we use set here instead of where
+			$this->db->set('`key`', $in_key);
 			return $this->db->insert(ST_USERS_TABLE);
 		}
 	}
