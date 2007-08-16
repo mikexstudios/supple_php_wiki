@@ -26,6 +26,16 @@ class Users_model extends Model {
 		return $this->all_users;
 	}
 	
+	function get_username($in_uid) {
+		$this->db->select('username');
+		$this->db->from(ST_USERS_TABLE);
+		$this->db->where('`key`', 'uid'); //key is a MySQL reserved word. We need to quote it.
+		$this->db->where('value', $in_uid);
+		$this->db->limit(1);
+		$query = $this->db->get();
+		return element('username', $query->row_array()); //We want a single result
+	}
+	
 	function get_value($in_key) {
 		$this->db->select('value');
 		$this->db->from(ST_USERS_TABLE);
@@ -53,12 +63,17 @@ class Users_model extends Model {
 		
 		if(!empty($temp_value)) //empty() can only be used on a variable
 		{
-			$this->db->update(ST_USERS_TABLE);
+			return $this->db->update(ST_USERS_TABLE);
 		}
 		else
 		{
-			$this->db->insert(ST_USERS_TABLE);
+			return $this->db->insert(ST_USERS_TABLE);
 		}
+	}
+	
+	function delete() {
+		$this->db->where('username', $this->username);
+		return $this->db->delete(ST_USERS_TABLE);
 	}
 	
 }

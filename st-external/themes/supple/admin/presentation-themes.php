@@ -20,6 +20,7 @@
 <h2>Available Themes</h2>
 <?php 
 	$avaliable_themes = get('avaliable_themes'); 
+	if(!empty($avaliable_themes)):
 	foreach($avaliable_themes as $each_theme): //themes.php?action=activate&amp;template=classic&amp;stylesheet=classic&#038;_wpnonce=23364fbf1f
 		$each_theme_data = get('theme_data', $each_theme);
 ?>
@@ -34,7 +35,11 @@
 </div>
 <?php 
 	endforeach;
+	else:
 ?>
+<p>There are currently no avaliable themes.</p>
+<br />
+<?php endif; ?>
 
 
 <h2>Get More Themes</h2>
