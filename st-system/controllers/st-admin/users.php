@@ -147,7 +147,7 @@ class Users extends Controller {
 	
 	function addnew() {
 		$this->_initialize();
-		$this->template->add_value('admin_page_title', 'Users &rsaquo; Management');
+		$this->template->add_value('admin_page_title', 'Users &rsaquo; Add New User');
 		$this->load->helper('string');
 		
 		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');

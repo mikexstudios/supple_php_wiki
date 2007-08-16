@@ -13,7 +13,7 @@
 
 <?php $username = get('logged_in_username'); ?>
 
-<h2>Your Profile and Personal Options</h2>
+<h2>Profile and Personal Options</h2>
 <form action="<?php out('admin_url', 'users/profile'); ?>" name="profile" id="your-profile" method="post">
 
 <fieldset>
