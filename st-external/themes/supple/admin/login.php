@@ -17,7 +17,6 @@
 <?php endif; ?>
 
 <form name="loginform" id="loginform" action="<?php out('current_url'); ?>" method="post">
-<input type="hidden" name="redirect_to" value="HomePage" />
 	<p>
 		<label>Username:<br />
 		<input type="text" name="user_login" class="input" value="<?php echo $this->validation->user_login; ?>" size="20" tabindex="10" /></label>

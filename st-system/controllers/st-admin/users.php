@@ -155,7 +155,7 @@ class Users extends Controller {
 		//Set validation rules
 		$rules['user_login'] = 'required|trim|max_length[100]|alpha_dash|callback__user_exist_check'; //We don't require this since the page can be empty.
 		$rules['email'] = 'required|trim|max_length[300]|valid_email'; //Add page name check here
-		$rules['pass1'] = 'required|trim|max_length[250]';
+		$rules['pass1'] = 'required|trim|max_length[250]|matches[pass2]';
 		$rules['pass2'] = 'required|trim|max_length[250]|matches[pass1]';
 		$rules['role'] = 'required|trim|max_length[100]|alpha_dash';
 		$rules['adduser'] = 'required'; //The submit button
@@ -208,7 +208,45 @@ class Users extends Controller {
 	}
 	
 	function profile() {
-	
+		$this->_initialize();
+		$this->template->add_value('admin_page_title', 'Users &rsaquo; Profile');
+		
+		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+		
+		//Set validation rules
+		$rules['email'] = 'required|trim|max_length[300]|valid_email'; //Add page name check here
+		$rules['pass1'] = 'trim|max_length[250]|matches[pass2]';
+		$rules['pass2'] = 'trim|max_length[250]|matches[pass1]';
+		$rules['updateprofile'] = 'required'; //The submit button
+		$this->validation->set_rules($rules);
+		
+		//Also repopulate the form
+		$fields['email'] = 'E-mail';
+		$fields['pass1'] = 'Password';
+		$fields['pass2'] = 'Password Again';
+		$fields['updateprofile'] = 'Update Profile Submit';
+		$this->validation->set_fields($fields);
+		
+		if($this->validation->run() === TRUE)
+		{
+			//Now we add the user
+			$this->users_model->username = get_logged_in_username();
+			//Do we change the password?
+			if(!empty($this->validation->pass1))
+			{
+				$this->load->library('encrypt');
+				$hashed_password = $this->encrypt->sha1($this->config->item('encryption_salt').$this->validation->pass1);
+				$this->users_model->set_value('password', $hashed_password);
+			}			
+			
+			$this->users_model->set_value('email', $this->validation->email);
+			
+			//Now display sucess message
+			$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
+			$this->message->set_text('Profile updated.');
+		}
+		
+		$this->load->view('admin/users-profile');
 	}
 	
 	function login() {
