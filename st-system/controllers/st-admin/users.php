@@ -268,11 +268,7 @@ class Users extends Controller {
 		$fields['rememberme'] = 'Remember me checkbox';
 		$this->validation->set_fields($fields);
 
-		if ($this->validation->run() == FALSE)
-		{
-			$this->load->view('admin/login');
-		}
-		else
+		if ($this->validation->run() === TRUE)
 		{
 			//User submitted the form
 			$this->load->library('authorization');
@@ -291,8 +287,10 @@ class Users extends Controller {
 			//User was not authenticated! Hack to get custom error message:
 			$this->validation->_error_array[] = 'Incorrect Username or Password.';
 			$this->validation->run();
-			$this->load->view('admin/login');
+			
 		}
+		
+		$this->load->view('admin/users-login');
 	}
 	
 	function logout() {
