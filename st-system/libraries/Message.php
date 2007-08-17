@@ -4,7 +4,7 @@ class Message {
 	//var $CI;
 	
 	var $delimiters = array();
-	var $text = '';
+	var $text = array();
 	
 	function Message() {
 		//$this->CI =& get_instance();
@@ -18,11 +18,17 @@ class Message {
 	}
 	
 	function set_text($in_text) {
-		$this->text = $in_text;
+		$this->text[] = $in_text;
 	}
 	
 	function get() {
-		return $this->delimiters['pre'].$this->text.$this->delimiters['post'];
+		$return_html = '';
+		foreach($this->text as $each_text)
+		{
+			$return_html .= $this->delimiters['pre'].$each_text.$this->delimiters['post']."\n";
+		}
+		
+		return $return_html;
 	}
 
 }

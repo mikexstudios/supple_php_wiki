@@ -141,4 +141,19 @@ function get_user_info($in_username, $in_key) {
 	return $CI->users_model_theme->get_value($in_key);
 }
 
+$CI->template->add_function('full_domain_name', 'get_site_full_domain_name');
+function get_site_full_domain_name() {
+	//Get base url of site
+	if(preg_match('%^\S+://(\S+\.\S+?)/.*$%', base_url(), $matches))
+	{
+		$site_domain_name = $matches[1];
+	}
+	else
+	{
+		$site_domain_name = 'example.com';
+	}
+	
+	return $site_domain_name;
+}
+
 ?>

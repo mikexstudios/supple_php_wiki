@@ -35,7 +35,8 @@
 </div>
 
 <ul>
-	<!-- <li><a href="" title="Password Lost and Found">Lost your password?</a></li> -->
+	<li><a href="<?php out('admin_url', 'users/register'); ?>">Register</a></li>
+	<li><a href="<?php out('admin_url', 'users/lostpassword'); ?>" title="Password Lost and Found">Lost your password?</a></li>
 </ul>
 
 

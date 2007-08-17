@@ -86,7 +86,13 @@ class Users_model extends Model {
 		}
 	}
 	
-	function delete() {
+	function delete_key($in_key) {
+		$this->db->where('username', $this->username);
+		$this->db->where('`key`', $in_key);
+		return $this->db->delete(ST_USERS_TABLE);
+	}
+	
+	function delete_all() {
 		$this->db->where('username', $this->username);
 		return $this->db->delete(ST_USERS_TABLE);
 	}

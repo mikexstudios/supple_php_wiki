@@ -66,7 +66,7 @@ class Users extends Controller {
 				{
 					$username = $this->users_model->get_username($each_user_id);
 					$this->users_model->username = $username;
-					$this->users_model->delete();
+					$this->users_model->delete_all();
 					unset($this->users_model->username, $username);
 				}
 				
@@ -153,7 +153,7 @@ class Users extends Controller {
 		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
 		
 		//Set validation rules
-		$rules['user_login'] = 'required|trim|min_length[4]|max_length[100]|alpha_dash|callback__user_exist_check'; //We don't require this since the page can be empty.
+		$rules['user_login'] = 'required|trim|min_length[4]|max_length[100]|alpha_dash|callback__add_new_user_exist_check'; //We don't require this since the page can be empty.
 		$rules['email'] = 'required|trim|max_length[300]|valid_email'; //Add page name check here
 		$rules['pass1'] = 'required|trim|max_length[250]|matches[pass2]';
 		$rules['pass2'] = 'required|trim|max_length[250]|matches[pass1]';
@@ -193,14 +193,22 @@ class Users extends Controller {
 		$this->load->view('admin/users-addnew');
 	}
 	
-	function _user_exist_check($in_username) {
+	function _does_user_exist($in_username) {
 		$this->users_model->username = $in_username;
 		$uid_temp = $this->users_model->get_value('uid');
 
 		if(!empty($uid_temp))
 		{
-			//Set error
-			$this->validation->set_message('_user_exist_check', 'The user you are trying to add already exists.');
+			return true; //User exists!
+		}
+		
+		return false;	
+	}	
+	
+	function _add_new_user_exist_check($in_username) {
+		if($this->_does_user_exist($in_username) === TRUE)
+		{
+			$this->validation->set_message('_add_new_user_exist_check', 'The user you are trying to add already exists.');
 			return false; //User exists!
 		}
 		
@@ -250,6 +258,8 @@ class Users extends Controller {
 	}
 	
 	function login() {
+		$this->load->helper('admin/autoload');
+		
 		//Prepare Form:
 		$this->load->library('validation');
 		$this->validation->set_error_delimiters('<div class="error">', '</div>');
@@ -308,7 +318,7 @@ class Users extends Controller {
 		$this->load->library('authorization');
 		if($this->authorization->is_logged_in())
 		{
-			//redirect('/st-admin/users');
+			redirect('/st-admin/users');
 		}
 		
 		$this->load->library('validation');
@@ -316,7 +326,7 @@ class Users extends Controller {
 		
 		//Set validation rules
 		//Note we should also validate that the name does not already exist!
-		$rules['user_login'] = 'required|trim|alpha_dash|min_length[4]|max_length[100]|callback__user_exist_check';
+		$rules['user_login'] = 'required|trim|alpha_dash|min_length[4]|max_length[100]|callback__add_new_user_exist_check';
 		$rules['user_email'] = 'required|trim|max_length[300]|valid_email';
 		$this->validation->set_rules($rules);
 		
@@ -330,14 +340,7 @@ class Users extends Controller {
 			$this->load->library('email');
 			
 			//Get base url of site
-			if(preg_match('%^\S+://(\S+\.\S+?)/.*$%', base_url(), $matches))
-			{
-				$site_domain_name = $matches[1];
-			}
-			else
-			{
-				$site_domain_name = 'example.com';
-			}
+			$site_domain_name = get_site_full_domain_name();
 			
 			//Generate random password
 			$this->load->helper('string');
@@ -365,20 +368,220 @@ You can login here: '.construct_admin_url('users/login')."\n\n";
 				$this->users_model->set_value('email', $this->validation->user_email);
 				$this->users_model->set_value('role', 'Registered');
 				
-				//Now display sucess message
+				//Now display success message
 				$this->message->set_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
 				$this->message->set_text('Registration complete. Please check your email.');
 			}
 			else
 			{
-				//Now display sucess message
+				//Now display error message
 				$this->message->set_delimiters('<div id="error" class="updated fade"><p><strong>', '</strong></p></div>');
 				$this->message->set_text('Registration failed. Your registration email was unable to be sent. Please contact the site owner for assistance.');
 			}	
+			
+			//Clear set values
+			$this->validation->user_login = '';
+			$this->validation->user_email = '';
 		}
 		
 		$this->load->view('admin/users-register');
 
+	}
+	
+	function lostpassword() {
+		//We do not do the initialization stuff since this doesn't require admin-level
+		//access
+		
+		$this->load->helper('admin/autoload');
+		
+		$this->load->library('authorization');
+		if($this->authorization->is_logged_in())
+		{
+			redirect('/st-admin/users');
+		}
+		
+		$this->load->library('validation');
+		$this->validation->set_error_delimiters('<div class="error">', '</div>');
+		
+		//Set validation rules
+		//Note we should also validate that the name does not already exist!
+		$rules['user_login'] = 'required|trim|alpha_dash|min_length[4]|max_length[100]|callback__lostpassword_user_exist_check';
+		$rules['user_email'] = 'required|trim|max_length[300]|valid_email';
+		$this->validation->set_rules($rules);
+		
+		//Also repopulate the form
+		$fields['user_login'] = 'Username'; //These names correspond to what is shown in error message.
+		$fields['user_email'] = 'Email';
+		$this->validation->set_fields($fields);
+		
+		//Check that email exists and corresponds with the username
+		$email_matches_username = false;
+		if(!empty($this->validation->user_login) && !empty($this->validation->user_email))
+		{
+			$this->users_model->username = $this->validation->user_login;
+			$real_email = $this->users_model->get_value('email');
+			if(strcmp($real_email, $this->validation->user_email) == 0)
+			{
+				$email_matches_username = true;
+			}
+			else
+			{
+				$this->validation->_error_array[] = 'The email address you provided does not match the one associated with the username.';
+			}
+		} 
+		
+		if ($this->validation->run() === TRUE && $email_matches_username === TRUE)
+		{					
+			$this->load->library('email');
+			
+			$site_domain_name = get_site_full_domain_name();
+			
+			//Generate random string and store as field in users table. If user 
+			//enters this string through reset password, they will receive a new
+			//password.
+			$this->load->helper('string');
+			$random_string = random_string('alnum', 6);
+			$this->users_model->username = $this->validation->user_login;
+			$this->users_model->set_value('resetpassword', $random_string);	
+	
+			$this->email->from('noreply@'.$site_domain_name, $this->settings->get('site_name'));
+			$this->email->to($this->validation->user_email);
+			$this->email->subject('Password Reset');
+			$message = '
+Someone has asked to reset the password for the following site and username. 
+
+Site: '.$this->settings->get('site_name').' ('.base_url().').
+Username: '.$this->validation->user_login.'
+
+To reset your password visit the following address, otherwise just ignore this email and nothing will happen:
+
+'.construct_admin_url('users/resetpassword').'/'.$this->validation->user_login.'/'.$random_string."/\n\n";
+			$this->email->message($message);
+			if($this->email->send() === TRUE)
+			{				
+				//Now display success message
+				$this->message->set_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
+				$this->message->set_text('Please check your email for your lost password.');
+			}
+			else
+			{
+				//Now display error message
+				$this->message->set_delimiters('<div id="error" class="updated fade"><p><strong>', '</strong></p></div>');
+				$this->message->set_text('Your lost password email was unable to be sent. Please contact the site owner for assistance.');
+			}	
+			
+			//Clear set values
+			$this->validation->user_login = '';
+			$this->validation->user_email = '';
+		}
+		else
+		{
+			$this->message->set_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
+			$this->message->set_text('Please enter your username and e-mail address.'."\n".'You will receive your new password via e-mail.');
+		}
+		
+		$this->load->view('admin/users-lostpassword');
+	}
+	
+	function _lostpassword_user_exist_check($in_username) {
+		if($this->_does_user_exist($in_username) === FALSE)
+		{
+			$this->validation->set_message('_lostpassword_user_exist_check', 'The user does not exist.');
+			return false; //User exists!
+		}
+		
+		return true;
+	}
+	
+	function resetpassword() {
+		$this->load->helper('admin/autoload');
+		
+		$this->load->library('authorization');
+		if($this->authorization->is_logged_in())
+		{
+			redirect('/st-admin/users');
+		}
+		
+		$this->load->library('validation');
+		$this->validation->set_error_delimiters('<div class="error">', '</div>');
+		$this->validation->user_login = '';
+		$this->validation->user_email = '';
+		
+		$in_username = $this->uri->segment(4);
+		$random_string = $this->uri->segment(5);
+		if(!empty($in_username) && !empty($random_string))
+		{
+			//Perform validation
+			if($this->validation->min_length($in_username, 4) && $this->validation->max_length($in_username, 100)
+					&& $this->validation->alpha_dash($in_username) && $this->validation->exact_length($random_string, 6) 
+					&& $this->validation->alpha_numeric($random_string))
+			{
+				//Now check username with random string
+				$this->users_model->username = $in_username;
+				$password_reset_string = $this->users_model->get_value('resetpassword');
+				if(strcmp($password_reset_string, $random_string) == 0)
+				{
+					//All good! We generate a random password send out email
+					//Generate random password
+					$this->load->helper('string');
+					$random_password = random_string('alnum', 6);
+					$this->load->library('encrypt');
+					$hashed_password = $this->encrypt->sha1($this->config->item('encryption_salt').$random_password);				
+					
+					$this->load->library('email');
+					$site_domain_name = get_site_full_domain_name();
+					$this->email->from('noreply@'.$site_domain_name, $this->settings->get('site_name'));
+					$this->email->to($this->users_model->get_value('email'));
+					$this->email->subject('Your new password');
+					$message = '
+Here is your new password on '.$this->settings->get('site_name').':
+
+Username: '.$in_username.'
+Password: '.$random_password.'
+(You can change your password after you login.)
+
+You can login here: '.construct_admin_url('users/login')."\n\n";
+					$this->email->message($message);
+					if($this->email->send() === TRUE)
+					{
+						//Now we really change the password		
+						$this->users_model->set_value('password', $hashed_password);
+						//Delete the reset password key
+						$this->users_model->delete_key('resetpassword');
+						
+						//Now display success message
+						$this->message->set_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
+						$this->message->set_text('Your password has been reset successfully. Please check your email.');
+					}
+					else
+					{
+						//Now display error message
+						$this->message->set_delimiters('<div id="error" class="updated fade"><p><strong>', '</strong></p></div>');
+						$this->message->set_text('Your new password email was unable to be sent. Please contact the site owner for assistance.');
+					}	
+				}
+				else
+				{
+					//Now display error message
+					$this->message->set_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+					$this->message->set_text('The reset password string you provided is incorrect.');
+				}
+			}
+			else
+			{
+				//Now display error message
+				$this->message->set_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+				$this->message->set_text('Invalid username or provided string.');
+			}
+		}
+		else
+		{
+			redirect('/st-admin/users/lostpassword');
+		}
+		
+		$this->message->set_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
+		$this->message->set_text('Please enter your username and e-mail address.'."\n".'You will receive your new password via e-mail.');
+		$this->load->view('admin/users-lostpassword');
 	}
 	
 }
