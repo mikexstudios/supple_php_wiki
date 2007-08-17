@@ -153,7 +153,7 @@ class Users extends Controller {
 		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
 		
 		//Set validation rules
-		$rules['user_login'] = 'required|trim|max_length[100]|alpha_dash|callback__user_exist_check'; //We don't require this since the page can be empty.
+		$rules['user_login'] = 'required|trim|min_length[4]|max_length[100]|alpha_dash|callback__user_exist_check'; //We don't require this since the page can be empty.
 		$rules['email'] = 'required|trim|max_length[300]|valid_email'; //Add page name check here
 		$rules['pass1'] = 'required|trim|max_length[250]|matches[pass2]';
 		$rules['pass2'] = 'required|trim|max_length[250]|matches[pass1]';
@@ -299,6 +299,88 @@ class Users extends Controller {
 		$this->load->library('authorization');
 		$this->authorization->logout();
 		redirect('/st-admin/users');
+	}
+	
+	function register() {
+		//We do not do the initialization stuff since this doesn't require admin-level
+		//access
+		
+		$this->load->helper('admin/autoload');
+		
+		$this->load->library('authorization');
+		if($this->authorization->is_logged_in())
+		{
+			//redirect('/st-admin/users');
+		}
+		
+		$this->load->library('validation');
+		$this->validation->set_error_delimiters('<div class="error">', '</div>');
+		
+		//Set validation rules
+		//Note we should also validate that the name does not already exist!
+		$rules['user_login'] = 'required|trim|alpha_dash|min_length[4]|max_length[100]|callback__user_exist_check';
+		$rules['user_email'] = 'required|trim|max_length[300]|valid_email';
+		$this->validation->set_rules($rules);
+		
+		//Also repopulate the form
+		$fields['user_login'] = 'Username'; //These names correspond to what is shown in error message.
+		$fields['user_email'] = 'Email';
+		$this->validation->set_fields($fields);
+
+		if ($this->validation->run() === TRUE)
+		{					
+			$this->load->library('email');
+			
+			//Get base url of site
+			if(preg_match('%^\S+://(\S+\.\S+?)/.*$%', base_url(), $matches))
+			{
+				$site_domain_name = $matches[1];
+			}
+			else
+			{
+				$site_domain_name = 'example.com';
+			}
+			
+			//Generate random password
+			$this->load->helper('string');
+			$random_password = random_string('alnum', 6);
+			$this->load->library('encrypt');
+			$hashed_password = $this->encrypt->sha1($this->config->item('encryption_salt').$random_password);				
+	
+			$this->email->from('noreply@'.$site_domain_name, $this->settings->get('site_name'));
+			$this->email->to($this->validation->user_email);
+			$this->email->subject('Your username and password');
+			$message = '
+Thanks for registering on '.$this->settings->get('site_name').'. Here is your login info:
+Username: '.$this->validation->user_login.'
+Password: '.$random_password.'
+(You can change your password after you login.)
+
+You can login here: '.construct_admin_url('users/login')."\n\n";
+			$this->email->message($message);
+			if($this->email->send() === TRUE)
+			{
+				//Now we add the user
+				$this->users_model->username = $this->validation->user_login;
+				$this->users_model->set_value('uid', $this->users_model->get_next_uid());		
+				$this->users_model->set_value('password', $hashed_password);
+				$this->users_model->set_value('email', $this->validation->user_email);
+				$this->users_model->set_value('role', 'Registered');
+				
+				//Now display sucess message
+				$this->message->set_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
+				$this->message->set_text('Registration complete. Please check your email.');
+			}
+			else
+			{
+				//Now display sucess message
+				$this->message->set_delimiters('<div id="error" class="updated fade"><p><strong>', '</strong></p></div>');
+				$this->message->set_text('Registration failed. Your registration email was unable to be sent. Please contact the site owner for assistance.');
+			}	
+		}
+		
+		$this->load->view('admin/users-register');
+
 	}
 	
 }
