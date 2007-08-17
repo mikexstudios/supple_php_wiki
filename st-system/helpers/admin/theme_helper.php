@@ -5,6 +5,20 @@
 
 $CI =& get_instance();
 
+$CI->template->add_function('admin_theme_url', 'get_admin_theme_url_path');
+function get_admin_theme_url_path($file='') {
+	global $CI;
+	
+	$return_url = site_url('st-system/views');
+	
+	if(!empty($file))
+	{
+		return $return_url.'/'.$file;
+	}
+	
+	return $return_url;
+}
+
 $CI->template->add_function('theme_data', 'get_theme_data');
 function get_theme_data($in_theme_name) {
 	return @include_once ABSPATH.THEMES_DIR.$in_theme_name.'/theme-info.php';

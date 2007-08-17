@@ -4,7 +4,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><?php out('admin_page_title'); ?> : suppleText</title>
-	<link rel="stylesheet" type="text/css" href="<?php out('theme_url', 'admin/admin.css'); ?>" />
+	<link rel="stylesheet" type="text/css" href="<?php out('admin_theme_url', 'admin/admin.css'); ?>" />
 </head>
 <body>
 <div id="header">
