@@ -21,22 +21,19 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 DROP TABLE IF EXISTS `st_config`;
 CREATE TABLE IF NOT EXISTS `st_config` (
-  `order` smallint(5) unsigned NOT NULL default '0',
-  `option` varchar(50) NOT NULL default '',
+  `id` int(5) NOT NULL auto_increment,
+  `key` varchar(50) NOT NULL,
   `value` text NOT NULL,
-  `vartype` enum('string','number','boolean') NOT NULL default 'string',
-  `displaycode` varchar(20) NOT NULL default '',
-  `name` varchar(100) NOT NULL default '',
-  `description` varchar(200) NOT NULL default '',
-  PRIMARY KEY  (`option`),
-  UNIQUE KEY `order` (`order`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
-INSERT INTO `st_config` (`order`, `option`, `value`, `vartype`, `displaycode`, `name`, `description`) VALUES 
-(4, 'is_rewrite', 'true', 'boolean', 'yesno', 'Enable Pretty URLs', 'Set to yes if proper .htaccess file is created with the necessary mod_rewrite code'),
-(1, 'root_page', 'HomePage', 'string', 'string', 'Default Page', 'The page that is displayed when no page is specified.'),
-(6, 'use_cache', 'false', 'boolean', 'yesno', 'Use Page Caching', 'If set to true, stores syntax parsed pages in database and loads the cached version to users.'),
-(2, 'use_theme', 'supple', 'string', 'text', 'Use Theme', 'The theme used to display pages');
+INSERT INTO `st_config` (`id`, `key`, `value`) VALUES 
+(1, 'is_rewrite', 'true'),
+(2, 'root_page', 'HomePage'),
+(3, 'site_name', 'My suppleText wiki'),
+(4, 'use_cache', 'false'),
+(5, 'use_theme', 'supple'),
+(6, 'version', '0.3.0');
 
 -- --------------------------------------------------------
 
