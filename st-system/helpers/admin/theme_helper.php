@@ -63,13 +63,7 @@ function does_theme_exist($in_theme_name) {
 	return false;
 }
 
-
-$CI->template->add_function('logged_in_username', 'get_logged_in_username');
-function get_logged_in_username() {
-	global $CI;
-	
-	return $CI->session->userdata('username');
-}
+//Logged in username function moved to the regular theme_helper
 
 $CI->template->add_function('this_admin_page', 'get_current_admin_pagename');
 function get_current_admin_pagename() {

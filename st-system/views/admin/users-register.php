@@ -4,7 +4,7 @@
 <head>
 	<title>Register : <?php out('site_name'); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<link rel="stylesheet" href="<?php out('theme_url', 'admin/login.css'); ?>" type="text/css" />
+	<link rel="stylesheet" href="<?php out('admin_theme_url', 'admin/login.css'); ?>" type="text/css" />
 </head>
 <body>
 
