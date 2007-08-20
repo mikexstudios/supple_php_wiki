@@ -142,15 +142,22 @@ function get_current_pagename() {
 }
 
 $CI->template->add_function('format', 'format_text');
-function format_text($in_text) {
+function format_text($in_text, $preprocess=false) {
 	global $CI;
 	
 	$CI->load->library('syntaxparser');
-	$CI->load->helper('misc');
+	//$CI->load->helper('misc');
 	$CI->syntaxparser->setSyntaxPath(base_path('/st-system/formatters/'));
 	$CI->syntaxparser->loadSyntax();
 	$CI->syntaxparser->setText($in_text);
-	$CI->syntaxparser->applyAll();
+	if($preprocess === true)
+	{
+		$CI->syntaxparser->applyAll(true);
+	}
+	else
+	{
+		$CI->syntaxparser->applyAll();
+	}
 	return $CI->syntaxparser->getText();
 }
 

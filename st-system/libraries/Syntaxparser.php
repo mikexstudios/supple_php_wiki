@@ -13,6 +13,7 @@
 class SyntaxParser {
 	var $CI;
 	var $text;
+	var $preprocessordefs = array();
 	var $blockdefs = array();
 	var $inlinedefs = array();
 	var $delimiter = "\xFF"; //Maybe something else might work better to allow for non UTF-8
@@ -45,6 +46,7 @@ class SyntaxParser {
 			return;
 		}
 		
+		$this->CI->load->helper('misc'); //Needed for load_files_in_directory;
 		load_files_in_directory($in_path);
 		//include_once $this->syntax_path.'/test.php';
 		$this->syntax_path_loaded[md5($in_path)] = true; //Set so we know it has already been loaded
@@ -56,6 +58,15 @@ class SyntaxParser {
 	
 	function getText() {
 		return $this->text;
+	}
+	
+	function add_preprocessor_definition($in_tag, $in_pattern, $in_callback, $in_priority, $is_callback=true) {
+		//It might be a good idea to cast to specific data formats here.
+		//Also add check for adding a tag that already exists.
+	    $this->preprocessordefs[$in_tag] = array('pattern' => $in_pattern, 
+														 'replacement' => $in_callback, 
+														 'priority' => $in_priority, 
+														 'is_callback' => $is_callback);
 	}
 	
 	/**
@@ -83,6 +94,19 @@ class SyntaxParser {
 	}
 	
 	//--------------------------------
+
+	function applyPreprocessorDef($in_tag, $in_text) {
+		//Check for callback
+		if($this->preprocessordefs[$in_tag]['is_callback']==true)
+		{
+			//Maybe we can add a doesfunctionexist check here.
+			return preg_replace_callback($this->preprocessordefs[$in_tag]['pattern'], $this->preprocessordefs[$in_tag]['replacement'] , $in_text);
+		}
+		else if($this->preprocessordefs[$in_tag]['is_callback']==false) //We could have just done an else too.
+		{
+			return preg_replace($this->preprocessordefs[$in_tag]['pattern'], $this->preprocessordefs[$in_tag]['replacement'] , $in_text);
+		}
+	}
 
 	function applyBlockDef($in_tag, $in_text) {
 		//Check for callback
@@ -114,6 +138,10 @@ class SyntaxParser {
 	/**
 	 * This and sortRules can be abstracted in the future
 	 */	 	
+	function sort_preprocessor_defs() {
+		uasort($this->preprocessordefs, array(&$this, '_priority_sort_callback'));	
+	} 
+	 
 	function sortBlockDefs() {
 		uasort($this->blockdefs, array(&$this, '_priority_sort_callback'));	
 	}
@@ -151,7 +179,23 @@ class SyntaxParser {
 			{ return 1; }			
 	}
 	
-	function applyAll() {
+	function apply_all_preprocessors($in_text) {
+		//Sort blocks by priority
+		$this->sort_by_priority($this->preprocessordefs);
+		
+		foreach(array_keys($this->preprocessordefs) as $tag)
+		{			
+			$in_text = $this->applyPreprocessorDef($tag, $in_text);
+		}
+		
+		return $in_text;
+	}
+	
+	function applyAll($preprocess=false) {
+		if($preprocess == true)
+		{
+			$this->text = $this->apply_all_preprocessors($this->text);
+		}
 		$this->text = $this->applyAllBlockDefs($this->text);
 		$this->text = $this->unhash_contents($this->text);
 	}
@@ -163,6 +207,7 @@ class SyntaxParser {
 		foreach(array_keys($this->blockdefs) as $tag)
 		{			
 			$in_text = $this->applyBlockDef($tag, $in_text);
+			//echo "\n\n-------------".$in_text;
 		}
 		
 		return $in_text;

@@ -52,6 +52,15 @@ class Show extends Controller {
 		if(does_current_page_exist())
 		{
 			$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
+			
+			//We also load page metadata
+			$this->load->model('page_metadata_model');
+			$this->page_metadata_model->pagename = $this->pages_model->pagename;
+			$page_metadata = $this->page_metadata_model->get_all();
+			foreach($page_metadata as $page_key => $page_value)
+			{
+				$this->template->add_value($page_key, $page_value);
+			}
 		}
 		$this->load->view('show');
 	}

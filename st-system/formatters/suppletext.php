@@ -3,6 +3,54 @@
 $CI =& get_instance();
 
 /**
+ * Preprocessors
+ */
+ 
+/**
+ * Metadata
+ * Undisplayed items associated with a page. Think of these as "page settings"
+ */
+$CI->syntaxparser->add_preprocessor_definition('metadata', '/@@([a-zA-Z0-9_-]+)\s*=\s*(.+)@@\s*/m', 'preprocessor_metadata_callback', 50, true);
+function preprocessor_metadata_callback(&$matches) {
+	global $CI;
+	//die($matches[0]);
+	$matches[1] = $CI->input->xss_clean($matches[1]);
+	$matches[1] = htmlentities($matches[1], ENT_QUOTES);
+	$matches[2] = $CI->input->xss_clean($matches[2]);
+	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
+	
+	//$CI->template->add_value($matches[1], $matches[2]);
+	
+	$CI->load->model('page_metadata_model');
+	$CI->page_metadata_model->pagename = get_current_pagename();
+	$CI->page_metadata_model->set_value($matches[1], $matches[2]);
+	
+	return $matches[0]; //Return it without any modification
+}  
+ 
+$CI->syntaxparser->add_preprocessor_definition('signature', '/~~~~(\s+)/', 'signature_callback', 100, true);
+function signature_callback(&$matches) {
+	global $CI;
+	
+	//the format is like: --mikexstudios 16:44, 20 August 2007 (UTC)
+	//Set author
+	if($CI->authorization->is_logged_in())
+	{
+		$author = $CI->session->userdata('username');
+	}
+	else
+	{
+		$author = $CI->input->ip_address();
+	}
+	
+	//We are using wikipedia style time
+	$date_time = mdate('%H:%i, %d %F %Y (UTC)', now());
+	
+	return $author.' '.$date_time.$matches[1];
+	
+} 
+
+/**
  * Comments
  * Not displayed. Not parsed
  */  
@@ -12,18 +60,9 @@ $CI->syntaxparser->add_block_definition('comments', '/\n?<comment>.*?<\/comment>
  * Metadata
  * Undisplayed items associated with a page. Think of these as "page settings"
  */
-$CI->syntaxparser->add_block_definition('metadata', '/\n@@([a-zA-Z0-9_-]+)\s*=\s*(.+)@@\s*\n/', 'metadata_callback', 50, true);
-function metadata_callback(&$matches) {
-	global $CI;
-	
-	$matches[1] = $CI->input->xss_clean($matches[1]);
-	$matches[1] = htmlentities($matches[1], ENT_QUOTES);
-	$matches[2] = $CI->input->xss_clean($matches[2]);
-	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
-	
-	$CI->template->add_value($matches[1], $matches[2]);
-	
-	return "\n";
+$CI->syntaxparser->add_block_definition('metadata', '/@@[a-zA-Z0-9_-]+\s*=\s*.+@@\s*/m', 'block_metadata_callback', 50, true);
+function block_metadata_callback(&$matches) {
+	return ''; //Don't display metadata
 }  
 
 /**

@@ -54,6 +54,32 @@ class Edit extends Show {
 					$author = $this->input->ip_address();
 				}
 				
+				/**
+				 * Do preprocesser parsing
+				 */				 
+				//We clear existing page metadata values
+				$this->load->model('page_metadata_model');
+				$this->page_metadata_model->pagename = $pagename;
+				$this->page_metadata_model->delete_all();
+				
+				$this->load->library('syntaxparser');
+				$this->syntaxparser->setSyntaxPath(base_path('/st-system/formatters/'));
+				$this->syntaxparser->loadSyntax();
+				$preprocessed_text = $this->syntaxparser->apply_all_preprocessors($this->validation->body);
+				
+				/* //We allow page metadata to exist anywhere on the page.
+				//Get page metadata from database and insert text at top of page
+				$this->load->model('page_metadata_model');
+				$this->page_metadata_model->pagename = $pagename;
+				$page_metadata = $this->page_metadata_model->get_all();
+				
+				$metadata_syntax = '';
+				foreach($page_metadata as $metadata_key => $metadata_value)
+				{
+					$metadata_syntax .= '@@'.$metadata_key.' = '.$metadata_value.'@@'."\n";
+				}
+				*/
+				
 				//The form is successful! This is where we make changes.
 				//Now create new record
 				$this->pages_model->pagename = $pagename;
@@ -62,7 +88,7 @@ class Edit extends Show {
 				//For some reason putting hsc_secure in form processing (above) doesn't work
 				//since the escaped characters are "unescaped" again!
 				$this->pages_model->note = $this->validation->hsc_secure($this->validation->note);
-				$this->pages_model->body = $this->validation->body;
+				$this->pages_model->body = $preprocessed_text;
 				$this->pages_model->insert();
 				
 				redirect($pagename);
@@ -75,7 +101,7 @@ class Edit extends Show {
 			else
 			{
 				//Otherwise, we preview
-				$this->pages_model->page['body'] = format_text($this->validation->body);
+				$this->pages_model->page['body'] = format_text($this->validation->body, true);
 				$this->load->view('preview');
 			}
 			
