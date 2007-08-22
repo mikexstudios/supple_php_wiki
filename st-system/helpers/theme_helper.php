@@ -223,11 +223,6 @@ function get_this_uri_fragment() {
 	return $CI->uri->uri_string();
 }
 
-$CI->template->add_function('logged_in_username', 'get_logged_in_username');
-function get_logged_in_username() {
-	global $CI;
-	
-	return $CI->session->userdata('username');
-}
+//Moved user functions to user_helper.php
 
 ?>

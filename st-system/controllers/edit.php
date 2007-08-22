@@ -37,6 +37,22 @@ class Edit extends Show {
 		
 		if ($this->validation->run() == FALSE)
 		{
+			//Get page metadata from database and insert text at top of page
+			$page_metadata_roles = get_page_metadata_access_roles();
+			$user_role = get_user_role();
+			if(does_user_have_permission($user_role, $page_metadata_roles))
+			{
+				$this->load->model('page_metadata_model');
+				$this->page_metadata_model->pagename = $pagename;
+				$page_metadata = $this->page_metadata_model->get_all();
+				
+				$metadata_syntax = '';
+				foreach($page_metadata as $metadata_key => $metadata_value)
+				{
+					$metadata_syntax .= '@@'.$metadata_key.' = '.$metadata_value.'@@'."\n";
+				}
+				$this->pages_model->page['body'] = $metadata_syntax."\n".$this->pages_model->page['body'];
+			}
 			$this->load->view('edit');
 		}
 		else
@@ -55,30 +71,22 @@ class Edit extends Show {
 				}
 				
 				/**
-				 * Do preprocesser parsing
+				 * Do preprocesser parsing. We only do this if the user has permission
 				 */				 
-				//We clear existing page metadata values
-				$this->load->model('page_metadata_model');
-				$this->page_metadata_model->pagename = $pagename;
-				$this->page_metadata_model->delete_all();
-				
+				$page_metadata_roles = get_page_metadata_access_roles();
+				$user_role = get_user_role();
+				if(does_user_have_permission($user_role, $page_metadata_roles))
+				{
+					//We clear existing page metadata values
+					$this->load->model('page_metadata_model');
+					$this->page_metadata_model->pagename = $pagename;
+					$this->page_metadata_model->delete_all();
+				}	
+						
 				$this->load->library('syntaxparser');
 				$this->syntaxparser->setSyntaxPath(base_path('/st-system/formatters/'));
 				$this->syntaxparser->loadSyntax();
 				$preprocessed_text = $this->syntaxparser->apply_all_preprocessors($this->validation->body);
-				
-				/* //We allow page metadata to exist anywhere on the page.
-				//Get page metadata from database and insert text at top of page
-				$this->load->model('page_metadata_model');
-				$this->page_metadata_model->pagename = $pagename;
-				$page_metadata = $this->page_metadata_model->get_all();
-				
-				$metadata_syntax = '';
-				foreach($page_metadata as $metadata_key => $metadata_value)
-				{
-					$metadata_syntax .= '@@'.$metadata_key.' = '.$metadata_value.'@@'."\n";
-				}
-				*/
 				
 				//The form is successful! This is where we make changes.
 				//Now create new record

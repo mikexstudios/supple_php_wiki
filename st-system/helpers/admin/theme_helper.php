@@ -140,14 +140,7 @@ function get_all_users_info() {
 	return $CI->users_model->get_all();
 }
 
-$CI->template->add_function('user_info', 'get_user_info');
-function get_user_info($in_username, $in_key) {
-	global $CI;
-	
-	$CI->load->model('users_model', 'users_model_theme');
-	$CI->users_model_theme->username = $in_username;
-	return $CI->users_model_theme->get_value($in_key);
-}
+//Moved user info func to regular theme_helper
 
 $CI->template->add_function('full_domain_name', 'get_site_full_domain_name');
 function get_site_full_domain_name() {

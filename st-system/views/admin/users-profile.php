@@ -23,7 +23,7 @@
 	</label></p>
 	
 	<p><label>E-mail: (required)<br />
-	<input type="text" name="email" value="<?php out('user_info', $username, 'email'); ?>" /></label></p>
+	<input type="text" name="email" value="<?php out('user_info', 'email', $username); ?>" /></label></p>
 </fieldset>
 
 <fieldset>
