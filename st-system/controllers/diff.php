@@ -26,54 +26,65 @@ class Diff extends Show {
 	
 	function display($pagename) {
 		$this->_set_page_info($pagename);
-		
-		$this->pid['a'] = $this->input->get('a');
-		$this->pid['b'] = $this->input->get('b');
-		
-		//die($this->pid['a']);
-		
-		//Secure input
-		if(!$this->validation->numeric($this->pid['a']) || !$this->validation->numeric($this->pid['b'])) 
+	
+		//Check to see if user has permission to read this page
+		$page_read_roles = get_page_read_roles($pagename);
+		$user_role = get_user_role();
+		if(does_user_have_permission($user_role, $page_read_roles))
 		{
-			show_error("The specified page id's are invalid.");
+			$this->pid['a'] = $this->input->get('a');
+			$this->pid['b'] = $this->input->get('b');
+			
+			//die($this->pid['a']);
+			
+			//Secure input
+			if(!$this->validation->numeric($this->pid['a']) || !$this->validation->numeric($this->pid['b'])) 
+			{
+				show_error("The specified page id's are invalid.");
+			}
+	
+			//Get page data from both revisions.
+			$this->load->model('Pages_model', 'pages_model_diff');
+			$this->pages_model_diff->pagename = $pagename;
+			
+			//Get data for a:
+			$this->pages_model_diff->id = $this->pid['a'];
+			$this->pages_model_diff->loadPage();
+			$this->data['a'] = $this->pages_model_diff->page;
+			
+			//Check for existance of this revision
+			if(empty($this->data['a']['time']))
+			{
+				show_error('The specified page id is invalid: '.$this->pid['a']);
+			}
+			
+			//Get data for b:
+			$this->pages_model_diff->id = $this->pid['b'];
+			$this->pages_model_diff->loadPage();
+			$this->data['b'] = $this->pages_model_diff->page;
+			
+			//Check for existance of this revision
+			if(empty($this->data['b']['time']))
+			{
+				show_error('The specified page id is invalid: '.$this->pid['b']);
+			}
+			
+			$this->compute_differences();
+			
+			//Set template tags
+			$this->template->add_value('diff_added', format_text($this->added));
+			$this->template->add_value('diff_deleted', format_text($this->deleted));
+			$this->template->add_value('diff_a', $this->data['a']);
+			$this->template->add_value('diff_b', $this->data['b']);
+			
+			
+			$this->load->view('diff');
 		}
-
-		//Get page data from both revisions.
-		$this->load->model('Pages_model', 'pages_model_diff');
-		$this->pages_model_diff->pagename = $pagename;
-		
-		//Get data for a:
-		$this->pages_model_diff->id = $this->pid['a'];
-		$this->pages_model_diff->loadPage();
-		$this->data['a'] = $this->pages_model_diff->page;
-		
-		//Check for existance of this revision
-		if(empty($this->data['a']['time']))
+		else
 		{
-			show_error('The specified page id is invalid: '.$this->pid['a']);
+			$this->pages_model->page['body'] = '<p>You do not have the permission to view this page.</p>';
+			$this->load->view('show');
 		}
-		
-		//Get data for b:
-		$this->pages_model_diff->id = $this->pid['b'];
-		$this->pages_model_diff->loadPage();
-		$this->data['b'] = $this->pages_model_diff->page;
-		
-		//Check for existance of this revision
-		if(empty($this->data['b']['time']))
-		{
-			show_error('The specified page id is invalid: '.$this->pid['b']);
-		}
-		
-		$this->compute_differences();
-		
-		//Set template tags
-		$this->template->add_value('diff_added', format_text($this->added));
-		$this->template->add_value('diff_deleted', format_text($this->deleted));
-		$this->template->add_value('diff_a', $this->data['a']);
-		$this->template->add_value('diff_b', $this->data['b']);
-		
-		
-		$this->load->view('diff');
 	}
 	
 	/**

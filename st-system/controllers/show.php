@@ -51,15 +51,19 @@ class Show extends Controller {
 		//Syntax formatting. 
 		if(does_current_page_exist())
 		{
-			$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
-			
-			//We also load page metadata
-			$this->load->model('page_metadata_model');
-			$this->page_metadata_model->pagename = $this->pages_model->pagename;
-			$page_metadata = $this->page_metadata_model->get_all();
-			foreach($page_metadata as $page_key => $page_value)
+			//Check to see if user has permission to read this page
+			$page_read_roles = get_page_read_roles($pagename);
+			$user_role = get_user_role();
+			if(does_user_have_permission($user_role, $page_read_roles))
 			{
-				$this->template->add_value($page_key, $page_value);
+				$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
+				
+				//We also load page metadata
+				load_page_metadata($this->pages_model->pagename);
+			}
+			else
+			{
+				$this->pages_model->page['body'] = '<p>You do not have the permission to view this page.</p>';
 			}
 		}
 		$this->load->view('show');

@@ -225,4 +225,16 @@ function get_this_uri_fragment() {
 
 //Moved user functions to user_helper.php
 
+function load_page_metadata($in_pagename) {
+	global $CI;
+	
+	$CI->load->model('page_metadata_model');
+	$CI->page_metadata_model->pagename = $in_pagename;
+	$page_metadata = $CI->page_metadata_model->get_all();
+	foreach($page_metadata as $page_key => $page_value)
+	{
+		$CI->template->add_value($page_key, $page_value);
+	}
+}
+
 ?>

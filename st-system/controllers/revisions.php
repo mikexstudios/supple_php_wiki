@@ -15,13 +15,24 @@ class Revisions extends Show {
 	function display($pagename) {
 		$this->_set_page_info($pagename);
 		
-		if(does_current_page_exist())
+		//Check to see if user has permission to read this page
+		$page_read_roles = get_page_read_roles($pagename);
+		$user_role = get_user_role();
+		if(does_user_have_permission($user_role, $page_read_roles))
 		{
-			$this->load->view('revisions');
+			if(does_current_page_exist())
+			{
+				$this->load->view('revisions');
+			}
+			else
+			{
+				redirect($pagename);
+			}
 		}
 		else
 		{
-			redirect($pagename);
+			$this->pages_model->page['body'] = '<p>You do not have the permission to view this page.</p>';
+			$this->load->view('show');
 		}
 	}
 	

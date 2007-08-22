@@ -61,4 +61,14 @@ function does_page_exist($in_pagename) {
 	return false;
 }
 
+function comma_list_to_array($in_comma_list) {
+	$array_list = explode(',', $in_comma_list);
+	foreach($array_list as $key => $each_element)
+	{
+		$array_list[$key] = trim($each_element);
+	}
+	
+	return $array_list;
+}
+
 ?>

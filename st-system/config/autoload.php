@@ -50,7 +50,7 @@ $autoload['libraries'] = array('database', 'template', 'settings', 'validation',
 |	$autoload['helper'] = array('url', 'file');
 */
 
-$autoload['helper'] = array('hacks', 'url', 'theme', 'user', 'date', 'array');
+$autoload['helper'] = array('hacks', 'url', 'theme', 'user', 'misc', 'date', 'array');
 
 
 /*
