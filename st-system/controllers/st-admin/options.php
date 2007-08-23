@@ -43,11 +43,15 @@ class Options extends Controller {
 		//Note we should also validate that the name does not already exist!
 		$rules['site_name'] = 'trim|max_length[300]|xss_clean'; //We don't require this since the page can be empty.
 		$rules['root_page'] = 'trim|required|max_length[200]'; //Add page name check here
+		$rules['default_read_permission'] = 'trim|required|max_length[200]';
+		$rules['default_write_permission'] = 'trim|required|max_length[200]';
 		$this->validation->set_rules($rules);
 		
 		//Also repopulate the form
 		$fields['site_name'] = 'Wiki title';
 		$fields['root_page'] = 'Default wiki page';
+		$fields['default_read_permission'] = 'Default read role(s)';
+		$fields['default_write_permission'] = 'Default write role(s)';
 		$this->validation->set_fields($fields);
 		
 		if ($this->validation->run() == FALSE)
