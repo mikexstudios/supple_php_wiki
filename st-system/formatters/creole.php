@@ -46,7 +46,7 @@ function escape_callback(&$matches) {
 	
 	//Protect against some XSS (When user tries to escape every character in XSS
 	//in hopes that after unhashing the malicious code is assembled again).
-	$matches[1] = htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
+	$matches[2] = htmlentities($matches[2], ENT_COMPAT, 'UTF-8');
 	
 	//If \s is a space, we remove it
 	if(strcmp($matches[1], ' ')==0)
@@ -531,7 +531,7 @@ function paragraph_callback(&$matches) {
 	if(preg_match('/'.$CI->syntaxparser->token_pattern.'/', $matches[1]))
 	{
 		//Replace escape hashes with contents of the escape.
-		$matches[1] = preg_replace_callback('/\s*('.$CI->syntaxparser->token_pattern.')\s*/', 'paragraph_callback_escape', $matches[1]);
+		$matches[1] = preg_replace_callback('/(\s|^)('.$CI->syntaxparser->token_pattern.')(\s*)/', 'paragraph_callback_escape', $matches[1]);
 		//die($matches[1]);
 		//This takes care of cases where one block is right under another with no
 		//line break inbetween. Essentially, we are checking for the existance of
@@ -631,13 +631,13 @@ function paragraph_callback(&$matches) {
 function paragraph_callback_escape(&$matches) {
 	global $CI;
 	
-	$temp_unhash = $CI->syntaxparser->unhash(trim($matches[1]));
+	$temp_unhash = $CI->syntaxparser->unhash(trim($matches[2]));
 	if(preg_match('/^.$/', $temp_unhash)) //one character
 	{
-		return ' ~'.$temp_unhash;
+		return $matches[1].'~'.$temp_unhash.$matches[3];
 	}
 	
-	return $matches[1];
+	return $matches[1].$matches[2].$matches[3];
 }
 
 
@@ -651,7 +651,7 @@ function inline_escape_callback(&$matches) {
 
 	//Protect against some XSS (When user tries to escape every character in XSS
 	//in hopes that after unhashing the malicious code is assembled again).
-	$matches[1] = htmlentities($matches[1], ENT_COMPAT, 'UTF-8');
+	$matches[2] = htmlentities($matches[2], ENT_COMPAT, 'UTF-8');
 	
 	//If \s is a space, we remove it
 	if(strcmp($matches[1], ' ')==0)
@@ -880,7 +880,7 @@ function raw_url_callback(&$matches) {
 	if(!empty($matches[1])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
 	{
 		$matches[1] = $CI->syntaxparser->unhash($matches[1]);
-		return $CI->input->xss_clean($matches[1].$matches[2].$matches[3]);
+		return $CI->syntaxparser->hash($matches[1].$matches[2].$matches[3]); //Preserve the url so that // isn't interpreted as italics
 	}
 	
 	//We won't consider single punctuation characters at the end of the URL

@@ -94,15 +94,20 @@ class Pages_model extends Model {
 		$this->db->insert(ST_PAGES_TABLE, $data);
 	}
 	
-	function get_all_revisions_data() {
+	function get_all_revisions_data($limit=100) {
 		//Set where clauses
+		$this->_set_where_clauses();
+		
+		/* //We now allow cases where page isn't set.
 		if($this->_set_where_clauses() == false)
 			{ return; } //Nothing can happen since page identifiers aren't set.
+		*/
 		
 		//We load the latest page first just so we can load information from the latest page.
 		$this->db->select('*');
 		$this->db->from(ST_PAGES_TABLE);
 		$this->db->orderby('id', 'desc');
+		$this->db->limit($limit);
 		$query = $this->db->get();
 		$this->revisions_data = $query->result_array();
 		

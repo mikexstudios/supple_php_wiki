@@ -138,7 +138,7 @@ function snippets_callback(&$matches) {
 //Replace 4 consecutive spaces at the beginning of a line with tab character.
 //Since the text is all one long string, we find the start of lines by the \n
 //and then we count four consecutive spaces.
-$CI->syntaxparser->add_inline_definition('spaces', '/([ ]{2,})/', 'spaces_callback', 20, true);
+$CI->syntaxparser->add_inline_definition('spaces', '/([ ]{2,})/', 'spaces_callback', 55, true); //Needs to come after inline escape
 function spaces_callback(&$matches) {
 	$length = strlen($matches[1]);
 	
