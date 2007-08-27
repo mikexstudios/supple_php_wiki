@@ -237,4 +237,22 @@ function load_page_metadata($in_pagename) {
 	}
 }
 
+$CI->template->add_function('current_revision', 'get_current_page_revision');
+function get_current_page_revision() {
+	global $CI;
+	
+	$action = $CI->uri->segment(2);
+	if($action == 'show')
+	{
+		$revision_num = $CI->uri->segment(3);
+		
+		if($CI->validation->numeric($revision_num))
+		{
+			return $revision_num;
+		}
+	}
+	
+	return '';
+}
+
 ?>

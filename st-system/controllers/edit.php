@@ -100,7 +100,6 @@ class Edit extends Show {
 					$preprocessed_text = $this->syntaxparser->apply_all_preprocessors($this->validation->body);
 					
 					//The form is successful! This is where we make changes.
-					//Now create new record
 					$this->pages_model->pagename = $pagename;
 					$this->pages_model->time = now(); //now() uses the date helper
 					$this->pages_model->author = $author; //For now

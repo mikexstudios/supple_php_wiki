@@ -15,7 +15,7 @@
 			$user_role = get_user_role();
 			if(does_user_have_permission($user_role, $page_read_roles) === TRUE):
 	?>
-		<a href="<?php out('page_url', get('page_tag')); ?>/edit">Edit this page</a> |
+		<a href="<?php out('page_url', get('page_tag'), 'edit', get('current_revision')); ?>">Edit this page</a> |
 	<?php endif; //does_user_have_permission ?> 
 		<a href="<?php out('page_url', get('page_tag'), 'revisions'); ?>" title="Click to view recent revisions list for this page"><?php echo unix_to_human(get('page_time')); ?></a>
 	<?php else: ?>
