@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `st_config` (
   `key` varchar(50) NOT NULL,
   `value` text NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10;
 
 INSERT INTO `st_config` (`id`, `key`, `value`) VALUES 
 (1, 'is_rewrite', 'true'),
@@ -34,6 +34,9 @@ INSERT INTO `st_config` (`id`, `key`, `value`) VALUES
 (4, 'use_cache', 'false'),
 (5, 'use_theme', 'supple'),
 (6, 'version', '0.3.0');
+(7, 'page_metadata_access', 'Editor'),
+(8, 'default_read_permission', 'Anonymous,Registered,Editor'),
+(9, 'default_write_permission', 'Registered,Editor');
 
 -- --------------------------------------------------------
 
@@ -61,6 +64,20 @@ INSERT INTO `st_pages` (`id`, `tag`, `time`, `body`, `user`, `note`) VALUES
 (3, 'Special:Navigation', UNIX_TIMESTAMP(), '[[HomePage|Home]] | [[http://www.suppletext.org/|suppleText]] | [[SandBox]] | //Put navigation links here by editing [[Special:Navigation]]//', 'suppleText', 'Initial Setup'),
 (4, 'FormattingRules', UNIX_TIMESTAMP(), '== suppleText Formatting Guide ==\n\nNote: Anything between {{{ {{{ }}} and {{{  ~}}} }}} is not formatted.\n \n\nOnce you have read through this, test your formatting skills in the SandBox.\n== 1. Text Formatting ==\n\n{{{**I''m bold**}}}\n**I''m bold**\n\n{{{//I''m italic text!//}}}\n//I''m italic text!//\n\n{{{ {{{monospace text ~}}} }}}\n{{{monospace text}}}\n\n== 2. Headers ==\n\nUse between five = (for the biggest header) and two = (for the smallest header) on both sides of a text to render it as a header.\n\n{{{= Really big header =}}}\n= Really big header =\n\n{{{== Rather big header ==}}}\n== Rather big header ==\n\n{{{=== Medium header ===}}}\n=== Medium header ===\n\n{{{==== Not-so-big header ====}}}\n==== Not-so-big header ====\n\n{{{===== Smallish header =====}}}\n===== Smallish header =====\n\n{{{====== Smallest header ======}}}\n====== Smallest header ======\n\n== 3. Horizontal separator ==\n{{{----}}}\n----\n\n== 4. Forced line break ==\nThis is the first line,{{{\\\\}}}and this is the second.\n\nThis is the first line,\\\\and this is the second.\n\n== 5. Lists and indents ==\n\nCurrently, no indent functionality.\n\nTo create bulleted/ordered lists, use the following markup (you can always use 4 spaces instead of a ~):\n\n=== Bulleted lists ===\n{{{\n* Line one\n* Line two\n}}}\n\n* Line one\n* Line two\n\n=== Numbered lists ===\n{{{\n# Line one\n# Line two\n}}}\n\n# Line one\n# Line two\n\n== 7. Images ==\n\n{{{ {{http://www.suppletext.org/logo-medium.gif|suppleText Logo}} }}}\n\n{{http://www.suppletext.org/logo-medium.gif|suppleText Logo}} \n\n== 8. Links ==\n\nTo create a link to a wiki page you can use any of the following options:\n\n   1. type a WikiName:\n\n	  {{{FormattingRules}}}\n	  FormattingRules\n\n   2. add a forced link surrounding the page name by {{{[[}}} and {{{]]}}} (everything after the | will be shown as description):\n\n	  {{{[[SandBox|Test your formatting skills]]}}}\n	  [[SandBox|Test your formatting skills]]\n\n	  {{{[[SandBox|??]]}}}\n	  [[SandBox|??]]\n\n   3. add an image with a link (see instructions above).\n\n\nTo link to external pages, you can do any of the following:\n\n   1. type a URL inside the page:\n\n	  {{{http://www.example.com}}}\n	  http://www.example.com\n\n   2. add a forced link surrounding the URL by {{{[[}}} and {{{]]}}} (everything after the | will be shown as description):\n\n	  {{{[[http://example.com/jenna/|Jenna''s Home Page]]}}}\n	  [[http://example.com/jenna/|Jenna''s Home Page]]\n\n	  {{{[[mailto:mail@example.com|Write me!]]}}}\n	  [[mailto:mail@example.com|Write me!]]\n\n   3. add an image with a link (see instructions above);\n\n== 9. Tables ==\n\nAll cells are separated by single pipes. Leading spaces are permitted before the first cell of a row and trailing spaces are permitted at the end of a line. The ending pipe is optional. You can embed links, bold, italics, line breaks, and nowiki in table cells. Equal sign directly following pipe defines a header. Headers can be arranged horizontally or vertically.\n\nExample:\n{{{\n|=Heading Col 1 |=Heading Col 2         |\n|Cell 1.1       |Two lines\\\\in Cell 1.2 |\n|Cell 2.1       |Cell 2.2               |\n}}}\n\n|=Heading Col 1 |=Heading Col 2         |\n|Cell 1.1       |Two lines\\\\in Cell 1.2 |\n|Cell 2.1       |Cell 2.2               |', 'suppleText', 'Initial Setup');
 
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `st_page_metadata`
+-- 
+
+CREATE TABLE IF NOT EXISTS `st_page_metadata` (
+  `id` int(100) NOT NULL auto_increment,
+  `pagename` varchar(100) NOT NULL,
+  `key` varchar(100) NOT NULL,
+  `value` varchar(100) NOT NULL,
+  `attribute` varchar(50) NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -86,9 +103,9 @@ CREATE TABLE IF NOT EXISTS `st_sessions` (
 DROP TABLE IF EXISTS `st_users`;
 CREATE TABLE IF NOT EXISTS `st_users` (
   `id` int(100) NOT NULL auto_increment,
-  `username` varchar(100) character set latin1 NOT NULL,
-  `key` varchar(100) character set latin1 NOT NULL,
-  `value` varchar(100) character set latin1 NOT NULL,
-  `attribute` varchar(50) character set latin1 NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `key` varchar(100) NOT NULL,
+  `value` varchar(100) NOT NULL,
+  `attribute` varchar(50) NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
