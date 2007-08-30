@@ -55,29 +55,10 @@ class Authorization {
   }
 
   function logout() {
-       
-      // delete session from session table for a dead kill
-      if (isset($this->CI->session->userdata)) 
-			{
-          if (isset($this->CI->session->userdata['session_id'])) 
-					{
-              $this->CI->load->model('Sessions_model', 'sessions_model');
-              $this->CI->sessions_model->delete_session($this->CI->session->userdata['session_id']);
-          }
-      }
       
-      /*
-       * the following operation clears session's userdata and
-       * clears the user's cookie data - both are important
-       * need to clear session user data in case code logs someone out
-       * and then checks login status before doing a GET (e.g. redirect)
-       * need to clear user's cookie in case code checks login status
-       * after a GET
-       */
-      
-      // clear session object userdata and user cookie value
-      $this->CI->session->unset_userdata($this->CI->session->userdata);
-      
+      //Seems like the OBSession library only requires this:
+      $this->CI->session->sess_destroy();
+    
   }
 
   function is_logged_in() {

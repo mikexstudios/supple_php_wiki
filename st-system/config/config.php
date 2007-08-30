@@ -228,16 +228,42 @@ $config['encryption_key'] = "suppleText"; //We shouldn't depend on this though.
 | 'session_cookie_name' = the name you want for the cookie
 | 'encrypt_sess_cookie' = TRUE/FALSE (boolean).  Whether to encrypt the cookie
 | 'session_expiration'  = the number of SECONDS you want the session to last.
-|  by default sessions last 7200 seconds (two hours).  Set to zero for no expiration.
+|  By default sessions expire when the browser is closed.  Set to zero.
+|---------------------------------  Additional config items:
+|  'sess_storage'       = Store USER DATA in 'cookie' OR 'database'
+|  'sess_data_cookie'   = The name of the cookie which will store user data if 'sess_storage' is 'cookie'.
+|  'sess_database' = 'default', Specify a database to use. Default is the "default" database connection group.
+|   configured in /config/database.php. If you change the "default" name, you must change it here also.
+|  'sess_timeout'       = session time-to-live, in seconds, set to zero for no timeout.
+|  'sess_destroy_on_timeout' = TRUE/FALSE (boolean)
+|  The default is FALSE, the session_id is regenerated and existing session data is saved.
+|  'sess_update_interval'    = Period in SECONDS between session updates.
+| 'sess_gc_probability'  = Percentage probability of garbage collection, default = 10, 100 = always, 0 = never.
+| 'sess_http_only' = FALSE; // NB!! Only set this to TRUE if your server runs PHP 5.2 or higher!
+|  An HttpOnly cookie protects against XSS, the cookie cannot be read via javascript, supported by IE6_SP1, IE7.
+|  Setting TRUE on PHP < 5.2 will make your cookies crumble!
+| 'sess_forwarded_ip'  = FALSE (boolean) If TRUE will use HTTP_X_FORWARDED_FOR IP if valid.
+| 'sess_secure' = FALSE (boolean) If TRUE the cookie will only be set on ssl (https) connections
 |
 */
-$config['sess_cookie_name']		= 'session';
-$config['sess_expiration']		= 24*60*60*365; //Set session cookie to expire in a year. Hopefully, this won't retain DB records.
-$config['sess_encrypt_cookie']	= TRUE;
-$config['sess_use_database']	= TRUE;
-$config['sess_table_name']		= 'sessions';
-$config['sess_match_ip']		= FALSE;
-$config['sess_match_useragent']	= TRUE;
+$config['sess_cookie_name']		    = 'session';
+$config['sess_expiration']		    = 0;
+$config['sess_encrypt_cookie']	    = TRUE;
+$config['sess_table_name']		    = 'sessions';
+$config['sess_match_ip']		    = FALSE;
+$config['sess_match_useragent']	    = TRUE;
+// [OB] additional config items: Set to 'database' to keep userdata exclusively on server database.
+$config['sess_storage']             = 'database';
+$config['sess_data_cookie']         = 'session_data';
+// [OB] additional config items: You can leave these as defaults for a standard session
+$config['sess_database']            = 'suppletext';
+$config['sess_timeout']             = 0; 
+$config['sess_destroy_on_timeout']  = FALSE; 
+$config['sess_update_interval']     = 180; 
+$config['sess_gc_probability']      = 10;
+$config['sess_http_only']           = FALSE; // PHP 5.2+ or better only!
+$config['sess_forwarded_ip']        = FALSE;
+$config['sess_secure']              = FALSE;
 
 /*
 |--------------------------------------------------------------------------
@@ -327,5 +353,9 @@ if($install_check === FALSE)
 	}
 	die('It does not seem like suppleText is installed since /st-external/st-config.php cannot be found. <a href="'.$pre_path.'st-system/install/index.php">Click here to install suppleText</a>! (If the link does not work, manually visit st-system/install/)');
 }
+
+//We include the config file here instead of through autoload so that
+//we can use the table prefix specified in the st-config.php file.
+include_once ABSPATH.'st-system/config/constants.php';
 
 ?>

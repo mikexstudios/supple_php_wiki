@@ -9,14 +9,13 @@ $db['suppletext']['username'] = "usernamehere"; // Your MySQL username
 $db['suppletext']['password'] = "yourpasswordhere"; // ...and password
 $db['suppletext']['database'] = "putyourdbnamehere"; // The name of the database
 // You can have multiple installations in one database if you give each a unique prefix
-$db['suppletext']['dbprefix'] = "st_"; // Only numbers, letters, and underscores please!
 $db['suppletext']['dbdriver'] = "mysql"; //Only MySQL is supported for now.
+$config['table_prefix'] = "st_"; // Only numbers, letters, and underscores please!
 
 // ** URI Settings ** //
 $config['index_page'] = ""; //If using URL Rewriting, set to empty. Otherwise, set to 'index.php'
 
 // ** Other Settings ** //
 $config['encryption_salt'] = 'stsalt_'; // 99% chance you won't need to change this value
-$config['sess_table_name'] = $db['suppletext']['dbprefix'].'sessions'; //For if your session table is different.
 
 ?>

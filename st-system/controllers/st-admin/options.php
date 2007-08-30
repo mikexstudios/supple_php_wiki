@@ -17,7 +17,7 @@ class Options extends Controller {
 		if(!$this->authorization->is_logged_in())
 		{
 			//Set where to redirect to after login
-			$this->session->set_userdata('login_redirect_to', $this->uri->uri_string());
+			$this->session->set_userdata('redirect_to', $this->uri->uri_string());
 			
 			//Not logged in, redirect to login page.
 			redirect('/st-admin/users/login');
