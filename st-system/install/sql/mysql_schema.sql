@@ -30,10 +30,9 @@ CREATE TABLE IF NOT EXISTS `st_config` (
 INSERT INTO `st_config` (`id`, `key`, `value`) VALUES 
 (1, 'is_rewrite', 'true'),
 (2, 'root_page', 'HomePage'),
-(3, 'site_name', 'My suppleText wiki'),
 (4, 'use_cache', 'false'),
 (5, 'use_theme', 'supple'),
-(6, 'version', '0.3.0');
+(6, 'version', '0.3.0'),
 (7, 'page_metadata_access', 'Editor'),
 (8, 'default_read_permission', 'Anonymous,Registered,Editor'),
 (9, 'default_write_permission', 'Registered,Editor');

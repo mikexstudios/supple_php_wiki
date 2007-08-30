@@ -62,6 +62,11 @@ function does_page_exist($in_pagename) {
 }
 
 function comma_list_to_array($in_comma_list) {
+	if(empty($in_comma_list))
+	{
+		return array();
+	}
+
 	$array_list = explode(',', $in_comma_list);
 	foreach($array_list as $key => $each_element)
 	{
@@ -69,6 +74,17 @@ function comma_list_to_array($in_comma_list) {
 	}
 	
 	return $array_list;
+}
+
+function array_to_comma_list($in_array) {
+	return implode(',', $in_array);
+}
+
+function add_to_comma_list($in_comma_list, $in_add_element) {
+	$list = comma_list_to_array($in_comma_list);
+	$list[] = trim($in_add_element);
+	
+	return array_to_comma_list($list);
 }
 
 ?>
