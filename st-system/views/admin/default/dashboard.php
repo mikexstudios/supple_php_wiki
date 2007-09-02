@@ -1,6 +1,6 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed'); ?>
 
-<?php admin_theme_include('header'); ?>
+<?php theme_include('header'); ?>
 
 <!--starting page content-->
 <div class="wrap">
@@ -22,4 +22,4 @@ the <a href='http://www.suppletext.org/forums/'>support forums</a>.</p>
 </div>
 <!--closing page content-->
 
-<?php admin_theme_include('footer'); ?>
+<?php theme_include('footer'); ?>

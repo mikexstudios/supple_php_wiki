@@ -60,7 +60,7 @@ class Presentation extends Controller {
 		}
 
 		//No matter if we have input or not, we always show the page
-		$this->load->view('admin/presentation-themes');
+		$this->load->view('presentation-themes');
 	}
 	
 }

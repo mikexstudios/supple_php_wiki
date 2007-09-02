@@ -9,7 +9,8 @@ $CI->template->add_function('admin_theme_url', 'get_admin_theme_url_path');
 function get_admin_theme_url_path($file='') {
 	global $CI;
 	
-	$return_url = site_url('st-system/views');
+	$return_url = site_url('st-system/views/admin/'.$CI->config->item('admin_theme'));
+
 	
 	if(!empty($file))
 	{
@@ -110,10 +111,6 @@ function get_sub_menu($in_associated_page='') {
 	global $CI;
 	
 	return $CI->adminmenu->get_sub_level($in_associated_page);
-}
-
-function admin_theme_include($file) {
-	theme_include('admin/'.$file);
 }
 
 /* //Moved to the regular theme_helper

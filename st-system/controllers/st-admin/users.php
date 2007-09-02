@@ -11,7 +11,7 @@ class Users extends Controller {
 	//We don't need to remap here since we are using traditional
 	//URI format.
 	
-	function _initialize() {
+	function _initialize() {	
 		$this->load->helper('admin/autoload');
 		
 		$this->load->library('authorization');
@@ -34,6 +34,11 @@ class Users extends Controller {
 	}
 	
 	function management() {
+		if($this->config->item('disable_user_admin') === true)
+		{
+			show_404();
+		}
+	
 		$this->_initialize();
 		$this->template->add_value('admin_page_title', 'Users &rsaquo; Management');
 		$this->load->helper('string');
@@ -123,7 +128,7 @@ class Users extends Controller {
 		}
 
 
-		$this->load->view('admin/users-management');
+		$this->load->view('users-management');
 	
 	}
 	
@@ -146,6 +151,11 @@ class Users extends Controller {
 	}
 	
 	function addnew() {
+		if($this->config->item('disable_user_admin') === true)
+		{
+			show_404();
+		}	
+	
 		$this->_initialize();
 		$this->template->add_value('admin_page_title', 'Users &rsaquo; Add New User');
 		$this->load->helper('string');
@@ -190,7 +200,7 @@ class Users extends Controller {
 			$this->validation->email = '';
 		}
 		
-		$this->load->view('admin/users-addnew');
+		$this->load->view('users-addnew');
 	}
 	
 	function _does_user_exist($in_username) {
@@ -254,7 +264,7 @@ class Users extends Controller {
 			$this->message->set_text('Profile updated.');
 		}
 		
-		$this->load->view('admin/users-profile');
+		$this->load->view('users-profile');
 	}
 	
 	function login() {
@@ -300,7 +310,7 @@ class Users extends Controller {
 			
 		}
 		
-		$this->load->view('admin/users-login');
+		$this->load->view('users-login');
 	}
 	
 	function logout() {
@@ -310,6 +320,11 @@ class Users extends Controller {
 	}
 	
 	function register() {
+		if($this->config->item('disable_user_admin') === true)
+		{
+			show_404();
+		}	
+	
 		//We do not do the initialization stuff since this doesn't require admin-level
 		//access
 		
@@ -384,7 +399,7 @@ You can login here: '.construct_admin_url('users/login')."\n\n";
 			$this->validation->user_email = '';
 		}
 		
-		$this->load->view('admin/users-register');
+		$this->load->view('users-register');
 
 	}
 	
@@ -480,7 +495,7 @@ To reset your password visit the following address, otherwise just ignore this e
 			$this->message->set_text('Please enter your username and e-mail address.'."\n".'You will receive your new password via e-mail.');
 		}
 		
-		$this->load->view('admin/users-lostpassword');
+		$this->load->view('users-lostpassword');
 	}
 	
 	function _lostpassword_user_exist_check($in_username) {
@@ -581,7 +596,7 @@ You can login here: '.construct_admin_url('users/login')."\n\n";
 		
 		$this->message->set_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
 		$this->message->set_text('Please enter your username and e-mail address.'."\n".'You will receive your new password via e-mail.');
-		$this->load->view('admin/users-lostpassword');
+		$this->load->view('users-lostpassword');
 	}
 	
 }

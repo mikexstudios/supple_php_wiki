@@ -30,7 +30,7 @@ class Dashboard extends Controller {
 		
 		//Otherwise, bring to profile
 		$this->template->add_value('admin_page_title', 'Dashboard'); //So header can display the correct title
-		$this->load->view('admin/dashboard.php');
+		$this->load->view('dashboard.php');
 	}
 	
 }

@@ -56,7 +56,7 @@ class Options extends Controller {
 		
 		if ($this->validation->run() == FALSE)
 		{
-			$this->load->view('admin/options-general');
+			$this->load->view('options-general');
 		}
 		else
 		{
@@ -70,7 +70,7 @@ class Options extends Controller {
 			$this->validation->set_error_delimiters('<div id="message" class="updated fade"><p><strong>', '</strong></p></div>');
 			$this->validation->_error_array[] = 'Options saved.';
 			$this->validation->run();
-			$this->load->view('admin/options-general');
+			$this->load->view('options-general');
 		}
 	}
 	

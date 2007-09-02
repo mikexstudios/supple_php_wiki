@@ -78,7 +78,7 @@ $autoload['plugin'] = array();
 |
 */
 
-$autoload['config'] = array();
+$autoload['config'] = array('suppletext');
 
 
 /*

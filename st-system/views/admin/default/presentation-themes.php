@@ -1,6 +1,6 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed'); ?>
 
-<?php admin_theme_include('header'); ?>
+<?php theme_include('header'); ?>
 
 <?php out('message'); ?>
 
@@ -48,4 +48,4 @@
 </div>
 <!--closing page content-->
 
-<?php admin_theme_include('footer'); ?>
+<?php theme_include('footer'); ?>

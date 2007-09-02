@@ -11,6 +11,11 @@ class Plugins extends Controller {
 	//URI format.
 
 	function _initialize() {
+		if($this->config->item('disable_user_admin') === true)
+		{
+			show_404();
+		}
+	
 		$this->load->helper('admin/autoload');
 		
 		$this->load->library('authorization');
@@ -30,7 +35,7 @@ class Plugins extends Controller {
 		
 		//Otherwise, bring to profile
 		$this->template->add_value('admin_page_title', 'Plugins'); //So header can display the correct title
-		$this->load->view('admin/plugins.php');
+		$this->load->view('plugins.php');
 	}
 	
 }
