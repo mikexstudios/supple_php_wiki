@@ -1,0 +1,505 @@
+* html #poststuff {
+	height: 100%; /* kill peekaboo bug in IE */
+}
+
+/* This is the Holly Hack \*/
+* html .wrap { height: 1% }
+/* For Win IE's eyes only */
+
+/*-------------------------------------------------
+PAGE BODY
+-------------------------------------------------*/
+
+body {
+	border: none;
+	font-size: 76%;/* font sizing in ems, baby. if you want to change anything, just change this.*/
+	width: 700px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+body, td {
+	font-family: Georgia,"Bitstream Vera Serif","Times New Roman",serif;
+}
+
+/*-------------------------------------------------
+GLOBALS & GENERAL CASES
+-------------------------------------------------*/
+
+a {
+	color: #060;
+	text-decoration: underline;
+}
+
+a.delete:hover {
+	background: #c00;
+	color: #fff;
+}
+
+a.edit, a.delete, a.edit:hover, a.delete:hover {
+	border-bottom: none;
+	display: block;
+	padding: 5px 0;
+	text-align: center;
+}
+
+a.edit:hover {
+	background: #ccc;
+	color: #036;
+}
+
+a:hover {
+	color: #ccc;
+}
+
+fieldset {
+	border: none;
+	padding: 3px;
+}
+
+fieldset label.selectit {
+	display: block;
+	font-size: 11px;
+	padding: 0 2px;
+}
+
+fieldset label.selectit:hover {
+	background: #e9e9e9;
+}
+
+fieldset legend {
+	padding: .1em .3em;
+}
+
+fieldset.options {
+	padding: 1em;
+}
+
+fieldset.options legend {
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+form, label input {
+	margin: 0;
+	padding: 0;
+}
+
+h2 {
+	background-color: #cfc;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 15px;
+	font-size: 2.3em;
+	margin-bottom: 20px;
+	font-weight: normal;
+}
+
+img, #footer a {
+	border: 0;
+}
+
+input:focus, textarea:focus, label:focus {
+	background: #fff;
+	border: 1px solid #686868;
+}
+
+label {
+	cursor: pointer;
+}
+
+li, dd {
+	margin-bottom: 6px;
+}
+
+p, li, dl, dd, dt {
+	line-height: 140%;
+}
+
+textarea, input, select {
+	background: #f4f4f4;
+	border: 1px solid #b2b2b2;
+	color: #000;
+	font: 13px Verdana, Arial, Helvetica, sans-serif;
+	margin: 1px;
+	padding: 3px;
+}
+
+/*-------------------------------------------------
+CLASSES
+-------------------------------------------------*/
+
+.alignleft {
+	float: left
+}
+
+.alignright {
+	float: right;
+}
+
+.alternate {
+	background: #f1f1f1;
+}
+
+.anchors {
+	margin: 10px 20px 10px 20px;
+}
+
+.available-theme {
+	width: 30%;
+	margin: 0 1em;
+	float: left;
+	text-align: center;
+	height: 28em;
+	overflow: hidden;
+}
+
+.available-theme a.screenshot {
+	width: 250px;
+	height: 200px;
+	display: block;
+	margin: auto;
+	background: #f1f1f1;
+	border: 1px solid #ccc;
+	margin-bottom: 10px;
+	overflow: hidden;
+}
+
+.available-theme a.screenshot:hover {
+/*	border: 1px solid #666;*/
+}
+
+.available-theme img {
+	width: 100%;
+}
+
+.checkbox {
+	background: #fff;
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+
+.code {
+	font-family: "Courier New", Courier, monospace;
+}
+
+.clear {
+	clear: both;
+	height: 2px;
+}
+
+.hidden {
+	display: none;
+}
+
+.navigation {
+	display: block;
+	text-align: center;
+	margin-top: 10px;
+	margin-bottom: 30px;
+}
+
+.submit input, .submit input:focus, .button, .button:focus {
+	background: url( images/fade-butt.png );
+	border: 3px double #999;
+	border-left-color: #ccc;
+	border-top-color: #ccc;
+	color: #333;
+	padding: 0.25em;
+}
+
+.submit input:active, .button:active {
+	background: #f4f4f4;
+	border: 3px double #ccc;
+	border-left-color: #999;
+	border-top-color: #999;
+}
+
+.button, .button:focus {
+	padding: 0.15em;
+}
+
+* html .button {
+	padding: 0;
+}
+
+.submit, .editform th, #postcustomsubmit {
+	text-align: right;
+}
+
+.optiontable {
+	width: 100%;
+}
+
+.optiontable td, .optiontable th {
+	padding: .5em;
+}
+
+.optiontable th {
+	width: 33%;
+	text-align: right;
+	font-size: 1.3em;
+	font-weight: normal;
+}
+
+.updated, .confirm {
+	background: #CFEBF7 url(images/notice.gif) no-repeat 1em;
+	border: 1px solid #2580B2;
+	margin: 1em 5% 10px;
+	padding: 0 1em 0 3em;
+}
+
+.error {
+	background: #FFEFF7;
+	border: 1px solid #c69;
+	margin: 1em 5% 10px;
+	padding: 0 1em 0 1em;
+}
+
+.narrow {
+	width: 450px;
+	margin: auto;
+}
+
+.narrow p {
+	line-height: 150%;
+}
+
+.wrap h2 {
+	margin: .4em 0 .5em;
+	clear: both;
+}
+
+* html .wrap h2 {
+	margin-top: 1em;
+}
+
+table .vers {
+	text-align: center;
+}
+
+textarea.all-options, input.all-options {
+	width: 250px;
+}
+
+input.disabled, textarea.disabled {
+	background: #ccc;
+}
+
+input.delete:hover {
+	background: #ce0000;
+	color: #fff;
+}
+
+.active td {
+	background: #BEB;
+}
+.active .name {
+	background: #9C9;
+}
+.alternate.active td {
+	background: #ADA;
+}
+.alternate.active .name {
+	background: #8B8;
+}
+
+/*-------------------------------------------------
+STRUCTURE
+-------------------------------------------------*/
+
+.wrap {
+	border: 1px #ccc solid;
+	clear: both;
+	padding: 1em;
+}
+
+/*-------------------------------------------------
+MENU
+-------------------------------------------------*/
+
+#adminmenu {
+	clear: both;
+	background: #cfc;
+	margin: 0;
+	padding-left: 8px;
+	padding-top: 6px;
+	padding-bottom: 3px;
+}
+
+#adminmenu .current, #submenu .current {
+	font-weight: bold;
+	text-decoration: none;
+}
+
+#adminmenu a {
+	color: #000;
+	font-size: 1.5em;
+	font-weight: normal;
+	margin: 0;
+	padding-left: 5px;
+	padding-right: 5px;
+	border-bottom: none;
+	text-decoration: none;
+}
+
+#adminmenu a:hover, #adminmenu a.current {
+	background: #9c9;
+	color: #333;
+	padding-top: 2px;
+	padding-bottom: 5px;
+}
+
+#adminmenu li, #submenu li {
+	display: inline;
+	line-height: 200%;
+	list-style: none;
+	text-align: center;
+	white-space: nowrap;
+}
+
+#adminmenu a.current {
+	background: #9c9;
+	color: #fff;
+	padding-top: 2px;
+	padding-bottom: 5px;
+}
+
+#submenu, #minisub {
+	background: #9c9;
+	border-bottom: none;
+	margin: 0;
+	padding: 3px 2em 0 3em;
+}
+
+#minisub {
+	height: 6px;
+}
+
+#submenu .current {
+	background: #fff;
+	color: #000;
+}
+
+#submenu a {
+	border: none;
+	color: #fff;
+	font-size: 1.1em;
+	padding: .3em .4em .4em;
+	text-decoration: none;
+}
+
+#submenu a:hover {
+	background: #eee;
+}
+
+#submenu li {
+	line-height: 180%;
+	height: 25px;
+}
+
+/*-------------------------------------------------
+OTHER IDS
+-------------------------------------------------*/
+
+#user_info {
+	padding-top: 18px;
+	padding-right: 5px;
+	text-align: right;
+	font-size: .9em;
+}
+
+#user_info a {
+}
+
+#currenttheme img {
+	float: left;
+	border: 1px solid #666;
+	margin-right: 1em;
+	margin-bottom: 1.5em;
+	width: 300px;
+}
+
+/*-------------------------------------------------
+HEADER
+-------------------------------------------------*/
+
+#header {
+	padding: .8em 19em .8em 2em;
+	float: left;
+}
+
+#header a {
+	text-decoration: none;
+}
+
+#header h1 {
+	font-size: 2.8em;
+	font-weight: normal;
+	margin: 0;
+}
+
+#header h1 span {
+	font-size: .4em;
+	letter-spacing: 0;
+}
+
+/*-------------------------------------------------
+FOOTER
+-------------------------------------------------*/
+
+#footer {
+	clear: both;
+	text-align: center;
+	width: 500px;
+	margin: auto;
+	height: 100px;
+}
+
+#footer .docs {
+	padding-top: 19px;
+	line-height: 160%;
+}
+
+#footer .docs a {
+	text-decoration: underline;
+}
+#footer .logo {
+	float: left;
+	margin: 0;
+	padding: 0;
+}
+
+/*-------------------------------------------------
+YOUR PROFILE
+-------------------------------------------------*/
+
+#your-profile #rich_editing {
+	border: none;
+	background: #fff;
+}
+
+#your-profile fieldset {
+	border: 1px solid #ccc;
+	float: left;
+	width: 40%;
+	padding: .5em 2em 1em;
+	margin: 1em 1em 1em 0;
+}
+
+#your-profile fieldset input {
+	width: 100%;
+	font-size: 20px;
+	padding: 2px;
+}
+
+#your-profile fieldset textarea {
+	width: 100%;
+	padding: 2px;
+}
+
+#your-profile legend {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 22px;
+}
