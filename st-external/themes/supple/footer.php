@@ -26,7 +26,10 @@
 		<a class="ext" href="http://validator.w3.org/check/referer">Valid XHTML 1.0 Transitional</a> |
 		<a class="ext" href="http://jigsaw.w3.org/css-validator/check/referer">Valid CSS</a> |
 		Powered by <a class="ext" href="http://www.suppletext.org/">suppleText</a>
-	<?php if(!empty($logged_in_username)): ?>
+	<?php 
+		$have_admin_access = get('have_admin_access');
+		if(!empty($logged_in_username) && $have_admin_access === true): 
+	?>
 		| <a href="<?php out('page_url', 'st-admin'); ?>">Admin</a><br />
 	<?php else: ?>
 		<br />

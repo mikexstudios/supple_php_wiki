@@ -12,6 +12,27 @@ function get_logged_in_username() {
 	return $CI->session->userdata('username');
 }
 
+$CI->template->add_function('have_admin_access', 'does_current_user_have_admin_access');
+function does_current_user_have_admin_access() {
+	global $CI;
+	
+	return $CI->authorization->is_logged_in();
+}
+
+/**
+ * Function mainly useful for MU environment
+ */ 
+$CI->template->add_function('user_wikis', 'get_user_wikis');
+function get_user_wikis($in_username='') {
+	$wikis = get_user_info('wikis', $in_username);
+	if(!empty($wikis))
+	{
+		return comma_list_to_array($wikis);
+	}
+	
+	return false;
+}	
+
 $CI->template->add_function('user_info', 'get_user_info');
 function get_user_info($in_key, $in_username='') {
 	global $CI;

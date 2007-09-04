@@ -7,10 +7,18 @@
 class Authorization {
 	var $CI;
 	
+	var $prefix = ''; //We set this to the config value
+	
 	function Authorization() {
 		$this->CI =& get_instance();
 		
 		$this->CI->load->model('Users_model', 'users_model');
+		
+		$wiki_tag = $this->CI->config->item('wiki_tag');
+		if(!empty($wiki_tag))
+		{
+			$this->prefix = $wiki_tag.'_';
+		} 
 		
 		log_message('debug', "Authorization Class Initialized");
 	}
@@ -51,7 +59,19 @@ class Authorization {
 	}
 
   function set_logged_in($username) {
-      $this->CI->session->set_userdata(array('username' => $username, 'logged_in' => true));
+      $this->CI->session->set_userdata('username', $username);
+      $user_wikis = get_user_wikis($username);
+      if($user_wikis !== false)
+      {
+	      foreach($user_wikis as $each_wiki)
+	      {
+					$this->CI->session->set_userdata($each_wiki.'_logged_in', true);
+				}
+			}
+			else
+			{
+				$this->CI->session->set_userdata('logged_in', true);
+			}
   }
 
   function logout() {
@@ -70,17 +90,17 @@ class Authorization {
        */
   
       /* yes, this is paranoid */
-      if (!isset($this->CI->session->userdata['logged_in'])) {
+      if (!isset($this->CI->session->userdata[$this->prefix.'logged_in'])) {
           return false;
       }
       
       /* yes, this is even sicker */
-      if (!is_bool($this->CI->session->userdata['logged_in'])) {
+      if (!is_bool($this->CI->session->userdata[$this->prefix.'logged_in'])) {
           return false;
       }
       
       /* yes, you could probably get away with just this */
-      if (!$this->CI->session->userdata['logged_in']) {
+      if (!$this->CI->session->userdata[$this->prefix.'logged_in']) {
           return false;
       }
       
