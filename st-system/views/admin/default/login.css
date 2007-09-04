@@ -58,24 +58,13 @@ code, pre	{
 	color: #666;
 }
 
-.error {
-	font-size: 70%;
-	margin: 0;
-	margin-bottom: 5px;
-	padding: 0;
- 	background: #FBE6F2;
- 	border: 1px solid #D893A1;
- 	color: #333;
-	padding: 2px;
-}
-
 .updated {
 
 	margin: 0;
 	margin-bottom: 5px;
 	padding: 0;
-	background: #CFEBF7;
-	border: 1px solid #2580B2;
+	background: #cfc;
+	border: 1px solid #6c6;
  	color: #333;
 	padding: 2px;
 	padding-left: 5px;
@@ -86,9 +75,9 @@ LOGIN PAGE
 -------------------------------------------------*/
 #login {
 	margin-top: 50px;
-	border: 1px solid #ccc;
+	/* border: 1px solid #ccc; */
 	padding: 5px 30px 5px 30px;
-	
+	background-color: #eee;
 }
 
 #login h1 {
@@ -97,6 +86,10 @@ LOGIN PAGE
 	line-height: 1.2em;
 	text-align: center;
 }
+
+#login h1 a {
+
+}	
 
 #login .input {
 	font-size: 1.8em;
@@ -112,6 +105,20 @@ LOGIN PAGE
 	margin-top: 10px;
 	background: #EEEEEE;
 	border: 1px solid #CCCCCC;
-	width: 40%;
+	padding-left: 8px;
+	padding-right: 8px;
 	height: 30px;
+}
+
+#message {
+	margin-bottom: 20px;
+}
+
+#message .error {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-bottom: 5px;
+	background-color: #FBE6F2;
 }

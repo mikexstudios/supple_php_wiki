@@ -4,7 +4,15 @@
 <head>
 	<title>Lost Password : <?php out('site_name'); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<link rel="stylesheet" href="<?php out('theme_url', 'admin/login.css'); ?>" type="text/css" />
+	<link rel="stylesheet" href="<?php out('admin_theme_url', 'login.css'); ?>" type="text/css" />
+
+	<script type="text/javascript" src="<?php out('admin_theme_url', 'niftycube.js'); ?>"></script>
+	<script type="text/javascript">
+		window.onload=function() {
+			Nifty("div#login","tl bottom big");
+			Nifty("div.error","tl bottom normal");
+		}
+	</script>
 </head>
 <body>
 
@@ -12,9 +20,11 @@
 
 <h1>Lost Password for <a href="<?php out('page_url', get('root_page')); ?>"><?php out('site_name'); ?></a></h1>
 
+<div id="message">
 <?php if(!empty($this->validation->error_string)): ?>
 	<?php echo $this->validation->error_string; ?>
 <?php endif; ?>
+</div>
 
 <?php out('message'); ?>
 

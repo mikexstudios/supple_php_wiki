@@ -2,9 +2,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 <head>
-	<title>Login : <?php out('site_name'); ?></title>
+	<title>Login to suppleText</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<link rel="stylesheet" href="<?php out('admin_theme_url', 'login.css'); ?>" type="text/css" />
+	
+	<script type="text/javascript" src="<?php out('admin_theme_url', 'niftycube.js'); ?>"></script>
+	<script type="text/javascript">
+		window.onload=function() {
+			Nifty("div#login","tl bottom big");
+			Nifty("div.error","tl bottom normal");
+		}
+	</script>
 </head>
 <body>
 
@@ -12,9 +20,11 @@
 
 <h1>Login to <a href="<?php out('page_url', get('root_page')); ?>"><?php out('site_name'); ?></a></h1>
 
-<?php if(!empty($this->validation->error_string)): ?>
-	<?php echo $this->validation->error_string; ?>
-<?php endif; ?>
+<div id="message">
+	<?php if(!empty($this->validation->error_string)): ?>
+		<?php echo $this->validation->error_string; ?>
+	<?php endif; ?>
+</div>
 
 <form name="loginform" id="loginform" action="<?php out('current_url'); ?>" method="post">
 	<p>
