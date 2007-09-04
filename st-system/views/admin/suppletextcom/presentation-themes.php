@@ -2,10 +2,10 @@
 
 <?php theme_include('header'); ?>
 
-<?php out('message'); ?>
-
 <!--starting page content-->
 <div class="wrap">
+
+<?php out('message'); ?>
 
 <h2>Current Theme</h2>
 <div id="currenttheme">

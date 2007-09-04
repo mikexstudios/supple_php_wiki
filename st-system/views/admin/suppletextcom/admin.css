@@ -1,3 +1,10 @@
+/*  
+Theme Name: suppleText Default
+Theme URI: http://www.suppletext.org/
+Description: The default suppleText theme based on the <a href="http://wordpress.org">Wordpress 2.x Administration Theme</a>.
+Version: 1.0
+*/
+
 * html #poststuff {
 	height: 100%; /* kill peekaboo bug in IE */
 }
@@ -90,7 +97,7 @@ h2 {
 	padding-top: 10px;
 	padding-bottom: 10px;
 	padding-left: 15px;
-	font-size: 2.3em;
+	font-size: 2.0em;
 	margin-bottom: 20px;
 	font-weight: normal;
 }
@@ -236,6 +243,14 @@ CLASSES
 	padding: .5em;
 }
 
+.optiontable td {
+	padding-top: 12px;
+}
+
+.optiontable td input[type=text] {
+	margin-bottom: 7px;
+}
+
 .optiontable th {
 	width: 33%;
 	text-align: right;
@@ -244,16 +259,16 @@ CLASSES
 }
 
 .updated, .confirm {
-	background: #CFEBF7 url(images/notice.gif) no-repeat 1em;
-	border: 1px solid #2580B2;
-	margin: 1em 5% 10px;
+	background: #ffc no-repeat 1em;
+	border: 1px solid #ff0;
+	margin: 5px 5% 20px;
 	padding: 0 1em 0 3em;
 }
 
-.error {
+#error {
 	background: #FFEFF7;
 	border: 1px solid #c69;
-	margin: 1em 5% 10px;
+	margin: 5px 5% 20px;
 	padding: 0 1em 0 1em;
 }
 
@@ -305,6 +320,37 @@ input.delete:hover {
 	background: #8B8;
 }
 
+.widefat {
+	width: 100%;
+}
+
+.widefat td, .widefat th {
+	padding: 5px 6px;
+}
+
+.widefat th {
+	text-align: left;
+	background: #ddd;
+}
+
+.plugins p {
+	margin: 4px;
+	padding: 0;
+}
+
+.plugins .name {
+	font-size: 16px;
+}
+
+.config_static_value {
+	margin: 0;
+	padding: 0;
+	margin-top: -3px;
+	margin-bottom: -10px;
+	font-size: 1.4em;
+	font-weight: bold;
+}
+
 /*-------------------------------------------------
 STRUCTURE
 -------------------------------------------------*/
@@ -313,6 +359,7 @@ STRUCTURE
 	border: 1px #ccc solid;
 	clear: both;
 	padding: 1em;
+	font-size: 1.2em;
 }
 
 /*-------------------------------------------------
@@ -392,6 +439,7 @@ MENU
 
 #submenu a:hover {
 	background: #eee;
+	color: #333;
 }
 
 #submenu li {
@@ -485,7 +533,6 @@ YOUR PROFILE
 	float: left;
 	width: 40%;
 	padding: .5em 2em 1em;
-	margin: 1em 1em 1em 0;
 }
 
 #your-profile fieldset input {

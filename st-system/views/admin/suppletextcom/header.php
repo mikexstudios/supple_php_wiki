@@ -4,6 +4,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><?php out('admin_page_title'); ?> : suppleText</title>
+	<!-- 
+	suppleText's administration XHTML and CSS code is based off of Wordpress'
+	administration theme (http://wordpress.com). Thanks, Wordpress!
+	-->
 	<link rel="stylesheet" type="text/css" href="<?php out('admin_theme_url', 'admin.css'); ?>" />
 
 	<script type="text/javascript" src="<?php out('admin_theme_url', 'niftycube.js'); ?>"></script>

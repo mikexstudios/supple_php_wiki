@@ -4,7 +4,6 @@
 
 <?php out('st_version'); ?> &#8212; <?php out('database_queries'); ?> queries &#8212; <?php out('execution_time'); ?> seconds <br />
 
-<small>Based off of the <a href="http://www.wordpress.org">Wordpress</a> administration look and feel</small>
 </p>
 </div>
 

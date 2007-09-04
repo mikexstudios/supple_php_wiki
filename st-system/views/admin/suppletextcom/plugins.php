@@ -2,14 +2,14 @@
 
 <?php theme_include('header'); ?>
 
+<!--starting page content-->
+<div class="wrap">
+
 <?php if(!empty($this->validation->error_string)): ?>
 		<?php echo $this->validation->error_string; ?>
 <?php endif; ?>
 
 <?php out('message'); ?>
-
-<!--starting page content-->
-<div class="wrap">
 
 <h2>Plugin Management</h2>
 <p>Plugins extend and expand the functionality of suppleText. Once a plugin is installed, you may activate it or deactivate it here.</p>

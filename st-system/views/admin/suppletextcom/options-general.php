@@ -2,12 +2,14 @@
 
 <?php theme_include('header'); ?>
 
+<!--starting page content-->
+<div class="wrap">
+
 <?php if(!empty($this->validation->error_string)): ?>
 		<?php echo $this->validation->error_string; ?>
 <?php endif; ?>
 
-<!--starting page content-->
-<div class="wrap">
+<?php out('message'); ?>
 
 <h2>General Options</h2>
 <form method="post" action="<?php out('admin_url', 'options/general'); ?>"> 

@@ -2,14 +2,14 @@
 
 <?php theme_include('header'); ?>
 
+<!--starting page content-->
+<div class="wrap">
+
 <?php if(!empty($this->validation->error_string)): ?>
 		<?php echo $this->validation->error_string; ?>
 <?php endif; ?>
 
 <?php out('message'); ?>
-
-<!--starting page content-->
-<div class="wrap">
 
 <h2>User List by Role</h2>
 
