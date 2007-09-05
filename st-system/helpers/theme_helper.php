@@ -225,18 +225,6 @@ function get_this_uri_fragment() {
 
 //Moved user functions to user_helper.php
 
-function load_page_metadata($in_pagename) {
-	global $CI;
-	
-	$CI->load->model('page_metadata_model');
-	$CI->page_metadata_model->pagename = $in_pagename;
-	$page_metadata = $CI->page_metadata_model->get_all();
-	foreach($page_metadata as $page_key => $page_value)
-	{
-		$CI->template->add_value($page_key, $page_value);
-	}
-}
-
 $CI->template->add_function('current_revision', 'get_current_page_revision');
 function get_current_page_revision() {
 	global $CI;
@@ -253,6 +241,20 @@ function get_current_page_revision() {
 	}
 	
 	return '';
+}
+
+$CI->template->add_function('page_metadata', 'get_page_metadata');
+function get_page_metadata($in_key, $in_pagename='') {
+	global $CI;
+	
+	if(empty($in_pagename))
+	{
+		$in_pagename = get_current_pagename();
+	}
+	
+	$CI->load->model('page_metadata_model');
+	$CI->page_metadata_model->pagename = $in_pagename;
+	return $CI->page_metadata_model->get_value($in_key);
 }
 
 ?>

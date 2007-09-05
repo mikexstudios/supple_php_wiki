@@ -37,7 +37,20 @@ class Page_metadata_model extends Model {
 		$this->db->limit(1);
 		$query = $this->db->get();
 		
-		return element('value', $query->row_array()); //We want a single result
+		$result = $query->row_array(); //We want a single result
+		
+		if(count($result) == 0) //Check for non-existent value
+		{
+			return false;
+		}
+		
+		$value = $result['value']; //We can't use element() because it returns false when the value is ''
+		if($value == '')
+		{
+			return '';
+		}
+		
+		return $value;
 	}
 	
 	function set_value($in_key, $in_value, $in_attribute='') {	
@@ -45,20 +58,20 @@ class Page_metadata_model extends Model {
 		//check if the key exists. We want this to come before the other
 		//AR SQL statements. Otherwise, we run into conflicts.
 		$temp_value = $this->get_value($in_key);
-		
+
 		//In both UPDATE and INSERT, we have to set the value and attr.
 		$this->db->set('value', $in_value);
 		$this->db->set('attribute', $in_attribute);
 		$this->db->limit(1);
 		
-		if(!empty($temp_value)) //empty() can only be used on a variable
+		if($temp_value !== false) //empty() can only be used on a variable
 		{
 			$this->db->where('pagename', $this->pagename);
 			$this->db->where('`key`', $in_key);
 			return $this->db->update(ST_PAGE_METADATA_TABLE);
 		}
 		else
-		{
+		{		
 			$this->db->set('pagename', $this->pagename); //Notice we use set here instead of where
 			$this->db->set('`key`', $in_key);
 			return $this->db->insert(ST_PAGE_METADATA_TABLE);

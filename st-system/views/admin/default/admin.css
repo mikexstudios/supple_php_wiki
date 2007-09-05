@@ -136,6 +136,10 @@ textarea, input, select {
 CLASSES
 -------------------------------------------------*/
 
+.highlight {
+	background-color: #ffc;
+}
+
 .alignleft {
 	float: left
 }

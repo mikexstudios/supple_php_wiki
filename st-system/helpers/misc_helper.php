@@ -37,6 +37,14 @@ function load_files_in_directory($inDir, $ext = '.php') {
 	}
 }
 
+function is_wiki_name($in_pagename) {
+	if(!empty($in_pagename) && preg_match('/[a-zA-Z0-9%:_-]+/', $in_pagename))
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 function does_page_exist($in_pagename) {
 	global $CI;

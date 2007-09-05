@@ -56,9 +56,21 @@ class Users_model extends Model {
 		$this->db->where('`key`', $in_key); //key is a MySQL reserved word. We need to quote it.
 		$this->db->limit(1);
 		$query = $this->db->get();
-		return element('value', $query->row_array()); //We want a single result
 		
-		$query->free_result();
+		$result = $query->row_array(); //We want a single result
+		
+		if(count($result) == 0) //Check for non-existent value
+		{
+			return false;
+		}
+		
+		$value = $result['value']; //We can't use element() because it returns false when the value is ''
+		if($value == '')
+		{
+			return '';
+		}
+		
+		return $value;
 	}
 	
 	function set_value($in_key, $in_value, $in_attribute='') {	

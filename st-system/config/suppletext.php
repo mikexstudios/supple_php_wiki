@@ -1,6 +1,14 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
+ * Default message delimiters. Used in admin control panel.
+ */
+/*
+$config['default_message_delimiter_pre'] = '<div id="message" class="updated fade"><p>';
+$config['default_message_delimiter_post'] = '</p></div>';
+*/
+
+/**
  * An alphanumeric string identifying the wiki. Important in MU environments.
  * Do NOT set this if you are running a one wiki installation
  */  

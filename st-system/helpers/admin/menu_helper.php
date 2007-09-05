@@ -6,6 +6,10 @@ $CI->load->library('AdminMenu');
 
 //Add menu entries here
 $CI->adminmenu->add_top_level('dashboard', 'Dashboard', 100);
+
+$CI->adminmenu->add_top_level('pages', 'Pages', 150);
+	$CI->adminmenu->add_sub_level('pages/permissions', 'Permissions', 100, 'pages');
+
 $CI->adminmenu->add_top_level('presentation', 'Presentation', 200);
 	$CI->adminmenu->add_sub_level('presentation/themes', 'Themes', 100, 'presentation');
 	
@@ -24,6 +28,7 @@ $CI->adminmenu->add_top_level('users', 'Users', 400);
 
 $CI->adminmenu->add_top_level('options', 'Options', 500);
 	$CI->adminmenu->add_sub_level('options/general', 'General', 100, 'options');
+	$CI->adminmenu->add_sub_level('options/permissions', 'Permissions', 200, 'options');
 
 
 ?>
