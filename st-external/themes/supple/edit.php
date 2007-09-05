@@ -23,6 +23,17 @@
 	} 
 ?>
 </textarea><br />
+
+<fieldset>
+	<legend>Additional Actions</legend>
+	<p>
+		<?php if(get('have_admin_access') === true):?>
+			<a href="<?php out('page_url', '/st-admin/pages/changepermissions/'.get('this_page').'/'); ?>">Change Page Permissions</a> | 
+		<?php endif; ?>
+		<a href="<?php out('page_url', get('this_page'), 'attachments'); ?>">View or Attach Files</a>
+	</p> 
+</fieldset>
+
 <fieldset>
 	<legend>Store page</legend>
 	<input id="note" size="50" type="text" name="note" value="<?php out('form_value', 'note'); ?>" /> <label for="note">Please add a note on your edit</label><br />
