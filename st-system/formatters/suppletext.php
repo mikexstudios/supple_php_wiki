@@ -6,35 +6,6 @@ $CI =& get_instance();
  * Preprocessors
  */
  
-/**
- * Metadata
- * Undisplayed items associated with a page. Think of these as "page settings"
- */
-$CI->syntaxparser->add_preprocessor_definition('metadata', '/@@([a-zA-Z0-9_-]+)\s*=\s*(.+)@@\s*/m', 'preprocessor_metadata_callback', 50, true);
-function preprocessor_metadata_callback(&$matches) {
-	global $CI;
-	//die($matches[0]);
-	$matches[1] = $CI->input->xss_clean($matches[1]);
-	$matches[1] = htmlentities($matches[1], ENT_QUOTES);
-	$matches[2] = $CI->input->xss_clean($matches[2]);
-	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
-	
-	//$CI->template->add_value($matches[1], $matches[2]);
-	//WARNING: The following is slow since we have to check for the users'
-	//         role each time (uses up CPU cycles).
-	$page_metadata_roles = get_page_metadata_access_roles();
-	$user_role = get_user_role();
-	if(does_user_have_permission($user_role, $page_metadata_roles))
-	{	
-		$CI->load->model('page_metadata_model');
-		$CI->page_metadata_model->pagename = get_current_pagename();
-		$CI->page_metadata_model->set_value($matches[1], $matches[2]);
-	}
-	
-	//return $matches[0]; //Return it without any modification
-	return '';
-}  
- 
 $CI->syntaxparser->add_preprocessor_definition('signature', '/~~~~(\s+)/', 'signature_callback', 100, true);
 function signature_callback(&$matches) {
 	global $CI;
@@ -64,12 +35,22 @@ function signature_callback(&$matches) {
 $CI->syntaxparser->add_block_definition('comments', '/\n?<comment>.*?<\/comment>\n?/s', '', 47, false);
 
 /**
- * Metadata
- * Undisplayed items associated with a page. Think of these as "page settings"
+ * Inline Metadata (not stored in database table)
+ * Undisplayed items associated with a page. Think of these as "quick page settings"
  */
-$CI->syntaxparser->add_block_definition('metadata', '/@@[a-zA-Z0-9_-]+\s*=\s*.+@@\s*/m', 'block_metadata_callback', 50, true);
+$CI->syntaxparser->add_block_definition('inline_metadata', '/@@([a-zA-Z0-9_-]+)\s*=\s*(.+)@@\s*/m', 'block_metadata_callback', 50, true);
 function block_metadata_callback(&$matches) {
-	return ''; //Don't display metadata
+	global $CI;
+	//die($matches[0]);
+	$matches[1] = $CI->input->xss_clean($matches[1]);
+	$matches[1] = htmlentities($matches[1], ENT_QUOTES);
+	$matches[2] = $CI->input->xss_clean($matches[2]);
+	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
+	
+	$CI->template->add_value($matches[1], $matches[2]);
+	
+	//return $matches[0]; //Return it without any modification
+	return '';
 }  
 
 /**
