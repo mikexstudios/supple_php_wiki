@@ -25,7 +25,7 @@ class Users extends Controller {
 		}
 		
 		//Check if the user has the permissions to access this page
-		if(!does_user_have_permission(get_user_role(), array('Registered'))) //Defaults to Administrator
+		if(!does_user_have_permission('Registered')) //Defaults to Administrator
 		{
 			show_404();
 		}
@@ -36,7 +36,7 @@ class Users extends Controller {
 		$this->_initialize();
 		
 		//Check if the user has the permissions to access this page
-		if(does_user_have_permission(get_user_role())) //Defaults to Administrator
+		if(does_user_have_permission('Administrator')) //Defaults to Administrator
 		{
 			$this->management();
 		}
@@ -54,7 +54,7 @@ class Users extends Controller {
 		}
 		
 		//Check if the user has the permissions to access this page
-		if(!does_user_have_permission(get_user_role())) //Defaults to Administrator
+		if(!does_user_have_permission('Administrator')) //Defaults to Administrator
 		{
 			show_404();
 		}
@@ -177,7 +177,7 @@ class Users extends Controller {
 		}	
 		
 		//Check if the user has the permissions to access this page
-		if(!does_user_have_permission(get_user_role())) //Defaults to Administrator
+		if(!does_user_have_permission('Administrator')) //Defaults to Administrator
 		{
 			show_404();
 		}

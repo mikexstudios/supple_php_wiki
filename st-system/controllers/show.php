@@ -53,8 +53,7 @@ class Show extends Controller {
 		{
 			//Check to see if user has permission to read this page
 			$page_read_roles = get_page_read_roles($pagename);
-			$user_role = get_user_role();
-			if(does_user_have_permission($user_role, $page_read_roles))
+			if(does_user_have_permission($page_read_roles))
 			{
 				$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
 			}

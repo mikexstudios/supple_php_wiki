@@ -29,8 +29,7 @@ class Diff extends Show {
 	
 		//Check to see if user has permission to read this page
 		$page_read_roles = get_page_read_roles($pagename);
-		$user_role = get_user_role();
-		if(does_user_have_permission($user_role, $page_read_roles))
+		if(does_user_have_permission($page_read_roles))
 		{
 			$this->pid['a'] = $this->input->get('a');
 			$this->pid['b'] = $this->input->get('b');
@@ -69,7 +68,7 @@ class Diff extends Show {
 				show_error('The specified page id is invalid: '.$this->pid['b']);
 			}
 			
-			$this->compute_differences();
+			$this->_compute_differences();
 			
 			//Set template tags
 			$this->template->add_value('diff_added', format_text($this->added));
@@ -91,7 +90,7 @@ class Diff extends Show {
 	 * Does not return anything.	
 	 * @access private
 	 */	 	
-	function compute_differences() {
+	function _compute_differences() {
 		
 		// prepare bodies. Below code from Wikkawiki:
 		$bodyA = explode("\n", $this->data['a']['body']);

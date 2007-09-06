@@ -24,7 +24,7 @@ class Pages extends Controller {
 		}
 		
 		//Check if the user has the permissions to access this page
-		if(!does_user_have_permission(get_user_role(), array('Editor')))
+		if(!does_user_have_permission('Editor'))
 		{
 			show_404();
 		} 
@@ -80,8 +80,8 @@ class Pages extends Controller {
 			$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
 			
 			//Set validation rules
-			$rules['read_permission'] = 'trim|max_length[200]';
-			$rules['write_permission'] = 'trim|max_length[200]';
+			$rules['read_permission'] = 'required|trim|alpha_numeric|max_length[200]';
+			$rules['write_permission'] = 'required|trim|alpha_numeric|max_length[200]';
 			$this->validation->set_rules($rules);
 			
 			//Also repopulate the form
@@ -96,24 +96,39 @@ class Pages extends Controller {
 				
 				//We should validate that the input permissions are actually valid
 				
-				if(!empty($this->validation->read_permission))
-				{
-					$this->page_metadata_model->set_value('read_permission', $this->validation->read_permission);
-				}
-				else
+				if($this->validation->read_permission == 'Default')
 				{
 					$this->page_metadata_model->delete_key('read_permission');
 				}
-				
-				if(!empty($this->validation->write_permission))
-				{
-					$this->page_metadata_model->set_value('write_permission', $this->validation->write_permission);
-				}
 				else
+				{
+					$this->page_metadata_model->set_value('read_permission', $this->validation->read_permission);
+				}
+				
+				if($this->validation->write_permission == 'Default')
 				{
 					$this->page_metadata_model->delete_key('write_permission');
 				}
+				else
+				{
+					$this->page_metadata_model->set_value('write_permission', $this->validation->write_permission);
+				}
 			}	
+			else
+			{
+				//Set initial values (if any)
+				$read_permission = get_page_metadata('read_permission', $page_name);
+				$write_permission = get_page_metadata('write_permission', $page_name);
+				
+				if(!empty($read_permission))
+				{
+					$_POST['read_permission'] = $read_permission;
+				}
+				if(!empty($write_permission))
+				{
+					$_POST['write_permission'] = $write_permission;
+				}
+			}
 			
 			$this->template->add_value('page_name', $page_name);
 			$this->load->view('pages-changepermissions');

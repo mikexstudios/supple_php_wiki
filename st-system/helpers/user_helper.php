@@ -12,20 +12,6 @@ function get_logged_in_username() {
 	return $CI->session->userdata('username');
 }
 
-/**
- * Function mainly useful for MU environment
- */ 
-$CI->template->add_function('user_wikis', 'get_user_wikis');
-function get_user_wikis($in_username='') {
-	$wikis = get_user_info('wikis', $in_username);
-	if(!empty($wikis))
-	{
-		return comma_list_to_array($wikis);
-	}
-	
-	return false;
-}	
-
 $CI->template->add_function('user_info', 'get_user_info');
 function get_user_info($in_key, $in_username='') {
 	global $CI;
@@ -36,11 +22,12 @@ function get_user_info($in_key, $in_username='') {
 		$in_username = get_logged_in_username();
 	}
 	
-	//We have to check again to fix the problem where an empty username
-	//gets returned 'Administrator' by the user_model!
+	//Check again if the username is set. This fixes the problem
+	//where if the username is not set, strange values can be
+	//returned.
 	if(empty($in_username))
 	{
-		return '';
+		return false;
 	}
 	
 	$CI->users_model_theme->username = $in_username;
@@ -50,7 +37,6 @@ function get_user_info($in_key, $in_username='') {
 $CI->template->add_function('user_role', 'get_user_role');
 function get_user_role($in_username='') {
 	$user_role = get_user_info('role', $in_username);
-
 	if(!empty($user_role))
 	{
 		return $user_role; 
@@ -59,28 +45,43 @@ function get_user_role($in_username='') {
 	return 'Anonymous';
 } 
 
-function get_page_metadata_access_roles() {
-	global $CI;
-	
-	$comma_list = $CI->settings->get('page_metadata_access');
-	return comma_list_to_array($comma_list);
-}
+function does_user_have_permission($lowest_permission_level='Administrator', $in_username='') {
 
-function does_user_have_permission($user_role, $list_of_valid_permissions=array()) {
+	$user_role = get_user_role($in_username);
 	
-	//Admin can access anything, so we augment the permission list with 
-	//'Administrator'
-	$list_of_valid_permissions[] = 'Administrator';
+	//Convert permissions into numbers
+	$user_role_number = permission_to_number($user_role);
+	$lowest_permission_level_number = permission_to_number($lowest_permission_level);
 	
-	foreach($list_of_valid_permissions as $each_role)
+	if($user_role_number >= $lowest_permission_level_number)
 	{
-		if($user_role == $each_role)
-		{
-			return true;
-		}
+		return true;
 	}
 	
 	return false;
+}
+
+/**
+ * Converts a permission (ie. Registered) to 
+ * a number level. This is useful for comparing
+ * permission levels to see which one is higher.
+ */   
+function permission_to_number($in_permission) {
+	switch($in_permission)
+	{
+		case 'Administrator':
+			return 1000;
+			break;
+		case 'Editor':
+			return 500;
+			break;
+		case 'Registered':
+			return 100;
+		default: //Anonymous
+			return 0;
+	}
+	
+	return 0;
 }
 
 
@@ -96,7 +97,7 @@ function get_page_read_roles($in_pagename) {
 		$page_permission = $CI->settings->get('default_read_permission');
 	}
 	
-	return comma_list_to_array($page_permission);
+	return $page_permission;
 }
 
 function get_page_write_roles($in_pagename) {
@@ -111,7 +112,22 @@ function get_page_write_roles($in_pagename) {
 		$page_permission = $CI->settings->get('default_write_permission');
 	}
 	
-	return comma_list_to_array($page_permission);
+	return $page_permission;
 }
+
+
+/**
+ * Functions mainly useful for MU environment:
+ */ 
+$CI->template->add_function('user_wikis', 'get_user_wikis');
+function get_user_wikis($in_username='') {
+	$wikis = get_user_info('wikis', $in_username);
+	if(!empty($wikis))
+	{
+		return comma_list_to_array($wikis);
+	}
+	
+	return false;
+}	
 
 ?>

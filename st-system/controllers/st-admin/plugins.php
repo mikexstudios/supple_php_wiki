@@ -29,7 +29,7 @@ class Plugins extends Controller {
 		}
 		
 		//Check if the user has the permissions to access this page
-		if(!does_user_have_permission(get_user_role())) //Defaults to Administrator
+		if(!does_user_have_permission('Administrator')) //Defaults to Administrator
 		{
 			show_404();
 		} 

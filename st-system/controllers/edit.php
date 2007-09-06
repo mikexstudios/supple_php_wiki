@@ -35,8 +35,7 @@ class Edit extends Show {
 		
 		//Check to see if user has permission to write to this page
 		$page_read_roles = get_page_write_roles($pagename);
-		$user_role = get_user_role();
-		if(does_user_have_permission($user_role, $page_read_roles) === FALSE)
+		if(does_user_have_permission($page_read_roles) === FALSE)
 		{
 			$this->pages_model->page['body'] = '<p>You do not have the permission to edit this page.</p>';
 			$this->load->view('show');

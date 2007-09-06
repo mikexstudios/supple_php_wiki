@@ -19,16 +19,30 @@
 <tr valign="top"> 
 <th scope="row">Read role(s):</th> 
 <td>
-	<input name="read_permission" type="text" id="read_permission" value="<?php if(empty($this->validation->read_permission)) { out('page_metadata', 'read_permission', get('page_name')); } else { echo $this->validation->read_permission; } ?>" size="40" /><br />
-	Enter roles separated by a comma allowed to view pages (ie. Anonymous, Registered, Editor). <em class="highlight">Leave blank for the <a href="<?php out('admin_url', 'options/permissions'); ?>">default permissions</a></em>.
+	<select name="read_permission" id="read_permission">
+		<option value='Default' <?php $read_permission = $this->input->post('read_permission'); if(empty($read_permission)) { echo 'selected="selected"'; } ?>>Default Permissions</option>
+		<option value='Anonymous' <?php echo $this->validation->set_select('read_permission', 'Anonymous'); ?>>Anonymous or Higher</option>
+		<option value='Registered' <?php echo $this->validation->set_select('read_permission', 'Registered'); ?>>Registered or Higher</option>
+		<option value='Editor' <?php echo $this->validation->set_select('read_permission', 'Editor'); ?>>Editors or Higher</option>
+		<option value='Administrator' <?php echo $this->validation->set_select('read_permission', 'Administrator'); ?>>Administrators Only</option>
+	</select>
+	<br />
+	Select the role(s) need to view the <?php out('page_name'); ?> page (ie. Registered or Higher). <em class="highlight">The <a href="<?php out('admin_url', 'options/permissions'); ?>">default permissions</a> can be changed on the Options page</em>.
 </td> 
 </tr>
 
 <tr valign="top"> 
 <th scope="row">Write role(s):</th> 
 <td>
-	<input name="write_permission" type="text" id="write_permission" value="<?php if(empty($this->validation->write_permission)) { out('page_metadata', 'write_permission', get('page_name')); } else { echo $this->validation->write_permission; } ?>" size="40" /><br />
-	Enter roles separated by a comma allowed to edit pages (ie. Registered, Editor). <em class="highlight">Leave blank for the <a href="<?php out('admin_url', 'options/permissions'); ?>">default permissions</a></em>.
+	<select name="write_permission" id="write_permission">
+		<option value='Default' <?php $write_permission = $this->input->post('write_permission'); if(empty($write_permission)) { echo 'selected="selected"'; } ?>>Default Permissions</option>
+		<option value='Anonymous' <?php echo $this->validation->set_select('write_permission', 'Anonymous'); ?>>Anonymous or Higher</option>
+		<option value='Registered' <?php echo $this->validation->set_select('write_permission', 'Registered'); ?>>Registered or Higher</option>
+		<option value='Editor' <?php echo $this->validation->set_select('write_permission', 'Editor'); ?>>Editors or Higher</option>
+		<option value='Administrator' <?php echo $this->validation->set_select('write_permission', 'Administrator'); ?>>Administrators Only</option>
+	</select>
+	<br />
+	Select the role(s) need to edit the <?php out('page_name'); ?> page (ie. Editors or Higher). <em class="highlight">The <a href="<?php out('admin_url', 'options/permissions'); ?>">default permissions</a> can be changed on the Options page</em>.
 </td> 
 </tr>
 

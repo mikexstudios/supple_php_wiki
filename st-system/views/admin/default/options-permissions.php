@@ -12,7 +12,7 @@
 <?php out('message'); ?>
 
 <h2>Permission Options</h2>
-<form method="post" action="<?php out('admin_url', 'options/general'); ?>"> 
+<form method="post" action="<?php out('admin_url', 'options/permissions'); ?>"> 
 <p class="submit"><input type="submit" name="Submit" value="Update Options &raquo;" /></p>
 
 <table class="optiontable"> 
@@ -20,16 +20,28 @@
 <tr valign="top"> 
 <th scope="row">Default read role(s):</th> 
 <td>
-	<input name="default_read_permission" type="text" id="default_read_permission" value="<?php if(empty($this->validation->default_read_permission)) { out('setting', 'default_read_permission'); } else { echo $this->validation->default_read_permission; } ?>" size="40" /><br />
-	Enter roles separated by a comma allowed to view pages (ie. Anonymous, Registered, Editor). <em>These roles can be overridden on specific pages</em>.
+	<select name="default_read_permission" id="default_read_permission">
+		<option value='Anonymous' <?php $default_read_permission = $this->input->post('default_read_permission'); if(empty($default_read_permission)) { echo 'selected="selected"'; } else { echo $this->validation->set_select('default_read_permission', 'Anonymous'); } ?>>Anonymous or Higher</option>
+		<option value='Registered' <?php echo $this->validation->set_select('default_read_permission', 'Registered'); ?>>Registered or Higher</option>
+		<option value='Editor' <?php echo $this->validation->set_select('default_read_permission', 'Editor'); ?>>Editors or Higher</option>
+		<option value='Administrator' <?php echo $this->validation->set_select('default_read_permission', 'Administrator'); ?>>Administrators Only</option>
+	</select>
+	<br />
+	Select the default permission(s) needed to view pages (ie. Anonymous or Higher). <em class="highlight">These roles can be overridden on specific pages</em>.
 </td> 
 </tr>
 
 <tr valign="top"> 
 <th scope="row">Default write role(s):</th> 
 <td>
-	<input name="default_write_permission" type="text" id="default_write_permission" value="<?php if(empty($this->validation->default_write_permission)) { out('setting', 'default_write_permission'); } else { echo $this->validation->default_write_permission; } ?>" size="40" /><br />
-	Enter roles separated by a comma allowed to edit pages (ie. Registered, Editor). <em>These roles can be overridden on specific pages</em>.
+	<select name="default_write_permission" id="default_write_permission">
+		<option value='Anonymous' <?php echo $this->validation->set_select('default_write_permission', 'Anonymous'); ?>>Anonymous or Higher</option>
+		<option value='Registered' <?php $default_write_permission = $this->input->post('default_write_permission'); if(empty($default_write_permission)) { echo 'selected="selected"'; } else { echo $this->validation->set_select('default_write_permission', 'Registered'); } ?>>Registered or Higher</option>
+		<option value='Editor' <?php echo $this->validation->set_select('default_write_permission', 'Editor'); ?>>Editors or Higher</option>
+		<option value='Administrator' <?php echo $this->validation->set_select('default_write_permission', 'Administrator'); ?>>Administrators Only</option>
+	</select>
+	<br />
+	Select the default permission(s) needed to edit pages (ie. Registered or Higher). <em class="highlight">These roles can be overridden on specific pages</em>.
 </td> 
 </tr>
 

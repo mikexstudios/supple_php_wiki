@@ -11,9 +11,7 @@
 	
 	<?php 
 		if(get('page_exists')):
-			$page_read_roles = get_page_write_roles(get('page_tag'));
-			$user_role = get_user_role();
-			if(does_user_have_permission($user_role, $page_read_roles) === TRUE):
+			if(does_user_have_permission(get_page_write_roles(get('page_tag'))) === TRUE):
 	?>
 		<a href="<?php out('page_url', get('page_tag'), 'edit', get('current_revision')); ?>">Edit this page</a> |
 	<?php endif; //does_user_have_permission ?> 
@@ -27,7 +25,7 @@
 		<a class="ext" href="http://jigsaw.w3.org/css-validator/check/referer">Valid CSS</a> |
 		Powered by <a class="ext" href="http://www.suppletext.org/">suppleText</a>
 	<?php 
-		if(!empty($logged_in_username) && get('have_admin_access') === true): 
+		if(!empty($logged_in_username)): 
 	?>
 		| <a href="<?php out('page_url', 'st-admin'); ?>">Admin</a><br />
 	<?php else: ?>

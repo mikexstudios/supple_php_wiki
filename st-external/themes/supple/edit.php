@@ -27,10 +27,11 @@
 <fieldset>
 	<legend>Additional Actions</legend>
 	<p>
-		<?php if(does_user_have_permission(get_user_role(), array('Editor'))): ?>
-			<a href="<?php out('page_url', '/st-admin/pages/changepermissions/'.get('this_page').'/'); ?>">Change Page Permissions</a> |
-		<?php endif; ?> 
-		<?php if(does_user_have_permission(get_user_role(), array('Registered','Editor'))): ?>
+		<?php if(does_user_have_permission('Registered')): ?>
+			<?php if(does_user_have_permission('Editor')): ?>
+				<a href="<?php out('page_url', '/st-admin/pages/changepermissions/'.get('this_page').'/'); ?>">Change Page Permissions</a> |
+			<?php endif; ?>
+			
 			<a href="<?php out('page_url', get('this_page'), 'attachments'); ?>">View or Attach Files</a>
 		<?php else: ?>
 			You currently do not have the user permissions to perform additional actions on this page.

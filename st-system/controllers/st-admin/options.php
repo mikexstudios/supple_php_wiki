@@ -83,8 +83,8 @@ class Options extends Controller {
 		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
 		
 		//Set validation rules
-		$rules['default_read_permission'] = 'trim|required|max_length[200]';
-		$rules['default_write_permission'] = 'trim|required|max_length[200]';
+		$rules['default_read_permission'] = 'required|trim|alpha_numeric|max_length[200]';
+		$rules['default_write_permission'] = 'required|trim|alpha_numeric|max_length[200]';
 		$this->validation->set_rules($rules);
 		
 		//Also repopulate the form
