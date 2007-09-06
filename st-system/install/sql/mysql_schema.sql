@@ -33,9 +33,8 @@ INSERT INTO `st_config` (`id`, `key`, `value`) VALUES
 (4, 'use_cache', 'false'),
 (5, 'use_theme', 'supple'),
 (6, 'version', '0.3.0'),
-(7, 'page_metadata_access', 'Editor'),
-(8, 'default_read_permission', 'Anonymous,Registered,Editor'),
-(9, 'default_write_permission', 'Registered,Editor');
+(7, 'default_read_permission', 'Anonymous,Registered,Editor'),
+(8, 'default_write_permission', 'Registered,Editor');
 
 -- --------------------------------------------------------
 
