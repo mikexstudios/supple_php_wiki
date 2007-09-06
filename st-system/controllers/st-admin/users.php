@@ -23,18 +23,38 @@ class Users extends Controller {
 			//Not logged in, redirect to login page.
 			redirect('/st-admin/users/login');
 		}
+		
+		//Check if the user has the permissions to access this page
+		if(!does_user_have_permission(get_user_role(), array('Registered'))) //Defaults to Administrator
+		{
+			show_404();
+		}
 	}
 	
 	function index()
 	{
 		$this->_initialize();
 		
-		//Otherwise, bring to user management
-		$this->management();
+		//Check if the user has the permissions to access this page
+		if(does_user_have_permission(get_user_role())) //Defaults to Administrator
+		{
+			$this->management();
+		}
+		else
+		{
+			$this->profile();
+		}
+		
 	}
 	
 	function management() {
 		if($this->config->item('disable_user_admin') === true)
+		{
+			show_404();
+		}
+		
+		//Check if the user has the permissions to access this page
+		if(!does_user_have_permission(get_user_role())) //Defaults to Administrator
 		{
 			show_404();
 		}
@@ -155,7 +175,13 @@ class Users extends Controller {
 		{
 			show_404();
 		}	
-	
+		
+		//Check if the user has the permissions to access this page
+		if(!does_user_have_permission(get_user_role())) //Defaults to Administrator
+		{
+			show_404();
+		}
+		
 		$this->_initialize();
 		$this->template->add_value('admin_page_title', 'Users &rsaquo; Add New User');
 		$this->load->helper('string');

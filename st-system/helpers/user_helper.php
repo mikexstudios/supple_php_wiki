@@ -12,13 +12,6 @@ function get_logged_in_username() {
 	return $CI->session->userdata('username');
 }
 
-$CI->template->add_function('have_admin_access', 'does_current_user_have_admin_access');
-function does_current_user_have_admin_access() {
-	global $CI;
-	
-	return $CI->authorization->is_logged_in();
-}
-
 /**
  * Function mainly useful for MU environment
  */ 
@@ -42,6 +35,14 @@ function get_user_info($in_key, $in_username='') {
 	{
 		$in_username = get_logged_in_username();
 	}
+	
+	//We have to check again to fix the problem where an empty username
+	//gets returned 'Administrator' by the user_model!
+	if(empty($in_username))
+	{
+		return '';
+	}
+	
 	$CI->users_model_theme->username = $in_username;
 	return $CI->users_model_theme->get_value($in_key);
 }
@@ -49,6 +50,7 @@ function get_user_info($in_key, $in_username='') {
 $CI->template->add_function('user_role', 'get_user_role');
 function get_user_role($in_username='') {
 	$user_role = get_user_info('role', $in_username);
+
 	if(!empty($user_role))
 	{
 		return $user_role; 
@@ -64,7 +66,7 @@ function get_page_metadata_access_roles() {
 	return comma_list_to_array($comma_list);
 }
 
-function does_user_have_permission($user_role, $list_of_valid_permissions) {
+function does_user_have_permission($user_role, $list_of_valid_permissions=array()) {
 	
 	//Admin can access anything, so we augment the permission list with 
 	//'Administrator'
