@@ -24,20 +24,21 @@
 ?>
 </textarea><br />
 
+<?php if(does_user_have_permission('Registered')): ?>
 <fieldset>
 	<legend>Additional Actions</legend>
 	<p>
-		<?php if(does_user_have_permission('Registered')): ?>
 			<?php if(does_user_have_permission('Editor')): ?>
 				<a href="<?php out('page_url', '/st-admin/pages/changepermissions/'.get('this_page').'/'); ?>">Change Page Permissions</a> |
 			<?php endif; ?>
-			
+
 			<a href="<?php out('page_url', get('this_page'), 'attachments'); ?>">View or Attach Files</a>
-		<?php else: ?>
-			You currently do not have the user permissions to perform additional actions on this page.
-		<?php endif; ?>
 	</p> 
 </fieldset>
+<?php else: ?>
+<p class="center">If you are a <em>Registered</em> user, there are additional actions you can
+perform on the page.</p>
+<?php endif; ?>
 
 <fieldset>
 	<legend>Store page</legend>

@@ -26,7 +26,12 @@ class Diff extends Show {
 	
 	function display($pagename) {
 		$this->_set_page_info($pagename);
-	
+		
+		if(does_current_page_exist() == false)
+		{
+			redirect($pagename);
+		}
+		
 		//Check to see if user has permission to read this page
 		$page_read_roles = get_page_read_roles($pagename);
 		if(does_user_have_permission($page_read_roles))
