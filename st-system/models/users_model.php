@@ -27,6 +27,26 @@ class Users_model extends Model {
 		return $this->all_users;
 	}
 	
+	/**
+	 * Mainly used for MU environments. Returns array of username and role.
+	 */	 	
+	function get_wiki_username_and_roles() {
+		$wiki_tag = $this->config->item('wiki_tag');
+		
+		$this->db->select('*');
+		$this->db->from(ST_USERS_TABLE);
+		$this->db->where('`key`', $wiki_tag.'_role');
+		$query = $this->db->get();
+		
+		$user_info = array();
+		foreach($query->result() as $row)
+		{
+			$user_info[$row->username]['role'] = $row->value;
+		}
+		
+		return $user_info;
+	}
+	
 	function get_next_uid() {
 		$this->db->select('value');
 		$this->db->from(ST_USERS_TABLE);
@@ -54,23 +74,41 @@ class Users_model extends Model {
 		$this->db->from(ST_USERS_TABLE);
 		$this->db->where('username', $this->username);
 		$this->db->where('`key`', $in_key); //key is a MySQL reserved word. We need to quote it.
-		$this->db->limit(1);
+		$this->db->limit(1); //Currently, we are only using results that return one row
 		$query = $this->db->get();
 		
-		$result = $query->row_array(); //We want a single result
-		
-		if(count($result) == 0) //Check for non-existent value
+		/**
+		 * Currently, we are only using results that return one row
+		 */		 		
+		//Check how many results are returned:
+		if($query->num_rows() > 1)
 		{
+			$result = $query->result_array();
+			
+			$value_array = array();
+			foreach($result as $row)
+			{
+				$value_array[] = $row['value'];
+			}
+			
+			return $value_array;
+		}
+		elseif($query->num_rows() == 1)
+		{
+			$result = $query->row_array(); //We want a single result
+			$value = $result['value']; //We can't use element() because it returns false when the value is ''
+			if($value == '')
+			{
+				return '';
+			}
+			
+			return $value;
+		}
+		else
+		{
+			//No results
 			return false;
 		}
-		
-		$value = $result['value']; //We can't use element() because it returns false when the value is ''
-		if($value == '')
-		{
-			return '';
-		}
-		
-		return $value;
 	}
 	
 	function set_value($in_key, $in_value, $in_attribute='') {	

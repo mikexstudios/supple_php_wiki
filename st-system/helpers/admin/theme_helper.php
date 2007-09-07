@@ -134,7 +134,15 @@ function get_all_users_info() {
 	global $CI;
 	
 	$CI->load->model('users_model');
-	return $CI->users_model->get_all();
+	
+	if($CI->config->item('is_mu') === true)
+	{
+		return $CI->users_model->get_wiki_username_and_roles();
+	}
+	else
+	{
+		return $CI->users_model->get_all();
+	}
 }
 
 //Moved user info func to regular theme_helper

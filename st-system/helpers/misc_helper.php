@@ -95,4 +95,14 @@ function add_to_comma_list($in_comma_list, $in_add_element) {
 	return array_to_comma_list($list);
 }
 
+function delete_from_comma_list($in_comma_list, $in_value) {
+	$list = comma_list_to_array($in_comma_list);
+	if(in_array($in_value, $list))
+	{
+		unset($list[array_search($in_value, $list)]);
+	}
+	
+	return array_to_comma_list($list);
+}
+
 ?>

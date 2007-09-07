@@ -59,19 +59,17 @@ class Authorization {
 	}
 
   function set_logged_in($username) {
-      $this->CI->session->set_userdata('username', $username);
-      $user_wikis = get_user_wikis($username);
-      if($user_wikis !== false)
+    $this->CI->session->set_userdata('username', $username);
+    $user_wikis = get_user_wikis($username);
+    if($user_wikis !== false)
+    {
+      foreach($user_wikis as $each_wiki)
       {
-	      foreach($user_wikis as $each_wiki)
-	      {
-					$this->CI->session->set_userdata($each_wiki.'_logged_in', true);
-				}
+				$this->CI->session->set_userdata($each_wiki.'_logged_in', true);
 			}
-			else
-			{
-				$this->CI->session->set_userdata('logged_in', true);
-			}
+		}
+		
+		$this->CI->session->set_userdata('logged_in', true); //Needed for MU's main page
   }
 
   function logout() {

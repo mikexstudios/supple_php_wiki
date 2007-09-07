@@ -36,7 +36,15 @@ function get_user_info($in_key, $in_username='') {
 
 $CI->template->add_function('user_role', 'get_user_role');
 function get_user_role($in_username='') {
-	$user_role = get_user_info('role', $in_username);
+	global $CI;
+	
+	$wiki_tag = $CI->config->item('wiki_tag');
+	if(!empty($wiki_tag))
+	{
+		$wiki_tag .= '_'; //So that we have wikiname_role
+	}
+	
+	$user_role = get_user_info($wiki_tag.'role', $in_username);
 	if(!empty($user_role))
 	{
 		return $user_role; 

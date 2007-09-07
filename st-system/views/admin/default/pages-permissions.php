@@ -21,8 +21,8 @@
 <td>
 	<input name="page_name" type="text" id="page_name" value="<?php echo $this->validation->page_name; ?>" size="40" /><br />
 	Enter the page name (ie. <em>SandBox</em>) for which you want to edit permissions.
-	You can also change the page permissions by clicking the change permissions link
-	when editing the page.	
+	<span class="highlight">You can also change the page permissions by clicking the change permissions link
+	when editing the page</span>.	
 </td> 
 </tr> 
 

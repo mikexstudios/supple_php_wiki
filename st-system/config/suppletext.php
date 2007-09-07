@@ -9,6 +9,11 @@ $config['default_message_delimiter_post'] = '</p></div>';
 */
 
 /**
+ * Are we in a Multi-User/Wiki (MU) Environment?
+ */
+$config['is_mu'] = false; 
+
+/**
  * An alphanumeric string identifying the wiki. Important in MU environments.
  * Do NOT set this if you are running a one wiki installation
  */  

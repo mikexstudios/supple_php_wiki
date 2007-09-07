@@ -48,20 +48,156 @@ class Users extends Controller {
 	}
 	
 	function management() {
-		if($this->config->item('disable_user_admin') === true)
-		{
-			show_404();
-		}
-		
 		//Check if the user has the permissions to access this page
 		if(!does_user_have_permission('Administrator')) //Defaults to Administrator
 		{
 			show_404();
 		}
 	
+		//We have a simplier page if running a multi-wiki installation.
+		if($this->config->item('is_mu') === true)
+		{
+			$this->_management_mu();
+		}	
+		else
+		{
+			$this->_management_full();
+		}	
+	}
+	
+	/**
+	 * This is the simplified version of user management for multi-wiki environments.
+	 */	 	
+	function _management_mu() {
 		$this->_initialize();
 		$this->template->add_value('admin_page_title', 'Users &rsaquo; Management');
-		$this->load->helper('string');
+		$this->load->helper('string'); //Used for alternator() in table generation
+		
+		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+		
+		//Set validation rules
+		//users is actually an array so we can't set rules for each of the elements.
+		//In the future, we can loop through the number of users and set rules for
+		//each one.
+		$rules['users'] = 'required|callback__user_management_user_check';
+		$rules['action'] = 'required|trim|alpha_dash|max_length[200]'; //Add page name check here
+		$rules['new_role'] = 'trim|alpha_dash|max_length[100]';
+		$rules['bulkupdate'] = 'required'; //Submit button
+		$this->validation->set_rules($rules);
+		
+		//Also repopulate the form
+		$fields['users'] = 'Username Selection';
+		$fields['action'] = 'Update Selected';
+		$fields['new_role'] = 'User Role';
+		$fields['bulkupdate'] = 'Bulk Update';
+		$this->validation->set_fields($fields);
+		
+		if($this->validation->run() === TRUE)
+		{
+			if($this->validation->action == 'delete')
+			{
+				$wiki_tag = $this->config->item('wiki_tag');
+				$in_usernames = $this->input->post('users');
+				foreach($in_usernames as $each_user)
+				{
+					$this->users_model->username = $each_user;
+					$this->users_model->delete_key($wiki_tag.'_role');
+					
+					//Remove from list of wikis
+					$user_wikis = $this->users_model->get_value('wikis');
+					$user_wikis = delete_from_comma_list($user_wikis, $wiki_tag);
+					$this->users_model->set_value('wikis', $user_wikis);
+					
+					unset($this->users_model->username, $each_user);
+				}
+				
+				//Now display sucess message
+				$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
+				$num_users_deleted = count($in_usernames);
+				if($num_users_deleted > 1)
+				{
+					$this->message->set_text($num_users_deleted.' users deleted.');
+				}
+				else
+				{ //One user
+					$this->message->set_text($num_users_deleted.' user deleted.');
+				}
+			}
+			else if($this->validation->action == 'promote')
+			{
+				//We require the new_role field
+				if($this->validation->required($this->validation->new_role))
+				{
+					$wiki_tag = $this->config->item('wiki_tag');
+					$in_usernames = $this->input->post('users');
+					foreach($in_usernames as $each_user)
+					{
+						$this->users_model->username = $each_user;
+						$this->users_model->set_value($wiki_tag.'_role', $this->validation->new_role);
+						unset($this->users_model->username, $each_user);
+					}
+					
+					//Now display sucess message
+					$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
+					$num_users_changed = count($in_usernames);
+					if($num_users_changed > 1)
+					{
+						$this->message->set_text('Roles for '.$num_users_changed.' users changed.');
+					}
+					else
+					{ //One user
+						$this->message->set_text('Role for '.$num_users_changed.' user changed.');
+					}
+				}
+				else
+				{
+					$this->message->set_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+					$this->message->set_text('No new role selected.');
+				}
+			}
+			else
+			{
+				$this->message->set_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+				$this->message->set_text('Invalid action selected.');
+			}
+
+		}
+		
+		$this->load->view('users-management');
+	}
+	
+	function _user_management_user_check($in_usernames) {
+		foreach($in_usernames as $each_user)
+		{
+			$each_user = trim($each_user);
+			
+			//Check if the user is modifying him/herself. We don't allow that.
+			if($each_user == get_logged_in_username())
+			{
+				$this->validation->set_message('_user_management_user_check', 'You cannot modify yourself. Get another Administrator to help you!');
+				return false;
+			}
+			
+			//Check if uid exists by getting the username
+			if($this->_does_user_exist($each_user))
+			{
+				return true;
+			}
+			
+			$this->validation->set_message('_user_management_user_check', 'One or more of the users you have selected are invalid.');
+			return false;
+		}
+	}
+	
+	function _management_full() {
+		if($this->config->item('disable_user_admin') === true) //Being paranoid here.
+		{
+			show_404();
+		}		
+	
+		$this->_initialize();
+		$this->template->add_value('admin_page_title', 'Users &rsaquo; Management');
+		$this->load->helper('string'); //Used for alternator() in table generation
 		
 		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
 		
@@ -121,35 +257,34 @@ class Users extends Controller {
 						unset($this->users_model->username, $username);
 					}
 					
-				//Now display sucess message
-				$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
-				$num_users_deleted = count($user_ids);
-				if($num_users_deleted > 1)
-				{
-					$this->message->set_text('Roles for '.$num_users_deleted.' users changed.');
+					//Now display sucess message
+					$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
+					$num_users_changed = count($user_ids);
+					if($num_users_changed > 1)
+					{
+						$this->message->set_text('Roles for '.$num_users_changed.' users changed.');
+					}
+					else
+					{ //One user
+						$this->message->set_text('Role for '.$num_users_changed.' user changed.');
+					}
 				}
 				else
-				{ //One user
-					$this->message->set_text('Role for '.$num_users_deleted.' user changed.');
-				}
-				}
-				else
 				{
-					$this->validation->_error_array[] = 'No new role selected.';
-					$this->validation->run();
+					$this->message->set_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+					$this->message->set_text('No new role selected.');
 				}
 			}
 			else
 			{
-				$this->validation->_error_array[] = 'Invalid action selected.';
-				$this->validation->run();
+				$this->message->set_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+				$this->message->set_text('Invalid action selected.');
 			}
 
 		}
 
 
 		$this->load->view('users-management');
-	
 	}
 	
 	function _user_ids_check($in_user_ids) {
@@ -171,16 +306,88 @@ class Users extends Controller {
 	}
 	
 	function addnew() {
-		if($this->config->item('disable_user_admin') === true)
-		{
-			show_404();
-		}	
-		
+
 		//Check if the user has the permissions to access this page
 		if(!does_user_have_permission('Administrator')) //Defaults to Administrator
 		{
 			show_404();
 		}
+	
+		//We have a simplier page if running a multi-wiki installation.
+		if($this->config->item('is_mu') === true)
+		{
+			$this->_addnew_mu();
+		}	
+		else
+		{
+			$this->_addnew_full();
+		}	
+	}
+
+	function _addnew_mu() {
+		
+		$this->_initialize();
+		$this->template->add_value('admin_page_title', 'Users &rsaquo; Add User to Wiki');
+		$this->load->helper('string');
+		
+		$this->validation->set_error_delimiters('<div id="error" class="updated fade"><p>', '</p></div>');
+		
+		//Set validation rules
+		$rules['user_login'] = 'required|trim|min_length[4]|max_length[100]|alpha_dash|callback__does_user_exist|callback__inverse_user_already_added'; //We don't require this since the page can be empty.
+		$rules['role'] = 'required|trim|max_length[100]|alpha_dash';
+		$rules['adduser'] = 'required'; //The submit button
+		$this->validation->set_rules($rules);
+		
+		//Also repopulate the form
+		$fields['user_login'] = 'Username';
+		$fields['role'] = 'Role';
+		$fields['adduser'] = 'Add User Submit';
+		$this->validation->set_fields($fields);
+		
+		if($this->validation->run() === TRUE)
+		{
+			//Now we add the user
+			$this->users_model->username = $this->validation->user_login;
+			$user_wiki_list = $this->users_model->get_value('wikis');
+			$user_wiki_list = add_to_comma_list($user_wiki_list, $this->config->item('wiki_tag'));
+			$this->users_model->set_value('wikis', $user_wiki_list);
+			$this->users_model->set_value($this->config->item('wiki_tag').'_role', $this->validation->role);
+			
+			//Now display sucess message
+			$this->message->set_delimiters('<div id="message" class="updated fade"><p>', '</p></div>');
+			$this->message->set_text('User added to wiki: '.$this->validation->user_login);
+			
+			//Now we empty some of the form fields
+			$this->validation->user_login = '';
+			$this->validation->role = '';
+		}
+		
+		$this->load->view('users-addnew');	
+	}
+	
+	/**
+	 * Check if user is already part of the wiki. Mainly
+	 * useful for MU environments.
+	 */	 	 	
+	function _inverse_user_already_added($in_username) {
+		$this->users_model->username = $in_username;
+		$user_role = $this->users_model->get_value($this->config->item('wiki_tag').'_role');
+		if(!empty($user_role))
+		{
+			//A user role exists	
+			$this->validation->set_message('_inverse_user_already_added', 'The user you are trying to add has already been added.');
+			return false;
+		}
+		
+		//User has not already been added
+		return true;
+	}
+
+	function _addnew_full() {
+		if($this->config->item('disable_user_admin') === true)
+		{
+			show_404();
+		}	
 		
 		$this->_initialize();
 		$this->template->add_value('admin_page_title', 'Users &rsaquo; Add New User');
@@ -226,7 +433,7 @@ class Users extends Controller {
 			$this->validation->email = '';
 		}
 		
-		$this->load->view('users-addnew');
+		$this->load->view('users-addnew');	
 	}
 	
 	function _does_user_exist($in_username) {
@@ -238,6 +445,7 @@ class Users extends Controller {
 			return true; //User exists!
 		}
 		
+		$this->validation->set_message('_does_user_exist', 'The user you are trying to add does not exist!');
 		return false;	
 	}	
 	

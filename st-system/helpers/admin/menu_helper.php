@@ -11,11 +11,9 @@ if(does_user_have_permission('Registered'))
 {
 	$CI->adminmenu->add_top_level('dashboard', 'Dashboard', 100);
 
-	if($CI->config->item('disable_user_admin') !== true)
-	{
+
 	$CI->adminmenu->add_top_level('users', 'Users', 400);
 		$CI->adminmenu->add_sub_level('users/profile', 'My Profile', 300, 'users');
-	}
 	
 	if(does_user_have_permission('Editor'))
 	{
@@ -33,11 +31,8 @@ if(does_user_have_permission('Registered'))
 		$CI->adminmenu->add_top_level('plugins', 'Plugins', 300);
 		}
 		
-		if($CI->config->item('disable_user_admin') !== true)
-		{
-			$CI->adminmenu->add_sub_level('users/management', 'Management', 100, 'users');
-			$CI->adminmenu->add_sub_level('users/addnew', 'Add New User', 200, 'users');
-		}
+		$CI->adminmenu->add_sub_level('users/management', 'Management', 100, 'users');
+		$CI->adminmenu->add_sub_level('users/addnew', 'Add New User', 200, 'users');
 		
 		$CI->adminmenu->add_top_level('options', 'Options', 500);
 			$CI->adminmenu->add_sub_level('options/general', 'General', 100, 'options');
