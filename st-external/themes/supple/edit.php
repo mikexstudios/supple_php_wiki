@@ -9,7 +9,7 @@
 <?php endif; ?>
 
 <form action="<?php out('current_url'); ?>" method="post">
-<textarea id="body" name="body">
+<textarea id="body" name="body" tabindex=1>
 <?php 
 	//This checks to see if we have some body value set from a form submission error.
 	$form_body = get('form_value', 'body');
@@ -41,11 +41,11 @@
 
 <fieldset>
 	<legend>Store page</legend>
-	<input id="note" size="50" type="text" name="note" value="<?php out('form_value', 'note'); ?>" /> <label for="note">Please add a note on your edit</label><br />
+	<input id="note" size="50" type="text" name="note" tabindex=2 value="<?php out('form_value', 'note'); ?>" /> <label for="note">Please add a note on your edit</label><br />
 	<br />
-	<input name="submit" type="submit" value="Store" accesskey="s" />
-	<input name="submit" type="submit" value="Preview" accesskey="p" />
-	<input type="button" value="Cancel" onclick="document.location='<?php out('page_url', get('page_tag')); ?>';" />
+	<input name="submit" type="submit" value="Store" accesskey="s" tabindex=3 />
+	<input name="submit" type="submit" value="Preview" accesskey="p" tabindex=4 />
+	<input type="button" value="Cancel" tabindex=5 onclick="document.location='<?php out('page_url', get('page_tag')); ?>';" />
 </fieldset>
 </form>
 
