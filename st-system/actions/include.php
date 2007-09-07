@@ -20,7 +20,7 @@ if ($page != get_current_pagename())
 		$CI->pages_model_include->loadPage();
 			
 		//Syntax formatting. 
-		//$this->pages_model->page['body'] = format_text($this->pages_model->page['body']);
+		$CI->pages_model_include->page['body'] = format_text($CI->pages_model_include->page['body']);
 		
 		echo $CI->pages_model_include->page['body'];
 		
@@ -30,8 +30,7 @@ if ($page != get_current_pagename())
 	}
 	else
 	{
-		//echo 'Unknown page: '.$page;
-		echo '';
+		echo ' '; //Need a space or the hash function on this won't work
 	}
 } 
 else print '<em class="error">Circular reference.</em>';

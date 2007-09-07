@@ -23,7 +23,11 @@
 	<div class="smallprint">
 		<a class="ext" href="http://validator.w3.org/check/referer">Valid XHTML 1.0 Transitional</a> |
 		<a class="ext" href="http://jigsaw.w3.org/css-validator/check/referer">Valid CSS</a> |
+	<?php if($this->config->item('is_mu') == true): ?>
+		Free wiki at <a class="ext" href="http://www.suppletext.com/">suppleText</a>
+	<?php else: ?>
 		Powered by <a class="ext" href="http://www.suppletext.org/">suppleText</a>
+	<?php endif; ?>
 	<?php 
 		if(!empty($logged_in_username)): 
 	?>
@@ -31,7 +35,9 @@
 	<?php else: ?>
 		<br />
 	<?php endif; ?>
+	<?php if($this->config->item('is_mu') != true): ?>
 		Page was generated in <?php out('execution_time'); ?> seconds with <?php out('database_queries'); ?> queries.
+	<?php endif; ?>
 	</div>
 </div>
 

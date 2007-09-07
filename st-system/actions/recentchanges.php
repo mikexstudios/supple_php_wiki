@@ -18,11 +18,10 @@ foreach($recent_changes_info as $each_change)
 	$day = mdate('%j', $each_change['time']);
 	if($day !== $prev_day)
 	{
-		
-		//A fix for the first \n not appearing
+		//Remove the first </ul> from appearing
 		if($first_header_print==true)
 		{
-			echo "\n";
+			echo "</ul>\n\n";
 		}
 		else
 		{
@@ -30,10 +29,19 @@ foreach($recent_changes_info as $each_change)
 		}
 		
 		//Print the date
-		echo '**'.mdate('%l %d %F %Y', $each_change['time']).'**'."\n\n";
+		echo '<p><strong>'.mdate('%l %d %F %Y', $each_change['time']).'</strong></p>'."\n\n";
+		echo "<ul>\n";
 	}
 	
-	echo '*([['.construct_page_url($each_change['tag'], 'show', $each_change['id']).'|'.mdate('%H:%i %T', $each_change['time']).']])  ~[[['.construct_page_url($each_change['tag'], 'revisions').'|revisions]]] - [['.$each_change['tag'].']] &#8594; '.$each_change['user']."\n";
+	echo "\t".'<li>(<a href="'.construct_page_url($each_change['tag'], 'show', $each_change['id']).'">'.mdate('%H:%i %T', $each_change['time']).'</a>)  [<a href="'.construct_page_url($each_change['tag'], 'revisions').'">revisions</a>] - <a href="'.site_url($each_change['tag']).'">'.$each_change['tag'].'</a> &#8594; '.$each_change['user'];
+	if(!empty($each_change['note']))
+	{
+		echo ' <span class="pagenote">['.$each_change['note'].']</span></li>'."\n";
+	}
+	else
+	{
+		echo '</li>'."\n";
+	}
 	
 	$prev_day = $day;
 	

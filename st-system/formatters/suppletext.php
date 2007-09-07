@@ -100,7 +100,7 @@ function snippets_callback(&$matches) {
 			$output = $CI->syntaxparser->doAction($action, $args);
 			if($output !== FALSE)
 			{
-				return $output;
+				return $CI->syntaxparser->hash($output);
 			}
 			
 			return '**Unknown action: '.$action.'**';
@@ -110,7 +110,7 @@ function snippets_callback(&$matches) {
 	$output = $CI->syntaxparser->doAction($action);
 	if($output !== FALSE)
 	{
-		return $output;
+		return $CI->syntaxparser->hash($output);
 	}
 	
 	return '**Unknown action: '.$action.'**';
