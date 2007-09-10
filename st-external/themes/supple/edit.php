@@ -8,6 +8,10 @@
 	<?php echo $this->validation->error_string; ?>
 <?php endif; ?>
 
+<div id='tab-container'>
+<div class="tab-content">
+<h1 class="tab" title="title for page 1">Edit Page</h1>
+
 <form action="<?php out('current_url'); ?>" method="post">
 <textarea id="body" name="body" tabindex=1>
 <?php 
@@ -49,6 +53,15 @@ perform on the page.</p>
 	<input type="button" value="Cancel" tabindex=5 onclick="document.location='<?php out('page_url', get('page_tag')); ?>';" />
 </fieldset>
 </form>
+</div> <!-- end tab-content -->
+
+<div class="tab-content formattingrules">
+		<h1 class="tab" title="Formatting Rules">Formatting Rules</h1>
+		<?php out('format', '<<include FormattingRules>>'); ?>
+</div>
+
+</div> <!-- end tab container -->
+<script type="text/javascript" src="<?php out('theme_url', 'tabs.js'); ?>"></script>
 
 </div>
 <!--closing page content-->
