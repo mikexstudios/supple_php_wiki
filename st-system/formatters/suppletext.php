@@ -46,6 +46,18 @@ function signature_callback(&$matches) {
 	
 } 
 
+$CI->syntaxparser->add_preprocessor_definition('html', '/<html>(.*?)<\/html>/s', 'preprocess_html_callback', 200, true);
+function preprocess_html_callback(&$matches) {
+	global $CI;
+
+	$CI->load->library('HTMLPurifier');
+	$config = HTMLPurifier_Config::createDefault();
+	$config->set('Core', 'DefinitionCache', null); //Disable caching for now
+	$clean_html = $CI->htmlpurifier->purify($matches[1], $config);
+	
+	return '<html>'.$clean_html.'</html>';
+}
+
 /**
  * Prefilters
  */ 
@@ -53,6 +65,27 @@ function signature_callback(&$matches) {
 //Insert a newline at the beginning and end of the text. This will help
 //in regex later since we can assume lines start and end with \n
 $CI->syntaxparser->add_block_definition('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40, false);
+
+/**
+ * HTML
+ */
+$CI->syntaxparser->add_block_definition('html', '/(\n?)<html>(.*?)<\/html>(\n?)/s', 'html_callback', 42, true);
+function html_callback(&$matches) {
+	global $CI;
+	
+	$matches[2] = trim($matches[2]); //Remove any possible newlines after <html> and before </html>
+	
+	//We assume if there are newlines before and after, that the user wants
+	//the HTML to be a block level element (un-paragraphed)
+	if($matches[1] == "\n" && $matches[3] == "\n")
+	{
+		return $matches[1].$CI->syntaxparser->block_hash($matches[2]).$matches[3]; 
+	}
+	
+	//We can assume that the HTML is safe since when we submitted our edit, it has
+	//been cleaned by HTMLPurifier.
+	return $CI->syntaxparser->inline_hash($matches[2]); 
+} 
 
 /**
  * Comments
