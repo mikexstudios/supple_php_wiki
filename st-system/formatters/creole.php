@@ -534,8 +534,8 @@ function tt_callback(&$matches) {
 /**
  * Escaping HTML
  */
-$CI->syntaxparser->add_inline_definition('escape_html_1', '/</', '&lt;', 102);
-$CI->syntaxparser->add_inline_definition('escape_html_2', '/>/', '&gt;', 103);
+//$CI->syntaxparser->add_inline_definition('escape_html_1', '/</', '&lt;', 102);
+//$CI->syntaxparser->add_inline_definition('escape_html_2', '/>/', '&gt;', 103);
 
 /**
  * Newlines
@@ -730,38 +730,38 @@ function wikiwordlink_callback(&$matches) {
  * Perhaps we can just check for a delimiter or a space in front instead of 
  * checking for the whole token       
  */
-$CI->syntaxparser->add_inline_definition('raw_url', '/('.$CI->syntaxparser->getTokenPattern().')?([a-z]+:\/\/)(\S+)/', 'raw_url_callback', 185, true); //The lesser complex version is: '([a-z]+:\/\/)(\S+)/'
+$CI->syntaxparser->add_inline_definition('raw_url', '/(\s)('.$CI->syntaxparser->getTokenPattern().')?([a-z]+:\/\/)(\S+)/', 'raw_url_callback', 185, true); //The lesser complex version is: '([a-z]+:\/\/)(\S+)/'
 function raw_url_callback(&$matches) {
 	global $CI;
 	
 	//Check for escaped URL. If found, just return unlinked URL.
-	if(!empty($matches[1])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
+	if(!empty($matches[2])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
 	{
-		$matches[1] = $CI->syntaxparser->unhash($matches[1]);
-		return $CI->syntaxparser->inline_hash($matches[1].$matches[2].$matches[3]); //Preserve the url so that // isn't interpreted as italics
+		$matches[2] = $CI->syntaxparser->unhash($matches[2]);
+		return $matches[1].$CI->syntaxparser->inline_hash($matches[2].$matches[3].$matches[4]); //Preserve the url so that // isn't interpreted as italics
 	}
 	
 	//We won't consider single punctuation characters at the end of the URL
-	if(preg_match('/(\S+)([,\.\?!:;"\'\)\(]+)(\S+)?/', $matches[3], $raw_url_matches)) 
+	if(preg_match('/(\S+)([,\.\?!:;"\'\)\(]+)(\S+)?/', $matches[4], $raw_url_matches)) 
 	{
 		//This is kind of crude, but works. Perhaps a recursive approach would be
 		//more elegant.
 		//For cases like: http://www.another.rawlink.org where .org is in the second (\S+)
 		if(!empty($raw_url_matches[3])) 
 		{
-			$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
+			$url = $CI->input->xss_clean($matches[3].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
 			$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
-			return $CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>');
+			return $matches[1].$CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 		}
 
-		$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1]);
+		$url = $CI->input->xss_clean($matches[3].$raw_url_matches[1]);
 		$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>').$raw_url_matches[2]; //We keep the punctuation on the end.
+		return $matches[1].$CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>').$raw_url_matches[2]; //We keep the punctuation on the end.
 	}
 	
-	$url = $CI->input->xss_clean($matches[2].$matches[3]);
+	$url = $CI->input->xss_clean($matches[3].$matches[4]);
 	$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
-	return $CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>');
+	return $matches[1].$CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 }
 
 /**
