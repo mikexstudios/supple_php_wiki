@@ -16,8 +16,10 @@ class SyntaxParser {
 	var $preprocessordefs = array();
 	var $blockdefs = array();
 	var $inlinedefs = array();
-	var $delimiter = "\xFF"; //Maybe something else might work better to allow for non UTF-8
+	var $block_delimiter = "\xFF"; //Maybe something else might work better to allow for non UTF-8
+	var $inline_delimiter = "\xFE"; //NOTE: \xFF and \xFE are not valid in UTF-8 data and thus least likely to cause problems.
 	var $token_pattern;
+	var $block_token_pattern, $inline_token_pattern;
 	var $hashed_text = array();
 	var $syntax_path, $syntax_path_loaded;
 
@@ -26,7 +28,9 @@ class SyntaxParser {
 		
 		$this->CI->load->helper('syntax');
 		
-		$this->token_pattern = $this->delimiter.'(?:[a-z0-9]+)'.$this->delimiter;
+		$this->token_pattern = '(?:'.$this->block_delimiter.'|'.$this->inline_delimiter.')(?:[a-z0-9]+)(?:'.$this->block_delimiter.'|'.$this->inline_delimiter.')';
+		$this->block_token_pattern = $this->block_delimiter.'(?:[a-z0-9]+)'.$this->block_delimiter;
+		$this->inline_token_pattern = $this->inline_delimiter.'(?:[a-z0-9]+)'.$this->inline_delimiter;
 		log_message('debug', "SyntaxParser Class Initialized");
 	}	
 	
@@ -241,11 +245,39 @@ class SyntaxParser {
 		//die('orig: '.$key);
 		$this->hashed_text[$key] = $text;
 
-		return $this->delimiter.$key.$this->delimiter; # String that will replace the tag.
+		return $this->block_delimiter.$key.$this->block_delimiter; # String that will replace the tag.
+	}
+	
+	function block_hash($text) {
+		# Swap back any tag hash found in $text so we do not have to `unhash`
+		# multiple times at the end. Since this can decrease performance on each
+		# hash, perhaps we can add a param to this function to disable this unhash.
+		$text = $this->unhash_contents($text);
+		
+		# Then hash the block.
+		$key = md5($text);
+		//die('orig: '.$key);
+		$this->hashed_text[$key] = $text;
+
+		return $this->block_delimiter.$key.$this->block_delimiter; # String that will replace the tag.
+	}
+	
+	function inline_hash($text) {
+		# Swap back any tag hash found in $text so we do not have to `unhash`
+		# multiple times at the end. Since this can decrease performance on each
+		# hash, perhaps we can add a param to this function to disable this unhash.
+		$text = $this->unhash_contents($text);
+		
+		# Then hash the block.
+		$key = md5($text);
+		//die('orig: '.$key);
+		$this->hashed_text[$key] = $text;
+
+		return $this->inline_delimiter.$key.$this->inline_delimiter; # String that will replace the tag.
 	}
 
 	function unhash($key) {
-		$key = trim($key, $this->delimiter);
+		$key = trim($key, $this->block_delimiter.$this->inline_delimiter);
 		
 		if(!empty($this->hashed_text[$key]))
 		{
@@ -269,14 +301,23 @@ class SyntaxParser {
 	 * @access private
 	 */	 	
 	function _unhash_contents_callback(&$matches) {
-		//$matches[1] = trim($matches[1], $this->delimiter);
+		//$matches[1] = trim($matches[1], $this->block_delimiter);
 		return $this->unhash($matches[1]);
 	}
 	
-	function getTokenPattern() {
-		return $this->token_pattern;
+	function getTokenPattern($type='') {
+		switch($type)
+		{
+			case 'block':
+				return $this->block_token_pattern;
+				break;
+			case 'inline':
+				return $this->inline_token_pattern;
+				break;
+			default:
+				return $this->token_pattern;
+		}
 	}
-	
 
 	//Actions: <<<actionname parameters parameter2>>>
 	function doAction($in_action, $in_args='')

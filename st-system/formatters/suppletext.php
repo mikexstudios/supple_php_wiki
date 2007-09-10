@@ -6,6 +6,24 @@ $CI =& get_instance();
  * Preprocessors
  */
  
+//str_replace in this case is faster, but oh well, we sacrifice some.
+//Also, I've seen this done with (\r|\r\n), but this is slower since two
+//checks are done at each step.
+$CI->syntaxparser->add_preprocessor_definition('to_unix_lineendings', '/\r\n?/', "\n", 30, false); 
+
+/**
+ * Trim
+ * Remove whitespace from the beginning and end of a string
+ * Actually trim is pretty important since future regex depend on
+ * lines ending cleanly with \n.  
+ * (But below implementation could be a little slow)
+ * NOTE: Trim conflicts with spaces_to_tab! 
+ */ 
+//$CI->syntaxparser->add_preprocessor_definition('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30, true);
+function trim_spaces_callback(&$matches) {
+	return trim($matches[1]);
+}  
+ 
 $CI->syntaxparser->add_preprocessor_definition('signature', '/~~~~(\s+)/', 'signature_callback', 100, true);
 function signature_callback(&$matches) {
 	global $CI;
@@ -61,9 +79,9 @@ $CI->syntaxparser->add_block_definition('indent', '/^[ ]{4}(.*)$/m', 'indent_cal
 function indent_callback(&$matches) {
 	global $CI;
 	
-	$return_html = "\n".$CI->syntaxparser->hash('<div class="indent">'."\n");
+	$return_html = "\n".$CI->syntaxparser->block_hash('<div class="indent">'."\n");
 	$return_html .= $matches[1]."\n\n";
-	$return_html .= $CI->syntaxparser->hash('</div>'."\n"); 
+	$return_html .= $CI->syntaxparser->block_hash('</div>'."\n"); 
 	
 	return $return_html;
 }
@@ -100,7 +118,7 @@ function snippets_callback(&$matches) {
 			$output = $CI->syntaxparser->doAction($action, $args);
 			if($output !== FALSE)
 			{
-				return $CI->syntaxparser->hash($output);
+				return $CI->syntaxparser->block_hash($output);
 			}
 			
 			return '**Unknown action: '.$action.'**';
@@ -110,7 +128,7 @@ function snippets_callback(&$matches) {
 	$output = $CI->syntaxparser->doAction($action);
 	if($output !== FALSE)
 	{
-		return $CI->syntaxparser->hash($output);
+		return $CI->syntaxparser->block_hash($output);
 	}
 	
 	return '**Unknown action: '.$action.'**';

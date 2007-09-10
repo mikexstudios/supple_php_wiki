@@ -15,24 +15,6 @@ $CI =& get_instance();
  * Prefilter things 
  * (well, these things should be moved out of this creole class)
  */ 
- 
-//str_replace in this case is faster, but oh well, we sacrifice some.
-//Also, I've seen this done with (\r|\r\n), but this is slower since two
-//checks are done at each step.
-$CI->syntaxparser->add_block_definition('to_unix_lineendings', '/\r\n?/', "\n", 10, false); 
-
-/**
- * Trim
- * Remove whitespace from the beginning and end of a string
- * Actually trim is pretty important since future regex depend on
- * lines ending cleanly with \n.  
- * (But below implementation could be a little slow)
- * NOTE: Trim conflicts with spaces_to_tab! 
- */ 
-//$CI->syntaxparser->add_block_definition('trim_spaces', '/(.*)/m', 'trim_spaces_callback', 30);
-function trim_spaces_callback(&$matches) {
-	return trim($matches[1]);
-} 
 
 //Insert a newline at the beginning and end of the text. This will help
 //in regex later since we can assume lines start and end with \n
@@ -51,10 +33,10 @@ function escape_callback(&$matches) {
 	//If \s is a space, we remove it
 	if(strcmp($matches[1], ' ')==0)
 	{
-		return $CI->syntaxparser->hash($matches[2]);
+		return $CI->syntaxparser->inline_hash($matches[2]);
 	}
 	
-	return $matches[1].$CI->syntaxparser->hash($matches[2]);
+	return $matches[1].$CI->syntaxparser->inline_hash($matches[2]);
 }
 
 //We want to specify blocks first.
@@ -83,7 +65,7 @@ function preformatted_callback(&$matches) {
 	
 	//There is more, but I didn't include it.
 	
-	return "\n".$CI->syntaxparser->hash("<pre>\n".$matches[1]."\n</pre>")."\n";
+	return "\n".$CI->syntaxparser->block_hash("<pre>\n".$matches[1]."\n</pre>")."\n";
 }  
 
 //When non-paragraph items are separated by more than one newline, then we
@@ -100,7 +82,7 @@ function intentional_newline_callback(&$matches) {
 		$br_html .= "<br />\n";
 	}
 	
-	return "\n\n".$CI->syntaxparser->hash($br_html)."\n";
+	return "\n\n".$CI->syntaxparser->block_hash($br_html)."\n";
 }
 
 $CI->syntaxparser->add_block_definition('headings', '/^(={1,6}) *(.*)$/m', 'headings_callback', 100);
@@ -114,7 +96,7 @@ function headings_callback(&$matches) {
   $text = $CI->syntaxparser->applyAllInlineDefs($text);
   
   
-  return $CI->syntaxparser->hash('<h'.$level.'>'.$text.'</h'.$level.'>')."\n"; //Maybe we don't need the newlines
+  return $CI->syntaxparser->block_hash('<h'.$level.'>'.$text.'</h'.$level.'>')."\n"; //Maybe we don't need the newlines
 }
 
 /**
@@ -125,7 +107,7 @@ $CI->syntaxparser->add_block_definition('horizontalrule', '/^[-]{4,}$/m', 'horiz
 function horizontalrule_callback(&$matches) {
 	global $CI;
 	
-	return $CI->syntaxparser->hash('<hr />');
+	return $CI->syntaxparser->block_hash('<hr />');
 }
 
 /**
@@ -141,15 +123,6 @@ function lists_callback(&$matches) {
 	
 	$in_text = $matches[0];
 	//die($matches[0]);
-	
-	//If we match ** by itself without surrounding *, then we know that it
-	//is the 'strong' modifier. Therefore, we return without doing anything.
-	/*
-	if(preg_match('/^\*\*.+$/s', $in_text))
-	{
-		return "\n".$in_text;
-	}
-	*/
 	
 	//Define a few things:
 	$tags_def['ul']['identifier'] = '*';
@@ -222,15 +195,6 @@ function lists_callback(&$matches) {
 		return "\n".$new_split_text[0]."\n";
 	}
 	
-	//If the count is more than one, we have to check each entry and see if
-	//the user actually meant bold.
-	//print_r($new_split_text);
-	//$new_split_text = array_filter($new_split_text, 'lists_determine_if_bold');
-	//print_r($new_split_text);
-	//die();
-	
-	
-	
 	//If the list starts out with a level greater than 1, then we pad the beginning
 	//of the array with the previous levels.
 	$new_split_first_entry = get_list_entry_info($new_split_text[0]);
@@ -250,7 +214,7 @@ function lists_callback(&$matches) {
 	$in_text = lists($new_split_text);
 	//die($in_text);
 
-	return "\n".$CI->syntaxparser->hash($in_text)."\n";
+	return "\n".$CI->syntaxparser->block_hash($in_text)."\n";
 }
 function lists_determine_if_bold($in_entry) {
 	//$split_entry = preg_split('/(\*\*)/', $in_entry, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
@@ -303,21 +267,6 @@ function lists($in_list_array, $ol_index=1) {
 	$first_entry = get_list_entry_info($in_list_array[0]);
 	$list_type = $first_entry['type'];
 	$list_level = $first_entry['level'];
-	
-	//die($list_type.' '.$list_level);
-	
-	/*
-	if($list_level != 1)
-	{
-		$type_tabs =  str_repeat("\t", $list_level);
-		$tabs = $type_tabs."\t";
-	}
-	else
-	{
-		$type_tabs =  str_repeat("\t", $list_level-1);
-		$tabs = $type_tabs."\t";
-	}
-	*/
 	
 	$type_tabs = str_repeat("\t", ($list_level-1)*2); //Calculate indents correctly
 	$tabs = $type_tabs."\t";
@@ -511,7 +460,7 @@ function tables_callback(&$matches) {
 	
 	$table_html .= "</table>\n";
 	
-	return $CI->syntaxparser->hash($table_html);
+	return $CI->syntaxparser->block_hash($table_html);
 			
 	//return "\n".'<pre>'.$matches[0].'</pre>'."\n";
 } 
@@ -528,78 +477,23 @@ $CI->syntaxparser->add_block_definition('paragraph', '/\n?(.+?)(\n\s*\n|\z)/s', 
 function paragraph_callback(&$matches) {
 	global $CI;
 	
-	if(preg_match('/'.$CI->syntaxparser->token_pattern.'/', $matches[1]))
+	if(preg_match('/'.$CI->syntaxparser->block_token_pattern.'/', $matches[1]))
 	{
-		//Replace escape hashes with contents of the escape.
-		$matches[1] = preg_replace_callback('/(\s|^)('.$CI->syntaxparser->token_pattern.')(\s*)/', 'paragraph_callback_escape', $matches[1]);
-		//die($matches[1]);
 		//This takes care of cases where one block is right under another with no
 		//line break inbetween. Essentially, we are checking for the existance of
 		//hashed blocks and then ignoring the hashed blocks (and working only on
 		//the visible blocks). For example:
 		//= Header =
 		//Paragraph right underneath header without a newline inbetween.
-		$split_by_token = preg_split('/(\s*'.$CI->syntaxparser->token_pattern.'\s*)/', $matches[1], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+		$split_by_token = preg_split('/(\s*'.$CI->syntaxparser->block_token_pattern.'\s*)/', $matches[1], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 		
 		//NOTE: Tokens (hashes) are stored in $split_by_token each as their own entry.
-		
-		//echo $matches[1]."\n\n";
-		//print_r($split_by_token);
-		//die();
-		
-		/*
-		//Check for the escape character hash and connect paragraphs if needed.
-		$new_split_by_token = array();
-		for($i=0;$i<count($split_by_token);$i++)
-		{
-			if(preg_match('/'.$CI->syntaxparser->token_pattern.'/', $split_by_token[$i]))
-			{
-				//We check if the hash is from an escape character.
-				$temp_unhash = $CI->syntaxparser->unhash(trim($split_by_token[$i]));
-				if(preg_match('/^.$/', $temp_unhash)) //one character
-				{
-					if(isset($split_by_token[$i+1]))
-					{
-						//If the next element is a hash, we don't connect it.
-						if(preg_match('/'.$CI->syntaxparser->token_pattern.'/', $split_by_token[$i+1]))
-						{
-							$new_split_by_token[] = array_pop($new_split_by_token).$temp_unhash;
-						}
-						else
-						{
-							$new_split_by_token[] = array_pop($new_split_by_token).$temp_unhash.$split_by_token[$i+1];
-							$i++; //Skip next element
-						}
-					}
-					else
-					{
-						$new_split_by_token[] = array_pop($new_split_by_token).$temp_unhash;
-					}
-				}
-				else
-				{
-					$new_split_by_token[] = $split_by_token[$i];
-				}
-			}
-			else
-			{
-				$new_split_by_token[] = $split_by_token[$i];
-			}
-		}
-		*/
-		
-		//print_r($new_split_by_token);
-		//die();
-		
 		$output = '';
 		foreach($split_by_token as $each_split)
 		{
 			//echo $each_split."\n";
-			if(!preg_match('/'.$CI->syntaxparser->token_pattern.'/', $each_split))
+			if(!preg_match('/'.$CI->syntaxparser->block_token_pattern.'/', $each_split))
 			{
-				//Re-escape the un-hashed elements. Crude, but ok for now.
-				$each_split = $CI->syntaxparser->applyBlockDef('escape', $each_split);
-				
 				$each_split = $CI->syntaxparser->applyAllInlineDefs($each_split);
 				$output .= '<p>'.$each_split.'</p>';
 			}
@@ -610,57 +504,21 @@ function paragraph_callback(&$matches) {
 		}
 		return $output.$matches[2];
 	}
-	else if(!preg_match('/'.$CI->syntaxparser->token_pattern.'/', $matches[1]))
+	else if(!preg_match('/'.$CI->syntaxparser->block_token_pattern.'/', $matches[1]))
 	{
 		$matches[1] = $CI->syntaxparser->applyAllInlineDefs($matches[1]);
 		return '<p>'.$matches[1].'</p>'.$matches[2];
 	}
-	
-	/*
-	if(preg_match('/((?:'.$CI->syntaxparser->token_pattern.'\s+)*)(.+)((?:'.$CI->syntaxparser->token_pattern.'\s+)*)/s', $matches[1], $with_token_matches))
-	{
-		die($with_token_matches[0]."\n\n".$with_token_matches[1]."\n\n".$with_token_matches[2]."\n\n".$with_token_matches[3]);
 
-		//$with_token_matches[2] = $CI->syntaxparser->applyAllInlineDefs($with_token_matches[2]);
-		//return $with_token_matches[1].'<p>'.$with_token_matches[2].'</p>'.$with_token_matches[3].$matches[2];
-	}
-	*/
-	
 	return $matches[1].$matches[2]; //Why don't we need to prepend \n ?
 }
-function paragraph_callback_escape(&$matches) {
-	global $CI;
-	
-	$temp_unhash = $CI->syntaxparser->unhash(trim($matches[2]));
-	if(preg_match('/^.$/', $temp_unhash)) //one character
-	{
-		return $matches[1].'~'.$temp_unhash.$matches[3];
-	}
-	
-	return $matches[1].$matches[2].$matches[3];
-}
-
 
 //Specify inline elements
 
-//Escape character here. We parse the escape character only if it is at the start
-//of some word (so we have a whitespace char in front).
-$CI->syntaxparser->add_inline_definition('escape', '/(^|\s)~(.)/', 'inline_escape_callback', 50, true);
-function inline_escape_callback(&$matches) {
-	global $CI;
-
-	//Protect against some XSS (When user tries to escape every character in XSS
-	//in hopes that after unhashing the malicious code is assembled again).
-	$matches[2] = htmlentities($matches[2], ENT_COMPAT, 'UTF-8');
-	
-	//If \s is a space, we remove it
-	if(strcmp($matches[1], ' ')==0)
-	{
-		return $CI->syntaxparser->hash($matches[2]);
-	}
-	
-	return $matches[1].$CI->syntaxparser->hash($matches[2]);
-}
+/**
+ * Escape Character
+ */  
+//We parse as a block-level element
 
 //Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
 //NOTE: This should be checked VERY carefully against the Creole specification.
@@ -670,7 +528,7 @@ $CI->syntaxparser->add_inline_definition('tt', '/{{{(.*?)}}}/', 'tt_callback', 1
 function tt_callback(&$matches) {
 	global $CI;
 	//die($matches[1]);
-	return $CI->syntaxparser->hash('<tt>'.$matches[1].'</tt>');
+	return $CI->syntaxparser->inline_hash('<tt>'.$matches[1].'</tt>');
 }
 
 /**
@@ -706,7 +564,7 @@ function inlineimage_callback(&$matches) {
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
 		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->hash('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />');
+		return $CI->syntaxparser->inline_hash('<img src="'.$url_matches[1].'" alt="'.$url_matches[2].'" />');
 	}
 	
 	//Match just external url.
@@ -714,7 +572,7 @@ function inlineimage_callback(&$matches) {
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->hash('<img src="'.$url_matches[1].'" />');
+		return $CI->syntaxparser->inline_hash('<img src="'.$url_matches[1].'" />');
 		
 	}
 	
@@ -741,7 +599,7 @@ function links_callback(&$matches) {
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
 		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
+		return $CI->syntaxparser->inline_hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
 	
 	//Match just external url.
@@ -749,7 +607,7 @@ function links_callback(&$matches) {
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
+		return $CI->syntaxparser->inline_hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
 	}
 	
 	//Match mailto: type links. NOTE: This could be dangerous if we don't check well.
@@ -760,13 +618,13 @@ function links_callback(&$matches) {
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
 		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
+		return $CI->syntaxparser->inline_hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
 		if(preg_match('/^([a-z]+:\S+@\S+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
 		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
+		return $CI->syntaxparser->inline_hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[1].'</a>');
 	}
 	
 	//Match WikiLinks (The regex for these should be better...and safer)
@@ -790,7 +648,7 @@ function links_callback(&$matches) {
 			$return_url = '<a href="'.construct_page_url($link_matches[1]).'" class="missingpage" title="Create this page">'.$link_matches[2].'</a>';
 		}
 		
-		return $CI->syntaxparser->hash($return_url);
+		return $CI->syntaxparser->inline_hash($return_url);
 	}	
 	
 	//Dangerous regex? Limit characters
@@ -809,7 +667,7 @@ function links_callback(&$matches) {
 			$return_url = '<a href="'.construct_page_url(wiki_url_title($link_matches[1])).'" class="missingpage" title="Create this page">'.$link_matches[1].'</a>';
 		}
 		
-		return $CI->syntaxparser->hash($return_url);
+		return $CI->syntaxparser->inline_hash($return_url);
 	}	
 	
 	//For everything else that doesn't seem to match.
@@ -853,7 +711,7 @@ function wikiwordlink_callback(&$matches) {
 		$return_url = '<a href="'.construct_page_url($matches[2]).'" class="missingpage" title="Create this page">'.$matches[2].'</a>';
 	}
 	
-	return $matches[1].$CI->syntaxparser->hash($return_url);
+	return $matches[1].$CI->syntaxparser->inline_hash($return_url);
 }
 
 /**
@@ -880,7 +738,7 @@ function raw_url_callback(&$matches) {
 	if(!empty($matches[1])) //Even though we have ?, if ()? doesn't occur, $matches[1] will be empty
 	{
 		$matches[1] = $CI->syntaxparser->unhash($matches[1]);
-		return $CI->syntaxparser->hash($matches[1].$matches[2].$matches[3]); //Preserve the url so that // isn't interpreted as italics
+		return $CI->syntaxparser->inline_hash($matches[1].$matches[2].$matches[3]); //Preserve the url so that // isn't interpreted as italics
 	}
 	
 	//We won't consider single punctuation characters at the end of the URL
@@ -893,17 +751,17 @@ function raw_url_callback(&$matches) {
 		{
 			$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1].$raw_url_matches[2].$raw_url_matches[3]);
 			$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
-			return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>');
+			return $CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 		}
 
 		$url = $CI->input->xss_clean($matches[2].$raw_url_matches[1]);
 		$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
-		return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>').$raw_url_matches[2]; //We keep the punctuation on the end.
+		return $CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>').$raw_url_matches[2]; //We keep the punctuation on the end.
 	}
 	
 	$url = $CI->input->xss_clean($matches[2].$matches[3]);
 	$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
-	return $CI->syntaxparser->hash('<a href="'.$url.'" class="external">'.$url.'</a>');
+	return $CI->syntaxparser->inline_hash('<a href="'.$url.'" class="external">'.$url.'</a>');
 }
 
 /**
@@ -946,7 +804,7 @@ $CI->syntaxparser->add_inline_definition('unhash_all', '/('.$CI->syntaxparser->g
 function unhash_all_callback(&$matches) {
 	global $CI;
 	
-	$matches[1] = trim($matches[1], $CI->syntaxparser->delimiter);
+	$matches[1] = trim($matches[1], $CI->syntaxparser->block_delimiter);
 	return $CI->syntaxparser->unhash($matches[1]);
 }
 
