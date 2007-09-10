@@ -16,10 +16,6 @@ $CI =& get_instance();
  * (well, these things should be moved out of this creole class)
  */ 
 
-//Insert a newline at the beginning and end of the text. This will help
-//in regex later since we can assume lines start and end with \n
-$CI->syntaxparser->add_block_definition('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40, false);
-
 //Escape character here. We parse the escape character only if it is at the start
 //of some word (so we have a whitespace char in front).
 $CI->syntaxparser->add_block_definition('escape', '/(\s|^)~(.)/', 'escape_callback', 45, true);
@@ -67,23 +63,6 @@ function preformatted_callback(&$matches) {
 	
 	return "\n".$CI->syntaxparser->block_hash("<pre>\n".$matches[1]."\n</pre>")."\n";
 }  
-
-//When non-paragraph items are separated by more than one newline, then we
-//assume that the user is intentionally inserting a newline:
-//See #10: http://dev.suppletext.org/ticket/10
-$CI->syntaxparser->add_block_definition('intentional_newline', '/\n(\n+)\n/', 'intentional_newline_callback', 80, true);
-function intentional_newline_callback(&$matches) {
-	global $CI;
-	
-	$num_of_br = strlen($matches[1]);
-	$br_html = '';
-	for($i=0;$i<$num_of_br;$i++)
-	{
-		$br_html .= "<br />\n";
-	}
-	
-	return "\n\n".$CI->syntaxparser->block_hash($br_html)."\n";
-}
 
 $CI->syntaxparser->add_block_definition('headings', '/^(={1,6}) *(.*)$/m', 'headings_callback', 100);
 function headings_callback(&$matches) {
@@ -532,18 +511,6 @@ function tt_callback(&$matches) {
 }
 
 /**
- * Escaping HTML
- */
-//$CI->syntaxparser->add_inline_definition('escape_html_1', '/</', '&lt;', 102);
-//$CI->syntaxparser->add_inline_definition('escape_html_2', '/>/', '&gt;', 103);
-
-/**
- * Newlines
- * Convert all \n in to <br />. 
- */  
-$CI->syntaxparser->add_inline_definition('newline', '/\n/', " <br />\n", 110); //Note the space before the <br />
-
-/**
  * Image (inline)
  * {{myimage.png|text}} -> <img src="myimage.png" alt="text"> 
  */ 
@@ -798,16 +765,5 @@ $CI->syntaxparser->add_inline_definition('strong_noclose', '/\*\*(.+\n?.*)/', '<
 $CI->syntaxparser->add_inline_definition('linebreak', '/\\\\\\\/', "<br />\n", 400);   
 
 //Inline Postfilters
-
-//Unhash everything. This is absolutely necessary to reverse all of the hiding done by other functions.
-$CI->syntaxparser->add_inline_definition('unhash_all', '/('.$CI->syntaxparser->getTokenPattern().')/', 'unhash_all_callback', 2000, true);
-function unhash_all_callback(&$matches) {
-	global $CI;
-	
-	$matches[1] = trim($matches[1], $CI->syntaxparser->block_delimiter);
-	return $CI->syntaxparser->unhash($matches[1]);
-}
-
-
 
 ?>

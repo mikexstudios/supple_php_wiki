@@ -47,6 +47,14 @@ function signature_callback(&$matches) {
 } 
 
 /**
+ * Prefilters
+ */ 
+
+//Insert a newline at the beginning and end of the text. This will help
+//in regex later since we can assume lines start and end with \n
+$CI->syntaxparser->add_block_definition('beg_end_newline', '/(.+)/s', "\n".'$1'."\n", 40, false);
+
+/**
  * Comments
  * Not displayed. Not parsed
  */  
@@ -134,6 +142,28 @@ function snippets_callback(&$matches) {
 	return '**Unknown action: '.$action.'**';
 }
 
+//When non-paragraph items are separated by more than one newline, then we
+//assume that the user is intentionally inserting a newline:
+//See #10: http://dev.suppletext.org/ticket/10
+$CI->syntaxparser->add_block_definition('intentional_newline', '/\n(\n+)\n/', 'intentional_newline_callback', 80, true);
+function intentional_newline_callback(&$matches) {
+	global $CI;
+	
+	$num_of_br = strlen($matches[1]);
+	$br_html = '';
+	for($i=0;$i<$num_of_br;$i++)
+	{
+		$br_html .= "<br />\n";
+	}
+	
+	return "\n\n".$CI->syntaxparser->block_hash($br_html)."\n";
+}
+
+
+/**
+ * Inline
+ */ 
+
 //Replace 4 consecutive spaces at the beginning of a line with tab character.
 //Since the text is all one long string, we find the start of lines by the \n
 //and then we count four consecutive spaces.
@@ -142,6 +172,27 @@ function spaces_callback(&$matches) {
 	$length = strlen($matches[1]);
 	
 	return ' '.str_repeat('&nbsp;', $length-1);
+}
+
+/**
+ * Escaping HTML
+ */
+$CI->syntaxparser->add_inline_definition('escape_html_1', '/</', '&lt;', 102);
+$CI->syntaxparser->add_inline_definition('escape_html_2', '/>/', '&gt;', 103);
+
+/**
+ * Newlines
+ * Convert all \n in to <br />. 
+ */  
+$CI->syntaxparser->add_inline_definition('newline', '/\n/', " <br />\n", 110); //Note the space before the <br />
+
+//Unhash everything. This is absolutely necessary to reverse all of the hiding done by other functions.
+$CI->syntaxparser->add_inline_definition('unhash_all', '/('.$CI->syntaxparser->getTokenPattern().')/', 'unhash_all_callback', 2000, true);
+function unhash_all_callback(&$matches) {
+	global $CI;
+	
+	$matches[1] = trim($matches[1], $CI->syntaxparser->block_delimiter);
+	return $CI->syntaxparser->unhash($matches[1]);
 }
 
 ?>
