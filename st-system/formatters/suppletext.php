@@ -53,6 +53,9 @@ function preprocess_html_callback(&$matches) {
 	$CI->load->library('HTMLPurifier');
 	$config = HTMLPurifier_Config::createDefault();
 	$config->set('Core', 'DefinitionCache', null); //Disable caching for now
+	$config->set('Core', 'AcceptFullDocuments', false);
+	$config->set('HTML', 'TidyLevel', 'none');
+	$config->set('Output', 'Newline', "\n");
 	$clean_html = $CI->htmlpurifier->purify($matches[1], $config);
 	
 	return '<html>'.$clean_html.'</html>';
@@ -91,7 +94,7 @@ function html_callback(&$matches) {
  * Comments
  * Not displayed. Not parsed
  */  
-$CI->syntaxparser->add_block_definition('comments', '/\n?<comment>.*?<\/comment>\n?/s', '', 47, false);
+$CI->syntaxparser->add_block_definition('comments', '/\n?<!--.*?-->\n?/s', '', 47, false);
 
 /**
  * Inline Metadata (not stored in database table)
@@ -192,6 +195,31 @@ function intentional_newline_callback(&$matches) {
 	return "\n\n".$CI->syntaxparser->block_hash($br_html)."\n";
 }
 
+/**
+ * Div
+ * (Currently, only the class attribute is supported) 
+ */
+$CI->syntaxparser->add_block_definition('div', '/<div(?: class\s*=\s*"(\S+)")?'.'>(.*?)<\/div>/s', 'div_callback', 80, true); 
+function div_callback(&$matches) {
+	global $CI;
+	
+	//Validate the class name
+	$matches[1] = trim($matches[1]);
+	if(preg_match('/[A-Za-z0-9-_ ]+/', $matches[1]))
+	{
+		$matches[1] = $CI->input->xss_clean($matches[1]); //Try to catch js injection
+		$pre = $CI->syntaxparser->block_hash('<div class="'.$matches[1].'">');
+	}
+	else
+	{
+		$pre = $CI->syntaxparser->block_hash('<div>');
+	}
+	
+	$post = $CI->syntaxparser->block_hash('</div>');
+	
+	return $pre.$matches[2].$post;
+}
+
 
 /**
  * Inline
@@ -218,6 +246,12 @@ $CI->syntaxparser->add_inline_definition('escape_html_2', '/>/', '&gt;', 103);
  * Convert all \n in to <br />. 
  */  
 $CI->syntaxparser->add_inline_definition('newline', '/\n/', " <br />\n", 110); //Note the space before the <br />
+
+/**
+ * Highlighting
+ * (This should be processed before other inline markup elements) 
+ */
+$CI->syntaxparser->add_inline_definition('highlight', '/!!(.*?)!!/', '<span class="highlight">$1</span>', 300); 
 
 //Unhash everything. This is absolutely necessary to reverse all of the hiding done by other functions.
 $CI->syntaxparser->add_inline_definition('unhash_all', '/('.$CI->syntaxparser->getTokenPattern().')/', 'unhash_all_callback', 2000, true);

@@ -106,12 +106,40 @@ h6 {
 	font-size: 8pt;
 }
 
+.center {
+	text-align: center;
+}
+
+/*-------------------------------------------------
+RELATED TO WIKI SYNTAX
+-------------------------------------------------*/
+
 .indent {
 	margin-left: 40px;
 }
 
-.center {
-	text-align: center;
+.highlight {
+	background-color: #ffc;
+}
+
+.floatl {
+	float: left;
+	text-align: left;
+	width: 46%;
+	margin-right: 15px;
+	padding: 4px;
+	background: #EEE;
+	border: 1px solid #CCC; 		
+}
+
+.floatr {
+	float: right;
+	text-align: left;
+	width: 46%;
+	margin-left: 15px;
+	padding: 4px;
+	background: #EEE;
+	border: 1px solid #CCC; 		
 }
 
 /*-------------------------------------------------

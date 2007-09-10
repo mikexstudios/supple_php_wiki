@@ -499,14 +499,21 @@ function paragraph_callback(&$matches) {
  */  
 //We parse as a block-level element
 
-//Creole 1.0 defines the monospace/tt as part of preformatted. We match {{{ }}}.
-//NOTE: This should be checked VERY carefully against the Creole specification.
-//      I have a feeling that this is currently wrong.
-//Creole 1.0 says that this doesn't HAVE to be monospace.
-$CI->syntaxparser->add_inline_definition('tt', '/{{{(.*?)}}}/', 'tt_callback', 100, true);
-function tt_callback(&$matches) {
+
+/**
+ * Inline Preformatted
+ * NOTE: We are not outputting as monospaced. See Creole Additions for monospace.
+ * Well, for now, we are using this as monospaced until we can implement monospace.
+ * (There is a conflict with list elements.)   
+ */ 
+$CI->syntaxparser->add_inline_definition('inline_preformatted', '/{{{(.*?)}}}/', 'inline_preformatted_callback', 100, true);
+function inline_preformatted_callback(&$matches) {
 	global $CI;
-	//die($matches[1]);
+	
+	//Should convert to HTML entities any special characters:
+	$matches[1] = htmlentities($matches[1], ENT_QUOTES, 'UTF-8');
+	
+	//return $CI->syntaxparser->inline_hash($matches[1]);
 	return $CI->syntaxparser->inline_hash('<tt>'.$matches[1].'</tt>');
 }
 
