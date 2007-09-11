@@ -17,4 +17,8 @@ function form_changed() {
 	is_form_changed = true;
 }
 
+function form_unchanged() {
+	is_form_changed = false;
+}
+
 window.onbeforeunload = unload_message;

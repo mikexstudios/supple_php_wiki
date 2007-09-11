@@ -110,7 +110,8 @@ function block_metadata_callback(&$matches) {
 	$matches[2] = $CI->input->xss_clean($matches[2]);
 	$matches[2] = htmlentities($matches[2], ENT_QUOTES);
 	
-	$CI->template->add_value($matches[1], $matches[2]);
+	//$CI->template->add_value($matches[1], $matches[2]);
+	add_page_var($matches[1], $matches[2]);
 	
 	//return $matches[0]; //Return it without any modification
 	return '';

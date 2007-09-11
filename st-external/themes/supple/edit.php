@@ -52,9 +52,9 @@ perform on the page.</p>
 	<legend>Store page</legend>
 	<input id="note" size="50" type="text" name="note" tabindex=2 value="<?php out('form_value', 'note'); ?>" onChange="form_changed()" /> <label for="note">Please add a note on your edit</label><br />
 	<br />
-	<input name="submit" type="submit" value="Store" accesskey="s" tabindex=3 />
-	<input name="submit" type="submit" value="Preview" accesskey="p" tabindex=4 />
-	<input type="button" value="Cancel" tabindex=5 onclick="document.location='<?php out('page_url', get('page_tag')); ?>';" />
+	<input name="submit" type="submit" value="Store" accesskey="s" tabindex=3 onClick="form_unchanged()" />
+	<input name="submit" type="submit" value="Preview" accesskey="p" tabindex=4 onClick="form_unchanged()" />
+	<input type="button" value="Cancel" tabindex=5 onclick="document.location='<?php out('page_url', get('page_tag')); ?>';" onClick="form_unchanged()" />
 </fieldset>
 </form>
 </div> <!-- end tab-content -->
