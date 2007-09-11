@@ -54,8 +54,9 @@ function preprocess_html_callback(&$matches) {
 	$config = HTMLPurifier_Config::createDefault();
 	$config->set('Core', 'DefinitionCache', null); //Disable caching for now
 	$config->set('Core', 'AcceptFullDocuments', false);
-	$config->set('HTML', 'TidyLevel', 'none');
+	//$config->set('HTML', 'TidyLevel', 'none');
 	$config->set('Output', 'Newline', "\n");
+	$config->set('Core', 'LexerImpl', 'DirectLex'); //To fix HTML formatting issues
 	$clean_html = $CI->htmlpurifier->purify($matches[1], $config);
 	
 	return '<html>'.$clean_html.'</html>';

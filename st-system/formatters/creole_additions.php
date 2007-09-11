@@ -33,7 +33,7 @@ $CI->syntaxparser->add_inline_definition('superscript', '/\^\^(.*?)\^\^/', '<sup
 /**
  * Subscript
  */
-$CI->syntaxparser->add_inline_definition('superscript', '/,,(.*?),,/', '<sub>$1</sub>', 510); 
+$CI->syntaxparser->add_inline_definition('subscript', '/,,(.*?),,/', '<sub>$1</sub>', 510); 
 
 //TODO:
 //Indented paragraphs

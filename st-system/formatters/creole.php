@@ -511,7 +511,8 @@ function inline_preformatted_callback(&$matches) {
 	global $CI;
 	
 	//Should convert to HTML entities any special characters:
-	$matches[1] = htmlentities($matches[1], ENT_QUOTES, 'UTF-8');
+	//$matches[1] = htmlentities($matches[1], ENT_QUOTES, 'UTF-8'); //This interferes with \xFE
+	$matches[1] = htmlspecialchars_secure($matches[1], ENT_QUOTES);
 	
 	//return $CI->syntaxparser->inline_hash($matches[1]);
 	return $CI->syntaxparser->inline_hash('<tt>'.$matches[1].'</tt>');
