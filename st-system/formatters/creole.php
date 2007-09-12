@@ -37,7 +37,7 @@ function escape_callback(&$matches) {
 
 //We want to specify blocks first.
 
-$CI->syntaxparser->add_block_definition('preformatted', '/\n{{{\n(.*)\n}}}\n/Us', 'preformatted_callback', 70, true);
+$CI->syntaxparser->add_block_definition('preformatted', '/\n{{{\s*\n(.*)\n}}}\s*\n/Us', 'preformatted_callback', 70, true);
 function preformatted_callback(&$matches) {
 	global $CI;
 
@@ -58,8 +58,7 @@ function preformatted_callback(&$matches) {
 	$find = "/\n( *) }}}/";
 	$replace = "\n$1}}}";
 	$matches[1] = preg_replace($find, $replace, $matches[1]);
-	
-	//There is more, but I didn't include it.
+	$matches[1] = htmlspecialchars_secure($matches[1]);
 	
 	return "\n".$CI->syntaxparser->block_hash("<pre>\n".$matches[1]."\n</pre>")."\n";
 }  
@@ -506,7 +505,7 @@ function paragraph_callback(&$matches) {
  * Well, for now, we are using this as monospaced until we can implement monospace.
  * (There is a conflict with list elements.)   
  */ 
-$CI->syntaxparser->add_inline_definition('inline_preformatted', '/{{{(.*?)}}}/', 'inline_preformatted_callback', 100, true);
+$CI->syntaxparser->add_inline_definition('inline_preformatted', '/{{{(.*?)}}}/', 'inline_preformatted_callback', 50, true);
 function inline_preformatted_callback(&$matches) {
 	global $CI;
 	
@@ -571,9 +570,12 @@ function links_callback(&$matches) {
 	if(preg_match('/^([a-z]+:\/\/\S+)\|(.+)/', $matches[1], $url_matches)) //if preg_match does not return 0
 	{
 		$url_matches[1] = $CI->input->xss_clean($url_matches[1]);
-		$url_matches[1] = htmlentities($url_matches[1], ENT_QUOTES, 'UTF-8');
+		//We use htmlspecialchars_secure() instead of htmlentities() since htmlspecialchars_secure
+		//works with hashes (\xFF and \xFE characters) while htmlentities destroys the  \xFE
+		//character.
+		$url_matches[1] = htmlspecialchars_secure($url_matches[1], ENT_QUOTES, 'UTF-8');
 		$url_matches[2] = $CI->input->xss_clean($url_matches[2]);
-		$url_matches[2] = htmlentities($url_matches[2], ENT_QUOTES, 'UTF-8');
+		$url_matches[2] = htmlspecialchars_secure($url_matches[2], ENT_QUOTES, 'UTF-8');
 		return $CI->syntaxparser->inline_hash('<a href="'.$url_matches[1].'" class="external">'.$url_matches[2].'</a>');
 	}
 	
@@ -606,12 +608,12 @@ function links_callback(&$matches) {
 	if(preg_match('/^(.+)\|(.+)/', $matches[1], $link_matches))
 	{
 		$link_matches[1] = $CI->input->xss_clean($link_matches[1]);
-		$link_matches[1] = htmlentities($link_matches[1], ENT_QUOTES, 'UTF-8');
+		$link_matches[1] = htmlspecialchars_secure($link_matches[1], ENT_QUOTES, 'UTF-8');
 		//Translate text into a linkable wikiword
 		$link_matches[1] = wiki_url_title($link_matches[1]);
 
 		$link_matches[2] = $CI->input->xss_clean($link_matches[2]);
-		$link_matches[2] = htmlentities($link_matches[2], ENT_QUOTES, 'UTF-8');
+		$link_matches[2] = htmlspecialchars_secure($link_matches[2], ENT_QUOTES, 'UTF-8');
 		
 		//Check for wiki-page existance
 		if(does_page_exist($link_matches[1]))

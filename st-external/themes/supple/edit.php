@@ -61,7 +61,7 @@ perform on the page.</p>
 
 <div class="tab-content formattingrules">
 		<h1 class="tab" title="Formatting Rules">Formatting Rules</h1>
-		<?php out('format', '<<include FormattingRules>>'); ?>
+		<?php out('format', '<<include AbridgedFormattingRules>>'); ?>
 </div>
 
 </div> <!-- end tab container -->

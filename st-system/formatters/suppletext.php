@@ -118,21 +118,6 @@ function block_metadata_callback(&$matches) {
 }  
 
 /**
- * Indent
- * Replace spaces at the beginning of a block with a surrounding <div> with class="indent"
- */  
-$CI->syntaxparser->add_block_definition('indent', '/^[ ]{4}(.*)$/m', 'indent_callback', 60); 
-function indent_callback(&$matches) {
-	global $CI;
-	
-	$return_html = "\n".$CI->syntaxparser->block_hash('<div class="indent">'."\n");
-	$return_html .= $matches[1]."\n\n";
-	$return_html .= $CI->syntaxparser->block_hash('</div>'."\n"); 
-	
-	return $return_html;
-}
-
-/**
  * Snippets
  * well, they are the Wikka/Wakka "actions", but we don't have a better 
  * name for them yet.
@@ -180,6 +165,22 @@ function snippets_callback(&$matches) {
 	return '**Unknown action: '.$action.'**';
 }
 
+/**
+ * Indent
+ * Replace spaces at the beginning of a block with a surrounding <div> with class="indent"
+ */  
+$CI->syntaxparser->add_block_definition('indent', '/^[ ]{4}(.*)$/m', 'indent_callback', 80); 
+function indent_callback(&$matches) {
+	global $CI;
+	
+	$return_html = "\n".$CI->syntaxparser->block_hash('<div class="indent">'."\n");
+	$return_html .= $matches[1]."\n\n";
+	$return_html .= $CI->syntaxparser->block_hash('</div>'."\n"); 
+	
+	return $return_html;
+}
+
+
 //When non-paragraph items are separated by more than one newline, then we
 //assume that the user is intentionally inserting a newline:
 //See #10: http://dev.suppletext.org/ticket/10
@@ -201,16 +202,25 @@ function intentional_newline_callback(&$matches) {
  * Div
  * (Currently, only the class attribute is supported) 
  */
-$CI->syntaxparser->add_block_definition('div', '/<div(?: class\s*=\s*"(\S+)")?'.'>(.*?)<\/div>/s', 'div_callback', 80, true); 
+$CI->syntaxparser->add_block_definition('div', '/(<div(?: class\s*=\s*"(\S+)")?'.'>)(.*?)<\/div>/s', 'div_callback', 80, true); 
 function div_callback(&$matches) {
 	global $CI;
 	
-	//Validate the class name
-	$matches[1] = trim($matches[1]);
-	if(preg_match('/[A-Za-z0-9-_ ]+/', $matches[1]))
+	//Check for internal <div>'s. This is a fix for when you have:
+	//<div> ... <div> ... </div>
+	//The regex will match the whole thing. This below will split things up.
+	if(preg_match('/<div(.*?)>/', $matches[3]))
 	{
-		$matches[1] = $CI->input->xss_clean($matches[1]); //Try to catch js injection
-		$pre = $CI->syntaxparser->block_hash('<div class="'.$matches[1].'">');
+		//return $matches[2];
+		return $matches[1].$CI->syntaxparser->applyBlockDef('div', $matches[3].'</div>');
+	}
+	
+	//Validate the class name
+	$matches[1] = trim($matches[2]);
+	if(preg_match('/[A-Za-z0-9-_ ]+/', $matches[2]))
+	{
+		$matches[1] = $CI->input->xss_clean($matches[2]); //Try to catch js injection
+		$pre = $CI->syntaxparser->block_hash('<div class="'.$matches[2].'">');
 	}
 	else
 	{
@@ -219,7 +229,7 @@ function div_callback(&$matches) {
 	
 	$post = $CI->syntaxparser->block_hash('</div>');
 	
-	return $pre.$matches[2].$post;
+	return $pre.$matches[3].$post;
 }
 
 
