@@ -16,7 +16,7 @@
 <!-- This bit of js handles the notification of the user if he/she navigates 
 away from the page with changes to the form -->
 <script type="text/javascript" src="<?php out('theme_url', 'discard_confirmation.js'); ?>"></script>
-<form action="<?php out('current_url'); ?>" method="post">
+<form action="<?php out('current_url'); ?>" method="post" class="editform">
 <textarea id="body" name="body" tabindex=1 onChange="form_changed()">
 <?php 
 	//This checks to see if we have some body value set from a form submission error.
@@ -33,7 +33,7 @@ away from the page with changes to the form -->
 </textarea><br />
 
 <?php if(does_user_have_permission('Registered')): ?>
-<fieldset>
+<fieldset class="additional_actions">
 	<legend>Additional Actions</legend>
 	<p>
 			<?php if(does_user_have_permission('Editor')): ?>

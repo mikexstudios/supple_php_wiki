@@ -233,6 +233,10 @@ FORM ELEMENTS
 -------------------------------------------------*/
 
 fieldset {
+	padding: 0;
+	padding-left: 12px;
+	padding-top: 3px;
+	padding-bottom: 10px;
 	margin-top: 10px;
 	margin-bottom: 10px;
 	border: 1px solid #CCC;	
@@ -305,6 +309,15 @@ textarea#body{
 /*-------------------------------------------------
 EDIT PAGE
 -------------------------------------------------*/
+
+.editform {
+	margin: 0;
+}
+
+.additional_actions p {
+	margin: 0;
+	padding: 0;
+}
 
 .formattingrules {
 	border: 1px solid #ccc;
