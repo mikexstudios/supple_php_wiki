@@ -32,7 +32,7 @@ INSERT INTO `st_config` (`id`, `key`, `value`) VALUES
 (2, 'root_page', 'HomePage'),
 (4, 'use_cache', 'false'),
 (5, 'use_theme', 'supple'),
-(6, 'version', '0.3.0'),
+(6, 'version', '0.4.0'),
 (7, 'default_read_permission', 'Anonymous'),
 (8, 'default_write_permission', 'Registered');
 
