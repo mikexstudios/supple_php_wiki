@@ -17,7 +17,7 @@ function load_db() {
 
 	//Augment imported db info
 	$db['suppletext']['pconnect'] = FALSE;
-	$db['suppletext']['db_debug'] = FALSE; //FALSE - We use our own custom error messages
+	$db['suppletext']['db_debug'] = TRUE; //FALSE - We use our own custom error messages
 	$db['suppletext']['active_r'] = TRUE;
 	$db['suppletext']['cache_on'] = FALSE;
 	$db['suppletext']['cachedir'] = "";

@@ -1,5 +1,7 @@
 <?php
 
+$config['dummy'] = 'variable'; //Need to add a dummy config to dispel Error
+
 //DATABASE
 define('ST_PAGES_TABLE', ((isset($config['pages_table_prefix'])) ? $config['pages_table_prefix'] : $config['table_prefix']).'pages');
 define('ST_USERS_TABLE', ((isset($config['users_table_prefix'])) ? $config['users_table_prefix'] : $config['table_prefix']).'users');

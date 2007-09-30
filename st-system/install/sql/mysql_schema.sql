@@ -33,8 +33,8 @@ INSERT INTO `st_config` (`id`, `key`, `value`) VALUES
 (4, 'use_cache', 'false'),
 (5, 'use_theme', 'supple'),
 (6, 'version', '0.3.0'),
-(7, 'default_read_permission', 'Anonymous,Registered,Editor'),
-(8, 'default_write_permission', 'Registered,Editor');
+(7, 'default_read_permission', 'Anonymous'),
+(8, 'default_write_permission', 'Registered');
 
 -- --------------------------------------------------------
 
@@ -87,9 +87,11 @@ CREATE TABLE IF NOT EXISTS `st_page_metadata` (
 DROP TABLE IF EXISTS `st_sessions`;
 CREATE TABLE IF NOT EXISTS `st_sessions` (
   `session_id` varchar(40) character set latin1 NOT NULL default '0',
-  `ip_address` varchar(16) character set latin1 NOT NULL default '0',
-  `user_agent` varchar(50) character set latin1 NOT NULL,
-  `last_activity` int(10) unsigned NOT NULL default '0',
+  `session_start` int(10) unsigned NOT NULL default '0',
+  `session_last_activity` int(10) unsigned NOT NULL default '0',
+  `session_ip_address` varchar(16) character set latin1 NOT NULL default '0',
+  `session_user_agent` varchar(50) character set latin1 NOT NULL,
+  `session_data` text character set latin1 NOT NULL,
   PRIMARY KEY  (`session_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

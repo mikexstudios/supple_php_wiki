@@ -34,10 +34,10 @@ function error_directory_writable() {
      information in /st-external/. Please check the following:
      <ul>
           <li>If you are using a linux or unix based system, make sure you
-          <code>chmod 755</code> the /st-external/ directory. This usually involves
+          <code>chmod 777</code> the /st-external/ directory. This usually involves
           right clicking the /st-external/ folder in your FTP client and selecting
           the chmod command. If you have shell access to your account issue the
-          following command: <code>chmod 755 /st-external/</code> while in the suppleText
+          following command: <code>chmod 777 /st-external/</code> while in the suppleText
           root directory (where index.php and LICENSE are).</li>
           
           <li>If you are on a windows based system, /st-external/ should already
