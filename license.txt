@@ -1,7 +1,7 @@
 
-suppleText is released under the GPL. However, suppleText is written on top
-of the CodeIgniter frame work which is released under its own license. Both
-the GPL and EllisLab licenses are included below.
+supple_php_wiki is released under the GPL. However, supple_php_wiki is written
+on top of the CodeIgniter frame work which is released under its own license.
+Both the GPL and EllisLab licenses are included below.
 
 ----------------------------------------------------------------------------
 
