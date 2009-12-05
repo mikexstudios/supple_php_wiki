@@ -1,0 +1,10 @@
+supple php wiki
+===============
+
+A simple wiki written with codeigniter (php) released under the GPL. Major
+features include: Creole 1.0 syntax, user permissions system, page
+permissions, and themes. It also have a pretty cool and easy-to-use install
+system!
+
+This wiki should NOT be used in a production environment. No further
+development will occur on this wiki.
